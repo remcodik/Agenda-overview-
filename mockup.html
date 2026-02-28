@@ -65,10 +65,16 @@
 
     /* ── Week grid ── */
     .week-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr);
+      display: grid; grid-template-columns: repeat(5, 1fr) 0.5fr;
       gap: 8px; padding: 12px 16px 16px;
       flex: 1; overflow-y: auto; min-height: 0;
     }
+
+    /* ── Weekend wrapper — half-width column, Sat + Sun stacked ── */
+    .weekend-wrapper {
+      display: flex; flex-direction: column; gap: 8px; min-width: 0;
+    }
+    .weekend-wrapper .day-col { flex: 1; min-height: 0; }
 
     /* ── Day column ── */
     .day-col {
@@ -358,30 +364,35 @@
       <div class="day-footer"><button class="btn-add">＋</button></div>
     </div>
 
-    <!-- Saturday 28 -->
-    <div class="day-col weekend">
-      <div class="day-header">
-        <div class="day-name">Sat</div>
-        <div class="day-date">28</div>
-      </div>
-      <div class="day-body"></div>
-      <div class="day-footer"><button class="btn-add">＋</button></div>
-    </div>
+    <!-- Weekend: Sat + Sun stacked in one half-width block -->
+    <div class="weekend-wrapper">
 
-    <!-- Sunday 1 -->
-    <div class="day-col weekend">
-      <div class="day-header">
-        <div class="day-name">Sun</div>
-        <div class="day-date">1</div>
-      </div>
-      <div class="day-body">
-        <div class="day-divider"></div>
-        <div class="item item-task c-red" onclick="this.classList.toggle('active')">
-          <span class="item-icon">🎯</span>
-          <span class="item-text">Plan next week</span>
+      <!-- Saturday 28 -->
+      <div class="day-col weekend">
+        <div class="day-header">
+          <div class="day-name">Sat</div>
+          <div class="day-date">28</div>
         </div>
+        <div class="day-body"></div>
+        <div class="day-footer"><button class="btn-add">＋</button></div>
       </div>
-      <div class="day-footer"><button class="btn-add">＋</button></div>
+
+      <!-- Sunday 1 -->
+      <div class="day-col weekend">
+        <div class="day-header">
+          <div class="day-name">Sun</div>
+          <div class="day-date">1</div>
+        </div>
+        <div class="day-body">
+          <div class="day-divider"></div>
+          <div class="item item-task c-red" onclick="this.classList.toggle('active')">
+            <span class="item-icon">🎯</span>
+            <span class="item-text">Plan next week</span>
+          </div>
+        </div>
+        <div class="day-footer"><button class="btn-add">＋</button></div>
+      </div>
+
     </div>
 
   </main>
