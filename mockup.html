@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Weekly Agenda – Layout Mockup</title>
+  <title>Weekly Agenda – Icon Overview</title>
   <style>
-    /* ── Reset & base ─────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -15,702 +14,257 @@
       min-height: 100vh;
     }
 
-    /* ── App shell ────────────────────────────────────────────── */
-    .app {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+    .app { display: flex; flex-direction: column; height: 100vh; }
 
-    /* ── Top bar ──────────────────────────────────────────────── */
+    /* ── Top bar ── */
     .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 24px;
-      background: #1a1a2e;
-      color: #fff;
-      flex-shrink: 0;
-      gap: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 24px; background: #1a1a2e; color: #fff;
+      flex-shrink: 0; gap: 16px;
     }
-
-    .topbar-title {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: .3px;
-    }
-
-    .week-nav {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
+    .topbar-title { font-size: 18px; font-weight: 700; }
+    .week-nav { display: flex; align-items: center; gap: 12px; }
     .week-nav button {
-      background: rgba(255,255,255,.12);
-      border: none;
-      color: #fff;
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background .15s;
+      background: rgba(255,255,255,.12); border: none; color: #fff;
+      width: 32px; height: 32px; border-radius: 8px; font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
     .week-nav button:hover { background: rgba(255,255,255,.22); }
-
-    .week-label {
-      font-size: 14px;
-      font-weight: 600;
-      min-width: 220px;
-      text-align: center;
-    }
-
-    .topbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .week-label { font-size: 14px; font-weight: 600; min-width: 220px; text-align: center; }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
     .btn-share {
-      background: #4f8ef7;
-      border: none;
-      color: #fff;
-      padding: 7px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      background: #4f8ef7; border: none; color: #fff;
+      padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
     }
     .btn-settings {
-      background: rgba(255,255,255,.12);
-      border: none;
-      color: #fff;
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: rgba(255,255,255,.12); border: none; color: #fff;
+      width: 34px; height: 34px; border-radius: 8px; font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
     }
 
-    /* ── Week grid ────────────────────────────────────────────── */
-    .week-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-      padding: 12px 16px 16px;
-      flex: 1;
-      overflow-y: auto;
-      min-height: 0;
-    }
-
-    /* ── Day column ───────────────────────────────────────────── */
-    .day-col {
-      background: #fff;
-      border-radius: 14px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,.07);
-      border: 2px solid transparent;
-      transition: border-color .2s;
-      min-width: 0;
-    }
-
-    /* Today highlight */
-    .day-col.today {
-      border-color: #4f8ef7;
-    }
-
-    /* Weekend dimming */
-    .day-col.weekend .day-header {
-      background: #f5f5fa;
-    }
-    .day-col.weekend .day-name {
-      color: #888;
-    }
-
-    /* ── Day header ───────────────────────────────────────────── */
-    .day-header {
-      padding: 10px 12px 8px;
-      background: #fafafa;
-      border-bottom: 1px solid #f0f0f5;
-      flex-shrink: 0;
-    }
-
-    .day-name {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .8px;
-      color: #666;
-    }
-
-    .day-date {
-      font-size: 22px;
-      font-weight: 800;
-      color: #1a1a2e;
-      line-height: 1.1;
-      margin-top: 1px;
-    }
-
-    .day-col.today .day-date {
-      color: #4f8ef7;
-    }
-
-    /* ── Dog badge ────────────────────────────────────────────── */
-    .dog-badge {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      background: linear-gradient(90deg, #fff3e0, #ffe0b2);
-      border-left: 3px solid #fb8c00;
-      padding: 4px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #e65100;
-      flex-shrink: 0;
-    }
-
-    /* ── Day body (scrollable) ────────────────────────────────── */
-    .day-body {
-      flex: 1;
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      overflow-y: auto;
-      min-height: 0;
-    }
-
-    /* ── Section label ────────────────────────────────────────── */
-    .section-label {
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #bbb;
-      padding: 4px 2px 2px;
-    }
-
-    /* ── Meeting block ────────────────────────────────────────── */
-    .meeting {
-      border-radius: 10px;
-      padding: 8px 10px;
-      border-left: 4px solid;
-      flex-shrink: 0;
-      position: relative;
-    }
-
-    .meeting-time {
-      font-size: 10px;
-      font-weight: 700;
-      opacity: .75;
-      margin-bottom: 2px;
-      letter-spacing: .3px;
-    }
-
-    .meeting-title {
-      font-size: 12px;
-      font-weight: 700;
-      line-height: 1.3;
-    }
-
-    .meeting-meta {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 4px;
-      flex-wrap: wrap;
-    }
-
-    .meeting-customer {
-      font-size: 10px;
-      font-weight: 600;
-      opacity: .8;
-    }
-
-    .badge {
-      font-size: 9px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: .3px;
-    }
-
-    .badge-online {
-      background: rgba(79,142,247,.15);
-      color: #4f8ef7;
-    }
-    .badge-onsite {
-      background: rgba(76,175,80,.15);
-      color: #388e3c;
-    }
-
-    /* ── Task block ───────────────────────────────────────────── */
-    .task {
-      border-radius: 10px;
-      padding: 7px 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: grab;
-      position: relative;
-      border: 1.5px solid transparent;
-      transition: transform .1s, box-shadow .1s;
-      flex-shrink: 0;
-    }
-    .task:active { cursor: grabbing; transform: scale(1.02); }
-    .task:hover { box-shadow: 0 3px 10px rgba(0,0,0,.12); }
-
-    .task-drag-handle {
-      font-size: 12px;
-      opacity: .35;
-      flex-shrink: 0;
-      cursor: grab;
-    }
-
-    .task-icon {
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-
-    .task-text {
-      font-size: 12px;
-      font-weight: 600;
-      flex: 1;
-      min-width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .task-hidden-badge {
-      font-size: 9px;
-      font-weight: 700;
-      padding: 2px 5px;
-      border-radius: 4px;
-      background: rgba(0,0,0,.08);
-      color: rgba(0,0,0,.4);
-      flex-shrink: 0;
-    }
-
-    /* Reminder glow — upcoming item */
-    .upcoming {
-      animation: pulse-glow 2s infinite;
-    }
-
-    @keyframes pulse-glow {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255,152,0,.4); }
-      50%       { box-shadow: 0 0 0 5px rgba(255,152,0,0); }
-    }
-
-    /* ── Add button ───────────────────────────────────────────── */
-    .btn-add {
-      width: 100%;
-      border: 1.5px dashed #d0d0e0;
-      background: transparent;
-      border-radius: 8px;
-      padding: 6px;
-      font-size: 13px;
-      color: #b0b0c0;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      font-weight: 600;
-      margin-top: 2px;
-      transition: border-color .15s, color .15s, background .15s;
-      flex-shrink: 0;
-    }
-    .btn-add:hover {
-      border-color: #4f8ef7;
-      color: #4f8ef7;
-      background: rgba(79,142,247,.04);
-    }
-
-    /* ── Day footer ───────────────────────────────────────────── */
-    .day-footer {
-      padding: 6px 8px 8px;
-      flex-shrink: 0;
-    }
-
-    /* ── Color presets ────────────────────────────────────────── */
-
-    /* Purple */
-    .c-purple { background: #f3effe; border-color: #7c3aed !important; color: #4c1d95; }
-    /* Blue */
-    .c-blue   { background: #eff6ff; border-color: #3b82f6 !important; color: #1e3a8a; }
-    /* Green */
-    .c-green  { background: #f0fdf4; border-color: #22c55e !important; color: #14532d; }
-    /* Orange */
-    .c-orange { background: #fff7ed; border-color: #f97316 !important; color: #7c2d12; }
-    /* Pink */
-    .c-pink   { background: #fdf2f8; border-color: #ec4899 !important; color: #831843; }
-    /* Teal */
-    .c-teal   { background: #f0fdfa; border-color: #14b8a6 !important; color: #134e4a; }
-    /* Red */
-    .c-red    { background: #fef2f2; border-color: #ef4444 !important; color: #7f1d1d; }
-    /* Slate */
-    .c-slate  { background: #f8fafc; border-color: #64748b !important; color: #1e293b; }
-
-    /* ── Modal overlay (mockup) ───────────────────────────────── */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.45);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-
-    .modal {
-      background: #fff;
-      border-radius: 18px;
-      width: 420px;
-      max-width: 95vw;
-      box-shadow: 0 20px 60px rgba(0,0,0,.25);
-      overflow: hidden;
-    }
-
-    .modal-header {
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid #f0f0f5;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .modal-header h3 {
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .modal-close {
-      background: #f0f0f5;
-      border: none;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-tabs {
-      display: flex;
-      gap: 4px;
-      padding: 16px 24px 0;
-    }
-
-    .modal-tab {
-      padding: 7px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      background: #f0f0f5;
-      color: #666;
-      transition: all .15s;
-    }
-    .modal-tab.active {
-      background: #1a1a2e;
-      color: #fff;
-    }
-
-    .modal-body {
-      padding: 16px 24px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .form-row {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .form-row label {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      color: #888;
-    }
-
-    .form-row input,
-    .form-row select {
-      border: 1.5px solid #e5e5ef;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 13px;
-      outline: none;
-      width: 100%;
-      transition: border-color .15s;
-    }
-    .form-row input:focus,
-    .form-row select:focus { border-color: #4f8ef7; }
-
-    .form-row-2col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .color-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .color-swatch {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid transparent;
-      transition: transform .15s;
-    }
-    .color-swatch:hover { transform: scale(1.2); }
-    .color-swatch.selected { border-color: #1a1a2e; transform: scale(1.15); }
-
-    .toggle-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 4px 0;
-    }
-
-    .toggle-label {
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .toggle {
-      width: 40px;
-      height: 22px;
-      background: #e5e5ef;
-      border-radius: 11px;
-      position: relative;
-      cursor: pointer;
-      transition: background .2s;
-    }
-    .toggle.on { background: #4f8ef7; }
-    .toggle::after {
-      content: '';
-      position: absolute;
-      width: 18px;
-      height: 18px;
-      background: #fff;
-      border-radius: 50%;
-      top: 2px;
-      left: 2px;
-      transition: left .2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,.2);
-    }
-    .toggle.on::after { left: 20px; }
-
-    .icon-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .icon-opt {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      cursor: pointer;
-      border: 2px solid #e5e5ef;
-      transition: all .15s;
-    }
-    .icon-opt:hover { border-color: #4f8ef7; background: #eff6ff; }
-    .icon-opt.selected { border-color: #4f8ef7; background: #eff6ff; }
-
-    .modal-footer {
-      padding: 0 24px 20px;
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-    }
-
-    .btn-cancel {
-      background: #f0f0f5;
-      border: none;
-      padding: 9px 20px;
-      border-radius: 9px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      color: #444;
-    }
-    .btn-save {
-      background: #1a1a2e;
-      border: none;
-      color: #fff;
-      padding: 9px 24px;
-      border-radius: 9px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .15s;
-    }
-    .btn-save:hover { background: #2d2d50; }
-
-    /* ── Shared view note ─────────────────────────────────────── */
-    .share-bar {
-      background: #eff6ff;
-      border-top: 1px solid #bfdbfe;
-      padding: 8px 20px;
-      font-size: 11px;
-      color: #3b82f6;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .share-url {
-      background: #fff;
-      border: 1px solid #bfdbfe;
-      border-radius: 6px;
-      padding: 3px 10px;
-      font-family: monospace;
-      font-size: 11px;
-      color: #1e40af;
-      cursor: pointer;
-    }
-
-    /* ── Scrollbar styling ────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: #d0d0e0; border-radius: 2px; }
-
-    /* ── Legend ───────────────────────────────────────────────── */
+    /* ── Legend ── */
     .legend {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 8px 20px;
-      background: #fff;
-      border-bottom: 1px solid #f0f0f5;
-      font-size: 11px;
-      flex-shrink: 0;
-      flex-wrap: wrap;
+      display: flex; align-items: center; gap: 16px;
+      padding: 7px 20px; background: #fff; border-bottom: 1px solid #f0f0f5;
+      font-size: 11px; flex-shrink: 0; flex-wrap: wrap;
     }
-
     .legend-title {
-      font-weight: 700;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      font-size: 10px;
+      font-weight: 700; color: #888; text-transform: uppercase;
+      letter-spacing: .5px; font-size: 10px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #333; }
+    .legend-chip {
+      width: 18px; height: 18px; border-radius: 5px;
+      display: flex; align-items: center; justify-content: center; font-size: 10px;
+    }
+    .legend-hint { margin-left: auto; color: #bbb; font-size: 10px; font-style: italic; }
+
+    /* Key icons */
+    .legend-key { display: flex; align-items: center; gap: 12px; margin-left: 8px; padding-left: 12px; border-left: 1px solid #f0f0f5; }
+    .legend-key-item { display: flex; align-items: center; gap: 4px; color: #888; font-size: 10px; }
+
+    /* ── Week grid ── */
+    .week-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 8px; padding: 12px 16px 16px;
+      flex: 1; overflow-y: auto; min-height: 0;
     }
 
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-weight: 600;
-      color: #444;
+    /* ── Day column ── */
+    .day-col {
+      background: #fff; border-radius: 14px;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.07);
+      border: 2px solid transparent; min-width: 0;
+    }
+    .day-col.today { border-color: #4f8ef7; }
+    .day-col.weekend { opacity: .7; }
+
+    /* ── Day header ── */
+    .day-header {
+      padding: 9px 10px 7px;
+      background: #fafafa; border-bottom: 1px solid #f0f0f5; flex-shrink: 0;
+    }
+    .day-name {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: #888;
+    }
+    .day-col.weekend .day-name { color: #ccc; }
+    .day-date { font-size: 20px; font-weight: 800; color: #1a1a2e; line-height: 1.1; margin-top: 1px; }
+    .day-col.today .day-date { color: #4f8ef7; }
+    .day-col.weekend .day-date { color: #ccc; }
+
+    /* ── Dog badge ── */
+    .dog-badge {
+      background: #fff8f0; border-bottom: 1px solid #ffe0b2;
+      padding: 3px 10px; font-size: 10px; font-weight: 700; color: #e65100; flex-shrink: 0;
     }
 
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 3px;
+    /* ── Day body ── */
+    .day-body {
+      flex: 1; padding: 8px 6px;
+      display: flex; flex-direction: column; gap: 5px;
+      overflow-y: auto; min-height: 0;
     }
+
+    /* ── Item tile ──
+       Color tells you WHO (customer).
+       Icon tells you WHAT (type of event/task).
+       Text is hidden — reveal on hover / tap for detail.
+    ── */
+    .item {
+      display: flex; align-items: center; gap: 6px;
+      border-radius: 9px; padding: 6px 8px;
+      cursor: pointer; overflow: hidden; flex-shrink: 0;
+      transition: filter .15s, box-shadow .15s, transform .1s;
+      user-select: none; min-width: 0; position: relative;
+    }
+    .item:hover, .item.active {
+      filter: brightness(.94);
+      box-shadow: 0 2px 10px rgba(0,0,0,.14);
+      transform: translateY(-1px);
+    }
+    .item:active { transform: scale(.97); }
+
+    /* Meeting: slightly stronger left indicator */
+    .item-meeting { border-left: 3px solid rgba(0,0,0,.18); }
+
+    .item-icon { font-size: 15px; flex-shrink: 0; line-height: 1; }
+
+    /* Text hidden until hover / tap */
+    .item-text {
+      font-size: 11px; font-weight: 700;
+      white-space: nowrap; overflow: hidden;
+      max-width: 0; opacity: 0;
+      transition: max-width .25s ease, opacity .2s ease;
+    }
+    .item:hover .item-text,
+    .item.active .item-text { max-width: 180px; opacity: 1; }
+
+    /* Private/hidden item */
+    .item-hidden { opacity: .38; }
+
+    /* Upcoming pulse */
+    .upcoming { animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,.25); }
+      50%       { box-shadow: 0 0 0 5px rgba(0,0,0,0); }
+    }
+
+    /* Divider between meetings block and tasks block */
+    .day-divider { height: 1px; background: rgba(0,0,0,.06); margin: 2px 2px; flex-shrink: 0; }
+
+    /* ── Customer color classes (background of tile) ── */
+    .c-purple { background: #ede0ff; color: #4c1d95; }
+    .c-blue   { background: #dbeafe; color: #1e3a8a; }
+    .c-green  { background: #dcfce7; color: #14532d; }
+    .c-orange { background: #ffedd5; color: #7c2d12; }
+    .c-pink   { background: #fce7f3; color: #831843; }
+    .c-teal   { background: #ccfbf1; color: #134e4a; }
+    .c-red    { background: #fee2e2; color: #7f1d1d; }
+    .c-slate  { background: #f1f5f9; color: #1e293b; }
+
+    /* ── Add button ── */
+    .btn-add {
+      width: 100%; border: 1.5px dashed #d8d8e8;
+      background: transparent; border-radius: 7px; padding: 5px;
+      font-size: 13px; color: #c8c8d8; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; transition: border-color .15s, color .15s;
+    }
+    .btn-add:hover { border-color: #4f8ef7; color: #4f8ef7; }
+
+    /* ── Day footer ── */
+    .day-footer { padding: 5px 6px 7px; flex-shrink: 0; }
+
+    /* ── Share bar ── */
+    .share-bar {
+      background: #eff6ff; border-top: 1px solid #bfdbfe;
+      padding: 7px 20px; font-size: 11px; color: #3b82f6; font-weight: 600;
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+    .share-url {
+      background: #fff; border: 1px solid #bfdbfe; border-radius: 6px;
+      padding: 2px 8px; font-family: monospace; font-size: 11px; color: #1e40af; cursor: pointer;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: #d0d0e0; border-radius: 2px; }
   </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- ── Top bar ── -->
+  <!-- Top bar -->
   <header class="topbar">
     <span class="topbar-title">📅 My Week</span>
-
     <div class="week-nav">
       <button>&#8249;</button>
       <span class="week-label">Week 9 &nbsp;·&nbsp; Feb 23 – Mar 1, 2026</span>
       <button>&#8250;</button>
     </div>
-
     <div class="topbar-actions">
-      <button class="btn-share" onclick="document.querySelector('.modal-overlay').classList.add('open')">
-        🔗 Share
-      </button>
+      <button class="btn-share">🔗 Share</button>
       <button class="btn-settings">⚙️</button>
     </div>
   </header>
 
-  <!-- ── Customer legend ── -->
+  <!-- Legend: color = customer, icon = type -->
   <div class="legend">
-    <span class="legend-title">Customers</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#7c3aed"></span>Acme Corp</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span>BrightCo</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#22c55e"></span>GreenTech</span>
-    <span class="legend-item"><span class="legend-dot" style="background:#f97316"></span>OrangeLabel</span>
-    <span class="legend-item" style="margin-left:auto; color:#888; font-weight:600; cursor:pointer">+ Manage customers</span>
+    <span class="legend-title">Color = customer</span>
+    <span class="legend-item">
+      <span class="legend-chip" style="background:#ede0ff">🟣</span>Acme Corp
+    </span>
+    <span class="legend-item">
+      <span class="legend-chip" style="background:#dbeafe">🔵</span>BrightCo
+    </span>
+    <span class="legend-item">
+      <span class="legend-chip" style="background:#dcfce7">🟢</span>GreenTech
+    </span>
+    <span class="legend-item">
+      <span class="legend-chip" style="background:#ffedd5">🟠</span>OrangeLabel
+    </span>
+
+    <!-- Icon key -->
+    <div class="legend-key">
+      <span class="legend-key-item">🤝 🏢 🖥️ 💬 = meeting</span>
+      <span class="legend-key-item">✉️ 📋 💻 📝 = task</span>
+    </div>
+
+    <span class="legend-hint">Tap / hover to see title</span>
   </div>
 
-  <!-- ── Week grid ── -->
+  <!-- Week grid -->
   <main class="week-grid">
 
-    <!-- Monday -->
+    <!-- Monday 23 -->
     <div class="day-col">
       <div class="day-header">
         <div class="day-name">Mon</div>
         <div class="day-date">23</div>
       </div>
       <div class="day-body">
-        <div class="section-label">Meetings</div>
-        <div class="meeting c-purple upcoming">
-          <div class="meeting-time">09:00 – 10:30</div>
-          <div class="meeting-title">Sprint planning</div>
-          <div class="meeting-meta">
-            <span class="meeting-customer">Acme Corp</span>
-            <span class="badge badge-online">Online</span>
-          </div>
+        <!-- meetings -->
+        <div class="item item-meeting c-purple upcoming" onclick="this.classList.toggle('active')">
+          <span class="item-icon">🤝</span>
+          <span class="item-text">Sprint planning</span>
         </div>
-        <div class="section-label">Tasks</div>
-        <div class="task c-slate">
-          <span class="task-drag-handle">⠿</span>
-          <span class="task-icon">📧</span>
-          <span class="task-text">Reply to client emails</span>
+        <div class="day-divider"></div>
+        <!-- tasks -->
+        <div class="item item-task c-slate" onclick="this.classList.toggle('active')">
+          <span class="item-icon">✉️</span>
+          <span class="item-text">Reply to client emails</span>
         </div>
-        <div class="task c-blue">
-          <span class="task-drag-handle">⠿</span>
-          <span class="task-icon">📋</span>
-          <span class="task-text">Weekly report</span>
+        <div class="item item-task c-blue" onclick="this.classList.toggle('active')">
+          <span class="item-icon">📋</span>
+          <span class="item-text">Weekly report</span>
         </div>
       </div>
-      <div class="day-footer">
-        <button class="btn-add">＋ Add</button>
-      </div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
     </div>
 
-    <!-- Tuesday -->
+    <!-- Tuesday 24 -->
     <div class="day-col">
       <div class="dog-badge">🐕 Dog day</div>
       <div class="day-header">
@@ -718,98 +272,68 @@
         <div class="day-date">24</div>
       </div>
       <div class="day-body">
-        <div class="section-label">Meetings</div>
-        <div class="meeting c-blue">
-          <div class="meeting-time">13:00 – 14:00</div>
-          <div class="meeting-title">Stakeholder update</div>
-          <div class="meeting-meta">
-            <span class="meeting-customer">BrightCo</span>
-            <span class="badge badge-onsite">On-site</span>
-          </div>
+        <div class="item item-meeting c-blue" onclick="this.classList.toggle('active')">
+          <span class="item-icon">🏢</span>
+          <span class="item-text">Stakeholder update</span>
         </div>
-        <div class="section-label">Tasks</div>
-        <div class="task c-purple">
-          <span class="task-drag-handle">⠿</span>
-          <span class="task-icon">💻</span>
-          <span class="task-text">Code review PR #47</span>
+        <div class="day-divider"></div>
+        <div class="item item-task c-purple" onclick="this.classList.toggle('active')">
+          <span class="item-icon">💻</span>
+          <span class="item-text">Code review PR #47</span>
         </div>
       </div>
-      <div class="day-footer">
-        <button class="btn-add">＋ Add</button>
-      </div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
     </div>
 
-    <!-- Wednesday (today) -->
+    <!-- Wednesday 25 – Today -->
     <div class="day-col today">
       <div class="day-header">
         <div class="day-name">Wed · Today</div>
         <div class="day-date">25</div>
       </div>
       <div class="day-body">
-        <div class="section-label">Meetings</div>
-        <div class="meeting c-green">
-          <div class="meeting-time">10:00 – 11:00</div>
-          <div class="meeting-title">Design review</div>
-          <div class="meeting-meta">
-            <span class="meeting-customer">GreenTech</span>
-            <span class="badge badge-online">Online</span>
-          </div>
+        <div class="item item-meeting c-green" onclick="this.classList.toggle('active')">
+          <span class="item-icon">🖥️</span>
+          <span class="item-text">Design review</span>
         </div>
-        <div class="meeting c-green">
-          <div class="meeting-time">15:30 – 16:00</div>
-          <div class="meeting-title">1-on-1 with manager</div>
-          <div class="meeting-meta">
-            <span class="meeting-customer">Internal</span>
-            <span class="badge badge-online">Online</span>
-          </div>
+        <div class="item item-meeting c-slate" onclick="this.classList.toggle('active')">
+          <span class="item-icon">💬</span>
+          <span class="item-text">1-on-1 with manager</span>
         </div>
-        <div class="section-label">Tasks</div>
-        <div class="task c-green">
-          <span class="task-drag-handle">⠿</span>
-          <span class="task-icon">📝</span>
-          <span class="task-text">Prepare agenda</span>
+        <div class="day-divider"></div>
+        <div class="item item-task c-green" onclick="this.classList.toggle('active')">
+          <span class="item-icon">📝</span>
+          <span class="item-text">Prepare agenda</span>
         </div>
-        <div class="task c-teal" style="opacity:.55;">
-          <span class="task-drag-handle">⠿</span>
-          <span class="task-icon">🔒</span>
-          <span class="task-text">Private task</span>
-          <span class="task-hidden-badge">Hidden</span>
+        <div class="item item-task item-hidden c-teal" onclick="this.classList.toggle('active')">
+          <span class="item-icon">🔒</span>
+          <span class="item-text">Private task</span>
         </div>
       </div>
-      <div class="day-footer">
-        <button class="btn-add">＋ Add</button>
-      </div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
     </div>
 
-    <!-- Thursday -->
+    <!-- Thursday 26 -->
     <div class="day-col">
       <div class="day-header">
         <div class="day-name">Thu</div>
         <div class="day-date">26</div>
       </div>
       <div class="day-body">
-        <div class="section-label">Meetings</div>
-        <div class="meeting c-orange">
-          <div class="meeting-time">09:30 – 12:00</div>
-          <div class="meeting-title">Workshop: Q2 roadmap</div>
-          <div class="meeting-meta">
-            <span class="meeting-customer">OrangeLabel</span>
-            <span class="badge badge-onsite">On-site</span>
-          </div>
+        <div class="item item-meeting c-orange" onclick="this.classList.toggle('active')">
+          <span class="item-icon">🗺️</span>
+          <span class="item-text">Workshop: Q2 roadmap</span>
         </div>
-        <div class="section-label">Tasks</div>
-        <div class="task c-orange">
-          <span class="task-drag-handle">⠿</span>
-          <span class="task-icon">🗂️</span>
-          <span class="task-text">Organise slides</span>
+        <div class="day-divider"></div>
+        <div class="item item-task c-orange" onclick="this.classList.toggle('active')">
+          <span class="item-icon">🗂️</span>
+          <span class="item-text">Organise slides</span>
         </div>
       </div>
-      <div class="day-footer">
-        <button class="btn-add">＋ Add</button>
-      </div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
     </div>
 
-    <!-- Friday -->
+    <!-- Friday 27 -->
     <div class="day-col">
       <div class="dog-badge">🐕 Dog day</div>
       <div class="day-header">
@@ -817,177 +341,59 @@
         <div class="day-date">27</div>
       </div>
       <div class="day-body">
-        <div class="section-label">Meetings</div>
-        <div class="meeting c-pink">
-          <div class="meeting-time">11:00 – 12:00</div>
-          <div class="meeting-title">Retro &amp; planning</div>
-          <div class="meeting-meta">
-            <span class="meeting-customer">Acme Corp</span>
-            <span class="badge badge-online">Online</span>
-          </div>
+        <div class="item item-meeting c-purple" onclick="this.classList.toggle('active')">
+          <span class="item-icon">🖥️</span>
+          <span class="item-text">Retro &amp; planning</span>
         </div>
-        <div class="section-label">Tasks</div>
-        <div class="task c-pink">
-          <span class="task-drag-handle">⠿</span>
-          <span class="task-icon">✅</span>
-          <span class="task-text">EOW status update</span>
+        <div class="day-divider"></div>
+        <div class="item item-task c-pink" onclick="this.classList.toggle('active')">
+          <span class="item-icon">✅</span>
+          <span class="item-text">EOW status update</span>
         </div>
-        <div class="task c-slate">
-          <span class="task-drag-handle">⠿</span>
-          <span class="task-icon">📦</span>
-          <span class="task-text">Archive old tickets</span>
+        <div class="item item-task c-slate" onclick="this.classList.toggle('active')">
+          <span class="item-icon">📦</span>
+          <span class="item-text">Archive old tickets</span>
         </div>
       </div>
-      <div class="day-footer">
-        <button class="btn-add">＋ Add</button>
-      </div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
     </div>
 
-    <!-- Saturday -->
+    <!-- Saturday 28 -->
     <div class="day-col weekend">
       <div class="day-header">
         <div class="day-name">Sat</div>
         <div class="day-date">28</div>
       </div>
-      <div class="day-body">
-        <!-- empty weekend day -->
-      </div>
-      <div class="day-footer">
-        <button class="btn-add">＋ Add</button>
-      </div>
+      <div class="day-body"></div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
     </div>
 
-    <!-- Sunday -->
+    <!-- Sunday 1 -->
     <div class="day-col weekend">
       <div class="day-header">
         <div class="day-name">Sun</div>
         <div class="day-date">1</div>
       </div>
       <div class="day-body">
-        <div class="section-label">Tasks</div>
-        <div class="task c-red">
-          <span class="task-drag-handle">⠿</span>
-          <span class="task-icon">🎯</span>
-          <span class="task-text">Plan next week</span>
+        <div class="day-divider"></div>
+        <div class="item item-task c-red" onclick="this.classList.toggle('active')">
+          <span class="item-icon">🎯</span>
+          <span class="item-text">Plan next week</span>
         </div>
       </div>
-      <div class="day-footer">
-        <button class="btn-add">＋ Add</button>
-      </div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
     </div>
 
   </main>
 
-  <!-- ── Share bar ── -->
+  <!-- Share bar -->
   <div class="share-bar">
     🔗 Shareable link:
     <span class="share-url">localhost:5173/share/a8f3k2x9</span>
-    <span style="color:#93c5fd; cursor:pointer">Copy link</span>
-    <span style="margin-left:auto; color:#93c5fd; font-size:10px">Others see this week's view · hidden items are invisible</span>
+    <span style="color:#93c5fd; cursor:pointer">Copy</span>
+    <span style="margin-left:auto; color:#93c5fd; font-size:10px">Hidden items invisible to others</span>
   </div>
 
 </div>
-
-<!-- ── Add / Edit Modal ── -->
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>Add to Wednesday 25</h3>
-      <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">×</button>
-    </div>
-
-    <div class="modal-tabs">
-      <button class="modal-tab active">📅 Meeting</button>
-      <button class="modal-tab">✅ Task</button>
-    </div>
-
-    <div class="modal-body">
-
-      <div class="form-row">
-        <label>Title</label>
-        <input type="text" placeholder="e.g. Sprint planning" value="Design review" />
-      </div>
-
-      <div class="form-row-2col">
-        <div class="form-row">
-          <label>Start time</label>
-          <input type="time" value="10:00" />
-        </div>
-        <div class="form-row">
-          <label>End time</label>
-          <input type="time" value="11:00" />
-        </div>
-      </div>
-
-      <div class="form-row-2col">
-        <div class="form-row">
-          <label>Customer</label>
-          <select>
-            <option>GreenTech</option>
-            <option>Acme Corp</option>
-            <option>BrightCo</option>
-            <option>OrangeLabel</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label>Type</label>
-          <select>
-            <option>Online</option>
-            <option>On-site</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <label>Color</label>
-        <div class="color-row">
-          <div class="color-swatch selected" style="background:#7c3aed"></div>
-          <div class="color-swatch" style="background:#3b82f6"></div>
-          <div class="color-swatch" style="background:#22c55e"></div>
-          <div class="color-swatch" style="background:#f97316"></div>
-          <div class="color-swatch" style="background:#ec4899"></div>
-          <div class="color-swatch" style="background:#14b8a6"></div>
-          <div class="color-swatch" style="background:#ef4444"></div>
-          <div class="color-swatch" style="background:#64748b"></div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <label>Repeat</label>
-        <select>
-          <option>No repeat</option>
-          <option>Every week on this day</option>
-          <option>Custom days…</option>
-        </select>
-      </div>
-
-      <div class="form-row-2col">
-        <div class="form-row">
-          <label>Reminder</label>
-          <select>
-            <option>No reminder</option>
-            <option>15 min before</option>
-            <option>30 min before</option>
-            <option>1 hour before</option>
-            <option>Custom…</option>
-          </select>
-        </div>
-        <div class="form-row" style="justify-content:flex-end; padding-top:18px;">
-          <div class="toggle-row">
-            <span class="toggle-label" style="font-size:11px; color:#888; margin-right:8px">Visible in share</span>
-            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="document.getElementById('modal').classList.remove('open')">Cancel</button>
-      <button class="btn-save">Save</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
