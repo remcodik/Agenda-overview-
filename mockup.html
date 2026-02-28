@@ -195,6 +195,27 @@
     /* Scrollbar */
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: #d0d0e0; border-radius: 2px; }
+
+    /* ── Tap tooltip (mobile & fallback for desktop click) ── */
+    #item-tooltip {
+      position: fixed;
+      background: rgba(20,20,20,.9);
+      color: #fff;
+      font-size: 12px; font-weight: 700;
+      padding: 6px 11px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 9999;
+      box-shadow: 0 4px 16px rgba(0,0,0,.28);
+      opacity: 0;
+      transition: opacity .15s ease, transform .15s ease;
+      transform: translateY(4px);
+    }
+    #item-tooltip.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
@@ -250,17 +271,17 @@
       </div>
       <div class="day-body">
         <!-- meetings -->
-        <div class="item item-meeting c-purple upcoming" onclick="this.classList.toggle('active')">
+        <div class="item item-meeting c-purple upcoming">
           <span class="item-icon">🤝</span>
           <span class="item-text">Sprint planning</span>
         </div>
         <div class="day-divider"></div>
         <!-- tasks -->
-        <div class="item item-task c-slate" onclick="this.classList.toggle('active')">
+        <div class="item item-task c-slate">
           <span class="item-icon">✉️</span>
           <span class="item-text">Reply to client emails</span>
         </div>
-        <div class="item item-task c-blue" onclick="this.classList.toggle('active')">
+        <div class="item item-task c-blue">
           <span class="item-icon">📋</span>
           <span class="item-text">Weekly report</span>
         </div>
@@ -276,12 +297,12 @@
         <div class="day-date">24</div>
       </div>
       <div class="day-body">
-        <div class="item item-meeting c-blue" onclick="this.classList.toggle('active')">
+        <div class="item item-meeting c-blue">
           <span class="item-icon">🏢</span>
           <span class="item-text">Stakeholder update</span>
         </div>
         <div class="day-divider"></div>
-        <div class="item item-task c-purple" onclick="this.classList.toggle('active')">
+        <div class="item item-task c-purple">
           <span class="item-icon">💻</span>
           <span class="item-text">Code review PR #47</span>
         </div>
@@ -296,20 +317,20 @@
         <div class="day-date">25</div>
       </div>
       <div class="day-body">
-        <div class="item item-meeting c-green" onclick="this.classList.toggle('active')">
+        <div class="item item-meeting c-green">
           <span class="item-icon">🖥️</span>
           <span class="item-text">Design review</span>
         </div>
-        <div class="item item-meeting c-slate" onclick="this.classList.toggle('active')">
+        <div class="item item-meeting c-slate">
           <span class="item-icon">💬</span>
           <span class="item-text">1-on-1 with manager</span>
         </div>
         <div class="day-divider"></div>
-        <div class="item item-task c-green" onclick="this.classList.toggle('active')">
+        <div class="item item-task c-green">
           <span class="item-icon">📝</span>
           <span class="item-text">Prepare agenda</span>
         </div>
-        <div class="item item-task item-hidden c-teal" onclick="this.classList.toggle('active')">
+        <div class="item item-task item-hidden c-teal">
           <span class="item-icon">🔒</span>
           <span class="item-text">Private task</span>
         </div>
@@ -324,12 +345,12 @@
         <div class="day-date">26</div>
       </div>
       <div class="day-body">
-        <div class="item item-meeting c-orange" onclick="this.classList.toggle('active')">
+        <div class="item item-meeting c-orange">
           <span class="item-icon">🗺️</span>
           <span class="item-text">Workshop: Q2 roadmap</span>
         </div>
         <div class="day-divider"></div>
-        <div class="item item-task c-orange" onclick="this.classList.toggle('active')">
+        <div class="item item-task c-orange">
           <span class="item-icon">🗂️</span>
           <span class="item-text">Organise slides</span>
         </div>
@@ -345,16 +366,16 @@
         <div class="day-date">27</div>
       </div>
       <div class="day-body">
-        <div class="item item-meeting c-purple" onclick="this.classList.toggle('active')">
+        <div class="item item-meeting c-purple">
           <span class="item-icon">🖥️</span>
           <span class="item-text">Retro &amp; planning</span>
         </div>
         <div class="day-divider"></div>
-        <div class="item item-task c-pink" onclick="this.classList.toggle('active')">
+        <div class="item item-task c-pink">
           <span class="item-icon">✅</span>
           <span class="item-text">EOW status update</span>
         </div>
-        <div class="item item-task c-slate" onclick="this.classList.toggle('active')">
+        <div class="item item-task c-slate">
           <span class="item-icon">📦</span>
           <span class="item-text">Archive old tickets</span>
         </div>
@@ -380,7 +401,7 @@
       </div>
       <div class="day-body">
         <div class="day-divider"></div>
-        <div class="item item-task c-red" onclick="this.classList.toggle('active')">
+        <div class="item item-task c-red">
           <span class="item-icon">🎯</span>
           <span class="item-text">Plan next week</span>
         </div>
@@ -399,5 +420,74 @@
   </div>
 
 </div>
+
+<!-- Floating tap tooltip -->
+<div id="item-tooltip"></div>
+
+<script>
+  (function () {
+    const tooltip = document.getElementById('item-tooltip');
+    let hideTimer = null;
+
+    function showTooltip(item, e) {
+      const text = item.querySelector('.item-text');
+      if (!text) return;
+      const label = text.textContent.trim();
+      if (!label) return;
+
+      tooltip.textContent = label;
+      tooltip.classList.remove('visible');
+
+      // Position above the tapped item, centred horizontally
+      const r = item.getBoundingClientRect();
+      const vw = window.innerWidth;
+      tooltip.style.left = '0';
+      tooltip.style.top  = '0';
+      tooltip.style.transform = 'none';
+      // Temporarily make visible to measure width
+      tooltip.style.opacity = '0';
+      tooltip.style.display = 'block';
+      const tw = tooltip.offsetWidth;
+
+      let left = r.left + r.width / 2 - tw / 2;
+      // Clamp to viewport with 8px margin
+      left = Math.max(8, Math.min(left, vw - tw - 8));
+      const top = r.top - tooltip.offsetHeight - 8;
+
+      tooltip.style.left = left + 'px';
+      tooltip.style.top  = (top < 8 ? r.bottom + 8 : top) + 'px';
+      tooltip.style.transform = 'translateY(4px)';
+      tooltip.style.opacity = '';
+
+      // Trigger transition
+      requestAnimationFrame(() => tooltip.classList.add('visible'));
+
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(hide, 2600);
+
+      e.stopPropagation();
+    }
+
+    function hide() {
+      tooltip.classList.remove('visible');
+    }
+
+    // Delegated listener on all .item elements
+    document.addEventListener('click', function (e) {
+      const item = e.target.closest('.item');
+      if (item) { showTooltip(item, e); return; }
+      hide();
+    });
+
+    // Touch: prevent ghost-click delay on mobile
+    document.addEventListener('touchend', function (e) {
+      const item = e.target.closest('.item');
+      if (item) {
+        e.preventDefault();
+        showTooltip(item, e);
+      }
+    }, { passive: false });
+  })();
+</script>
 </body>
 </html>
