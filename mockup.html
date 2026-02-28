@@ -102,12 +102,14 @@
       padding: 3px 10px; font-size: 10px; font-weight: 700; color: #e65100; flex-shrink: 0;
     }
 
-    /* ── Day body ── */
+    /* ── Day body: 2-col icon grid, scrollable per day ── */
     .day-body {
       flex: 1; padding: 8px 6px;
-      display: flex; flex-direction: column; gap: 5px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 5px; align-content: start;
       overflow-y: auto; min-height: 0;
     }
+
 
     /* ── Item tile ──
        Color tells you WHO (customer).
@@ -115,9 +117,9 @@
        Text is hidden — reveal on hover / tap for detail.
     ── */
     .item {
-      display: flex; align-items: center; gap: 6px;
-      border-radius: 9px; padding: 6px 8px;
-      cursor: pointer; overflow: hidden; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      border-radius: 9px; padding: 6px 4px;
+      cursor: pointer; overflow: hidden;
       transition: filter .15s, box-shadow .15s, transform .1s;
       user-select: none; min-width: 0; position: relative;
     }
@@ -154,7 +156,7 @@
     }
 
     /* Divider between meetings block and tasks block */
-    .day-divider { height: 1px; background: rgba(0,0,0,.06); margin: 2px 2px; flex-shrink: 0; }
+    .day-divider { grid-column: 1 / -1; height: 1px; background: rgba(0,0,0,.06); margin: 2px 0; }
 
     /* ── Customer color classes (background of tile) ── */
     .c-purple { background: #ede0ff; color: #4c1d95; }
