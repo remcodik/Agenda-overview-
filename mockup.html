@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weekly Agenda – Icon Overview</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    .app { display: flex; flex-direction: column; height: 100vh; }
+
+    /* ── Top bar ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 24px; background: #1a1a2e; color: #fff;
+      flex-shrink: 0; gap: 16px;
+    }
+    .topbar-title { font-size: 18px; font-weight: 700; }
+    .week-nav { display: flex; align-items: center; gap: 12px; }
+    .week-nav button {
+      background: rgba(255,255,255,.12); border: none; color: #fff;
+      width: 32px; height: 32px; border-radius: 8px; font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .week-nav button:hover { background: rgba(255,255,255,.22); }
+    .week-label { font-size: 14px; font-weight: 600; min-width: 220px; text-align: center; }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .btn-share {
+      background: #4f8ef7; border: none; color: #fff;
+      padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    #version-badge {
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.6);
+      padding: 4px 9px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer;
+      letter-spacing: .3px; transition: background .15s, color .15s;
+    }
+    #version-badge:hover { background: rgba(255,255,255,.2); color: #fff; }
+    .btn-settings {
+      background: rgba(255,255,255,.12); border: none; color: #fff;
+      width: 34px; height: 34px; border-radius: 8px; font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex; align-items: center; gap: 16px;
+      padding: 7px 20px; background: #fff; border-bottom: 1px solid #f0f0f5;
+      font-size: 11px; flex-shrink: 0; flex-wrap: wrap;
+    }
+    .legend-title {
+      font-weight: 700; color: #888; text-transform: uppercase;
+      letter-spacing: .5px; font-size: 10px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #333; }
+    .legend-chip {
+      width: 18px; height: 18px; border-radius: 5px;
+      display: flex; align-items: center; justify-content: center; font-size: 10px;
+    }
+    .legend-hint { margin-left: auto; color: #bbb; font-size: 10px; font-style: italic; }
+
+    /* Key icons */
+    .legend-key { display: flex; align-items: center; gap: 12px; margin-left: 8px; padding-left: 12px; border-left: 1px solid #f0f0f5; }
+    .legend-key-item { display: flex; align-items: center; gap: 4px; color: #888; font-size: 10px; }
+
+    /* ── Week grid: 6 cols × 2 rows fills the whole viewport ── */
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: 1fr 1fr;
+      gap: 8px; padding: 12px 16px 16px;
+      flex: 1; overflow: hidden; min-height: 0;
+    }
+
+    /* ── Day column ── */
+    .day-col {
+      background: #fff; border-radius: 14px;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.07);
+      border: 2px solid transparent; min-width: 0;
+    }
+    .day-col.today { border-color: #4f8ef7; }
+    .day-col.weekend { opacity: .7; }
+
+    /* ── Day header ── */
+    .day-header {
+      padding: 9px 10px 7px;
+      background: #fafafa; border-bottom: 1px solid #f0f0f5; flex-shrink: 0;
+    }
+    .day-name {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: #888;
+    }
+    .day-col.weekend .day-name { color: #ccc; }
+    .day-date { font-size: 20px; font-weight: 800; color: #1a1a2e; line-height: 1.1; margin-top: 1px; }
+    .day-col.today .day-date { color: #4f8ef7; }
+    .day-col.weekend .day-date { color: #ccc; }
+
+    /* ── Dog badge ── */
+    .dog-badge {
+      background: #fff8f0; border-bottom: 1px solid #ffe0b2;
+      padding: 3px 10px; font-size: 10px; font-weight: 700; color: #e65100; flex-shrink: 0;
+    }
+
+    /* ── Day body: 2-col icon grid, scrollable per day ── */
+    .day-body {
+      flex: 1; padding: 8px 6px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 5px; align-content: start;
+      overflow-y: auto; min-height: 0;
+    }
+
+    /* ── Item tile ──
+       Color tells you WHO (customer).
+       Icon tells you WHAT (type of event/task).
+       Text is hidden — reveal on hover / tap for detail.
+    ── */
+    .item {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      border-radius: 9px; padding: 6px 4px;
+      cursor: pointer; overflow: hidden;
+      transition: filter .15s, box-shadow .15s, transform .1s;
+      user-select: none; min-width: 0; position: relative;
+    }
+    .item:hover, .item.active {
+      filter: brightness(.94);
+      box-shadow: 0 2px 10px rgba(0,0,0,.14);
+      transform: translateY(-1px);
+    }
+    .item:active { transform: scale(.97); }
+
+    /* Meeting: slightly stronger left indicator */
+    .item-meeting { border-left: 3px solid rgba(0,0,0,.18); }
+
+    .item-icon { font-size: 15px; flex-shrink: 0; line-height: 1; }
+
+    /* Text hidden until hover / tap */
+    .item-text {
+      font-size: 11px; font-weight: 700;
+      white-space: nowrap; overflow: hidden;
+      max-width: 0; opacity: 0;
+      transition: max-width .25s ease, opacity .2s ease;
+    }
+    .item:hover .item-text,
+    .item.active .item-text { max-width: 180px; opacity: 1; }
+
+    /* Private/hidden item — completely invisible */
+    .item-hidden { display: none; }
+
+    /* Upcoming pulse */
+    .upcoming { animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,.25); }
+      50%       { box-shadow: 0 0 0 5px rgba(0,0,0,0); }
+    }
+
+    /* Divider between meetings block and tasks block */
+    .day-divider { grid-column: 1 / -1; height: 1px; background: rgba(0,0,0,.06); margin: 2px 0; }
+
+    /* ── Customer color classes (background of tile) ── */
+    .c-purple { background: #ede0ff; color: #4c1d95; }
+    .c-blue   { background: #dbeafe; color: #1e3a8a; }
+    .c-green  { background: #dcfce7; color: #14532d; }
+    .c-orange { background: #ffedd5; color: #7c2d12; }
+    .c-pink   { background: #fce7f3; color: #831843; }
+    .c-teal   { background: #ccfbf1; color: #134e4a; }
+    .c-red    { background: #fee2e2; color: #7f1d1d; }
+    .c-slate  { background: #f1f5f9; color: #1e293b; }
+
+    /* ── Add button ── */
+    .btn-add {
+      width: 100%; border: 1.5px dashed #d8d8e8;
+      background: transparent; border-radius: 7px; padding: 5px;
+      font-size: 13px; color: #c8c8d8; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; transition: border-color .15s, color .15s;
+    }
+    .btn-add:hover { border-color: #4f8ef7; color: #4f8ef7; }
+
+    /* ── Day footer ── */
+    .day-footer { padding: 5px 6px 7px; flex-shrink: 0; }
+
+    /* ── Share bar ── */
+    .share-bar {
+      background: #eff6ff; border-top: 1px solid #bfdbfe;
+      padding: 7px 20px; font-size: 11px; color: #3b82f6; font-weight: 600;
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+    .share-url {
+      background: #fff; border: 1px solid #bfdbfe; border-radius: 6px;
+      padding: 2px 8px; font-family: monospace; font-size: 11px; color: #1e40af; cursor: pointer;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: #d0d0e0; border-radius: 2px; }
+
+    /* ── Tap tooltip ── */
+    #item-tooltip {
+      position: fixed;
+      background: rgba(20,20,20,.9);
+      color: #fff;
+      font-size: 12px; font-weight: 700;
+      padding: 5px 10px 5px 11px;
+      border-radius: 8px;
+      white-space: nowrap;
+      z-index: 9999;
+      box-shadow: 0 4px 16px rgba(0,0,0,.28);
+      opacity: 0;
+      display: flex; align-items: center; gap: 8px;
+      transition: opacity .15s ease, transform .15s ease;
+      transform: translateY(4px);
+    }
+    #item-tooltip.visible { opacity: 1; transform: translateY(0); }
+    #tooltip-label { pointer-events: none; }
+    #tooltip-edit {
+      pointer-events: all;
+      background: rgba(255,255,255,.15); border: none; color: #fff;
+      font-size: 11px; font-weight: 700; padding: 2px 7px;
+      border-radius: 5px; cursor: pointer; white-space: nowrap;
+    }
+    #tooltip-edit:hover { background: rgba(255,255,255,.28); }
+
+    /* ── Shared bottom-sheet pattern ── */
+    .bottom-sheet {
+      position: fixed; inset: 0;
+      z-index: 10000; display: flex; align-items: flex-end;
+      pointer-events: none;
+    }
+    .bottom-sheet.open { pointer-events: all; }
+    .bs-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0);
+      transition: background .25s;
+    }
+    .bottom-sheet.open .bs-backdrop { background: rgba(0,0,0,.38); }
+    .bs-panel {
+      position: relative; width: 100%; max-width: 480px; margin: 0 auto;
+      background: #fff; border-radius: 20px 20px 0 0;
+      box-shadow: 0 -4px 32px rgba(0,0,0,.2);
+      transform: translateY(100%);
+      transition: transform .28s cubic-bezier(.32,1,.56,1);
+      overflow: hidden;
+    }
+    .bottom-sheet.open .bs-panel { transform: translateY(0); }
+    .sheet-handle {
+      width: 36px; height: 4px; background: #ddd;
+      border-radius: 2px; margin: 10px auto 0;
+    }
+    .sheet-title-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 18px 12px; border-bottom: 1px solid #f0f0f5;
+    }
+    .sheet-event-icon { font-size: 22px; flex-shrink: 0; }
+    .sheet-close {
+      width: 28px; height: 28px; border: none; background: #f0f0f5;
+      border-radius: 50%; font-size: 18px; cursor: pointer; color: #888;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    /* ── Edit sheet ── */
+    #sheet-title-input {
+      flex: 1; font-size: 15px; font-weight: 800; color: #1a1a2e;
+      border: none; outline: none; background: transparent;
+    }
+    .sheet-body { padding: 14px 18px 20px; display: flex; flex-direction: column; gap: 16px; }
+    .sheet-label {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .6px; color: #aaa; margin-bottom: 8px;
+    }
+    /* Customer chips */
+    .cust-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .cust-chip {
+      display: flex; align-items: center; gap: 5px;
+      border: 2px solid transparent; border-radius: 10px;
+      padding: 5px 9px; cursor: pointer; font-size: 12px; font-weight: 700;
+      transition: border-color .15s;
+    }
+    .cust-chip.selected { border-color: rgba(0,0,0,.5); }
+    .cust-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    /* Type segmented */
+    .type-seg {
+      display: flex; border: 1.5px solid #e8e8f0; border-radius: 9px;
+      overflow: hidden; align-self: flex-start;
+    }
+    .type-seg label { padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; color: #aaa; }
+    .type-seg input { display: none; }
+    .type-seg input:checked + label { background: #1a1a2e; color: #fff; }
+    /* Icon grid */
+    .sh-icon-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .sh-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      border: 2px solid transparent; background: #f6f6fb;
+      font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sh-icon.selected { border-color: #4f8ef7; background: #eff6ff; }
+    .sh-icon:hover { background: #eff6ff; }
+    .btn-sheet-save {
+      width: 100%; background: #1a1a2e; color: #fff;
+      border: none; border-radius: 10px; padding: 13px;
+      font-size: 14px; font-weight: 800; cursor: pointer;
+    }
+    .btn-sheet-save:hover { filter: brightness(1.18); }
+
+    /* Toggle switch (sheet) */
+    .sh-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .sh-switch input { opacity: 0; width: 0; height: 0; }
+    .sh-slider {
+      position: absolute; inset: 0;
+      background: #dde0e8; border-radius: 22px; cursor: pointer;
+      transition: background .2s;
+    }
+    .sh-slider::before {
+      content: ''; position: absolute; width: 16px; height: 16px;
+      border-radius: 50%; background: #fff; left: 3px; top: 3px;
+      transition: transform .2s; box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    }
+    .sh-switch input:checked + .sh-slider { background: #4f8ef7; }
+    .sh-switch input:checked + .sh-slider::before { transform: translateX(18px); }
+
+    /* Toggle row in sheet */
+    .sh-toggle-row { display: flex; align-items: center; gap: 12px; padding: 2px 0; }
+    .sh-toggle-info { flex: 1; }
+    .sh-toggle-label { font-size: 13px; font-weight: 700; color: #1a1a2e; }
+    .sh-toggle-sub   { font-size: 11px; color: #aaa; margin-top: 1px; }
+
+    /* Google Calendar note in edit sheet */
+    .sh-gcal-note {
+      display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+      background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px;
+    }
+    .sh-gcal-note-icon { font-size: 18px; flex-shrink: 0; }
+    .btn-gcal-open {
+      color: #16a34a; font-size: 11px; font-weight: 700; text-decoration: none; white-space: nowrap;
+      padding: 4px 10px; border-radius: 7px; background: #dcfce7; border: 1px solid #bbf7d0;
+      transition: background .15s;
+    }
+    .btn-gcal-open:hover { background: #bbf7d0; }
+
+    /* ── Hidden items badge in legend ── */
+    #hidden-badge {
+      display: none; align-items: center; gap: 4px;
+      background: #f1f5f9; border: 1.5px solid #e2e8f0;
+      border-radius: 8px; padding: 3px 9px;
+      font-size: 10px; font-weight: 800; color: #64748b;
+      cursor: pointer; user-select: none;
+      transition: background .15s, color .15s;
+    }
+    #hidden-badge.show { display: flex; }
+    #hidden-badge:hover { background: #e2e8f0; }
+
+    /* ── Hidden items panel ── */
+    #hidden-list {
+      padding: 12px 18px 24px; display: flex; flex-direction: column;
+      gap: 8px; max-height: 60vh; overflow-y: auto;
+    }
+    .hidden-item-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 10px;
+      background: #f8f8fc; border: 1.5px solid #f0f0f5;
+    }
+    .hidden-item-swatch {
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .hidden-item-title { flex: 1; font-size: 13px; font-weight: 700; color: #1a1a2e; }
+    .btn-unhide {
+      background: #eff6ff; border: 1.5px solid #bfdbfe; color: #3b82f6;
+      border-radius: 7px; padding: 5px 12px; font-size: 12px; font-weight: 700;
+      cursor: pointer; white-space: nowrap; transition: background .15s;
+    }
+    .btn-unhide:hover { background: #dbeafe; }
+    .hidden-empty {
+      text-align: center; padding: 24px; color: #bbb; font-size: 13px; font-weight: 600;
+    }
+
+    /* ── Version history panel ── */
+    #version-list {
+      padding: 8px 18px 24px; display: flex; flex-direction: column;
+    }
+    .version-entry {
+      display: grid; grid-template-columns: 52px 92px 1fr;
+      gap: 8px; padding: 11px 0; border-bottom: 1px solid #f0f0f5;
+      align-items: start;
+    }
+    .version-entry:last-child { border-bottom: none; }
+    .version-tag { font-size: 12px; font-weight: 800; color: #4f8ef7; }
+    .version-date { font-size: 11px; color: #aaa; padding-top: 1px; }
+    .version-desc { font-size: 12px; color: #1a1a2e; line-height: 1.45; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <span class="topbar-title">📅 My Week</span>
+    <div class="week-nav">
+      <button>&#8249;</button>
+      <span class="week-label">Week 9 &nbsp;·&nbsp; Feb 23 – Mar 1, 2026</span>
+      <button>&#8250;</button>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-share">🔗 Share</button>
+      <button id="version-badge" title="Version history">v0.3</button>
+      <button class="btn-settings">⚙️</button>
+    </div>
+  </header>
+
+  <!-- Legend: color = customer, icon = type -->
+  <div class="legend">
+    <span class="legend-title">Color = customer</span>
+    <span class="legend-item">
+      <span class="legend-chip" style="background:#ede0ff">🟣</span>Acme Corp
+    </span>
+    <span class="legend-item">
+      <span class="legend-chip" style="background:#dbeafe">🔵</span>BrightCo
+    </span>
+    <span class="legend-item">
+      <span class="legend-chip" style="background:#dcfce7">🟢</span>GreenTech
+    </span>
+    <span class="legend-item">
+      <span class="legend-chip" style="background:#ffedd5">🟠</span>OrangeLabel
+    </span>
+
+    <!-- Icon key -->
+    <div class="legend-key">
+      <span class="legend-key-item">🤝 🏢 🖥️ 💬 = meeting</span>
+      <span class="legend-key-item">✉️ 📋 💻 📝 = task</span>
+    </div>
+
+    <span id="hidden-badge">🔒 <span id="hidden-count">0</span> hidden</span>
+    <span class="legend-hint">Tap · hold to edit</span>
+  </div>
+
+  <!-- Week grid -->
+  <main class="week-grid">
+
+    <!-- Monday 23 -->
+    <div class="day-col" style="grid-column:1/3;grid-row:1">
+      <div class="day-header">
+        <div class="day-name">Mon</div>
+        <div class="day-date">23</div>
+      </div>
+      <div class="day-body">
+        <!-- meetings -->
+        <div class="item item-meeting c-purple upcoming">
+          <span class="item-icon">🤝</span>
+          <span class="item-text">Sprint planning</span>
+        </div>
+        <div class="day-divider"></div>
+        <!-- tasks -->
+        <div class="item item-task c-slate">
+          <span class="item-icon">✉️</span>
+          <span class="item-text">Reply to client emails</span>
+        </div>
+        <div class="item item-task c-blue">
+          <span class="item-icon">📋</span>
+          <span class="item-text">Weekly report</span>
+        </div>
+      </div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
+    </div>
+
+    <!-- Tuesday 24 -->
+    <div class="day-col" style="grid-column:3/5;grid-row:1">
+      <div class="dog-badge">🐕 Dog day</div>
+      <div class="day-header">
+        <div class="day-name">Tue</div>
+        <div class="day-date">24</div>
+      </div>
+      <div class="day-body">
+        <div class="item item-meeting c-blue">
+          <span class="item-icon">🏢</span>
+          <span class="item-text">Stakeholder update</span>
+        </div>
+        <div class="day-divider"></div>
+        <div class="item item-task c-purple">
+          <span class="item-icon">💻</span>
+          <span class="item-text">Code review PR #47</span>
+        </div>
+      </div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
+    </div>
+
+    <!-- Wednesday 25 – Today -->
+    <div class="day-col today" style="grid-column:5/7;grid-row:1">
+      <div class="day-header">
+        <div class="day-name">Wed · Today</div>
+        <div class="day-date">25</div>
+      </div>
+      <div class="day-body">
+        <div class="item item-meeting c-green">
+          <span class="item-icon">🖥️</span>
+          <span class="item-text">Design review</span>
+        </div>
+        <div class="item item-meeting c-slate">
+          <span class="item-icon">💬</span>
+          <span class="item-text">1-on-1 with manager</span>
+        </div>
+        <div class="day-divider"></div>
+        <div class="item item-task c-green">
+          <span class="item-icon">📝</span>
+          <span class="item-text">Prepare agenda</span>
+        </div>
+        <div class="item item-task item-hidden c-teal">
+          <span class="item-icon">🔒</span>
+          <span class="item-text">Private task</span>
+        </div>
+      </div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
+    </div>
+
+    <!-- Thursday 26 -->
+    <div class="day-col" style="grid-column:1/3;grid-row:2">
+      <div class="day-header">
+        <div class="day-name">Thu</div>
+        <div class="day-date">26</div>
+      </div>
+      <div class="day-body">
+        <div class="item item-meeting c-orange">
+          <span class="item-icon">🗺️</span>
+          <span class="item-text">Workshop: Q2 roadmap</span>
+        </div>
+        <div class="day-divider"></div>
+        <div class="item item-task c-orange">
+          <span class="item-icon">🗂️</span>
+          <span class="item-text">Organise slides</span>
+        </div>
+      </div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
+    </div>
+
+    <!-- Friday 27 -->
+    <div class="day-col" style="grid-column:3/5;grid-row:2">
+      <div class="dog-badge">🐕 Dog day</div>
+      <div class="day-header">
+        <div class="day-name">Fri</div>
+        <div class="day-date">27</div>
+      </div>
+      <div class="day-body">
+        <div class="item item-meeting c-purple">
+          <span class="item-icon">🖥️</span>
+          <span class="item-text">Retro &amp; planning</span>
+        </div>
+        <div class="day-divider"></div>
+        <div class="item item-task c-pink">
+          <span class="item-icon">✅</span>
+          <span class="item-text">EOW status update</span>
+        </div>
+        <div class="item item-task c-slate">
+          <span class="item-icon">📦</span>
+          <span class="item-text">Archive old tickets</span>
+        </div>
+      </div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
+    </div>
+
+    <!-- Saturday 28 – half-width -->
+    <div class="day-col weekend" style="grid-column:5/6;grid-row:2">
+      <div class="day-header">
+        <div class="day-name">Sat</div>
+        <div class="day-date">28</div>
+      </div>
+      <div class="day-body"></div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
+    </div>
+
+    <!-- Sunday 1 – half-width -->
+    <div class="day-col weekend" style="grid-column:6/7;grid-row:2">
+      <div class="day-header">
+        <div class="day-name">Sun</div>
+        <div class="day-date">1</div>
+      </div>
+      <div class="day-body">
+        <div class="day-divider"></div>
+        <div class="item item-task c-red">
+          <span class="item-icon">🎯</span>
+          <span class="item-text">Plan next week</span>
+        </div>
+      </div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
+    </div>
+
+  </main>
+
+  <!-- Share bar -->
+  <div class="share-bar">
+    🔗 Shareable link:
+    <span class="share-url">localhost:5173/share/a8f3k2x9</span>
+    <span style="color:#93c5fd; cursor:pointer">Copy</span>
+    <span style="margin-left:auto; color:#93c5fd; font-size:10px">Hidden items invisible to others</span>
+  </div>
+
+</div>
+
+<!-- Floating tap tooltip -->
+<div id="item-tooltip">
+  <span id="tooltip-label"></span>
+  <button id="tooltip-edit">✏️ Edit</button>
+</div>
+
+<!-- ── Event edit bottom sheet ── -->
+<div id="edit-sheet" class="bottom-sheet">
+  <div class="bs-backdrop" id="edit-backdrop"></div>
+  <div class="bs-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title-row">
+      <span class="sheet-event-icon" id="sheet-icon-display">🤝</span>
+      <input class="sheet-title" id="sheet-title-input" type="text" value="" />
+      <button class="sheet-close" id="sheet-close">×</button>
+    </div>
+    <div class="sheet-body">
+
+      <!-- Customer -->
+      <div>
+        <div class="sheet-label">Customer</div>
+        <div class="cust-chips">
+          <div class="cust-chip" style="background:#ede0ff" data-color-cls="c-purple">
+            <span class="cust-dot" style="background:#9333ea"></span>Acme Corp
+          </div>
+          <div class="cust-chip" style="background:#dbeafe" data-color-cls="c-blue">
+            <span class="cust-dot" style="background:#3b82f6"></span>BrightCo
+          </div>
+          <div class="cust-chip" style="background:#dcfce7" data-color-cls="c-green">
+            <span class="cust-dot" style="background:#22c55e"></span>GreenTech
+          </div>
+          <div class="cust-chip" style="background:#ffedd5" data-color-cls="c-orange">
+            <span class="cust-dot" style="background:#f97316"></span>OrangeLabel
+          </div>
+          <div class="cust-chip" style="background:#f1f5f9" data-color-cls="c-slate">
+            <span class="cust-dot" style="background:#94a3b8"></span>None
+          </div>
+        </div>
+      </div>
+
+      <!-- Type -->
+      <div>
+        <div class="sheet-label">Type</div>
+        <div class="type-seg">
+          <input type="radio" name="sh-type" id="sh-meeting" value="meeting" checked />
+          <label for="sh-meeting">🤝 Meeting</label>
+          <input type="radio" name="sh-type" id="sh-task" value="task" />
+          <label for="sh-task">✅ Task</label>
+        </div>
+      </div>
+
+      <!-- Icon -->
+      <div>
+        <div class="sheet-label">Icon</div>
+        <div class="sh-icon-grid">
+          <div class="sh-icon">🤝</div><div class="sh-icon">🏢</div>
+          <div class="sh-icon">🖥️</div><div class="sh-icon">💬</div>
+          <div class="sh-icon">📞</div><div class="sh-icon">🎤</div>
+          <div class="sh-icon">✉️</div><div class="sh-icon">📋</div>
+          <div class="sh-icon">💻</div><div class="sh-icon">📝</div>
+          <div class="sh-icon">✅</div><div class="sh-icon">📦</div>
+          <div class="sh-icon">🎯</div><div class="sh-icon">🗂️</div>
+          <div class="sh-icon">🗺️</div><div class="sh-icon">🔒</div>
+        </div>
+      </div>
+
+      <!-- Private -->
+      <div class="sh-toggle-row">
+        <div class="sh-toggle-info">
+          <div class="sh-toggle-label">🔒 Private / hidden</div>
+          <div class="sh-toggle-sub">Invisible in the main view — manage via the 🔒 badge in the legend</div>
+        </div>
+        <label class="sh-switch">
+          <input type="checkbox" id="sh-private" />
+          <span class="sh-slider"></span>
+        </label>
+      </div>
+
+      <!-- Recurring — Google Calendar note -->
+      <div class="sh-gcal-note">
+        <span class="sh-gcal-note-icon">🔁</span>
+        <div class="sh-toggle-info">
+          <div class="sh-toggle-label">Recurring events</div>
+          <div class="sh-toggle-sub">Set up repeating events in Google Calendar — they sync here automatically</div>
+        </div>
+        <a class="btn-gcal-open" href="https://calendar.google.com" target="_blank" rel="noopener">Open →</a>
+      </div>
+
+      <button class="btn-sheet-save" id="sheet-save">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Hidden items panel ── -->
+<div id="hidden-panel" class="bottom-sheet">
+  <div class="bs-backdrop" id="hidden-panel-backdrop"></div>
+  <div class="bs-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title-row">
+      <span style="font-size:20px">🔒</span>
+      <span style="flex:1; font-size:15px; font-weight:800; color:#1a1a2e">Hidden items</span>
+      <button class="sheet-close" id="hidden-panel-close">×</button>
+    </div>
+    <div id="hidden-list"></div>
+  </div>
+</div>
+
+<!-- ── Version history panel ── -->
+<div id="version-panel" class="bottom-sheet">
+  <div class="bs-backdrop" id="version-panel-backdrop"></div>
+  <div class="bs-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title-row">
+      <span style="font-size:20px">📋</span>
+      <span style="flex:1; font-size:15px; font-weight:800; color:#1a1a2e">Version history</span>
+      <button class="sheet-close" id="version-panel-close">×</button>
+    </div>
+    <div id="version-list">
+      <div class="version-entry">
+        <span class="version-tag">v0.3.0</span>
+        <span class="version-date">2026-03-01</span>
+        <span class="version-desc">Hidden items panel, version log, Google Calendar integration for recurring events</span>
+      </div>
+      <div class="version-entry">
+        <span class="version-tag">v0.2.0</span>
+        <span class="version-date">2026-02-28</span>
+        <span class="version-desc">Hide / private toggle, recurring events, reveal-to-unhide flow</span>
+      </div>
+      <div class="version-entry">
+        <span class="version-tag">v0.1.2</span>
+        <span class="version-date">2026-02-27</span>
+        <span class="version-desc">Event edit bottom sheet — customer &amp; icon assignment</span>
+      </div>
+      <div class="version-entry">
+        <span class="version-tag">v0.1.1</span>
+        <span class="version-date">2026-02-26</span>
+        <span class="version-desc">Customize settings page added</span>
+      </div>
+      <div class="version-entry">
+        <span class="version-tag">v0.1.0</span>
+        <span class="version-date">2026-02-25</span>
+        <span class="version-desc">Initial weekly overview layout — icon + color grid</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* ── App version ── */
+  const APP_VERSION = 'v0.3.0';
+  const APP_VERSION_DATE = '2026-03-01';
+
+  /* ── Tooltip ── */
+  const tooltip   = document.getElementById('item-tooltip');
+  const tipLabel  = document.getElementById('tooltip-label');
+  const tipEdit   = document.getElementById('tooltip-edit');
+  let hideTimer   = null;
+  let activeItem  = null;
+
+  function positionTooltip() {
+    if (!activeItem) return;
+    const r  = activeItem.getBoundingClientRect();
+    const vw = window.innerWidth;
+    tooltip.style.left = '0'; tooltip.style.top = '0'; tooltip.style.opacity = '0';
+    const tw = tooltip.offsetWidth;
+    let left = r.left + r.width / 2 - tw / 2;
+    left = Math.max(8, Math.min(left, vw - tw - 8));
+    const top = r.top - tooltip.offsetHeight - 8;
+    tooltip.style.left = left + 'px';
+    tooltip.style.top  = (top < 8 ? r.bottom + 8 : top) + 'px';
+    tooltip.style.opacity = '';
+  }
+
+  function showTooltip(item, e) {
+    const textEl = item.querySelector('.item-text');
+    const label  = textEl ? textEl.textContent.trim() : '';
+    if (!label) return;
+    activeItem = item;
+    tipLabel.textContent = label;
+    tooltip.classList.remove('visible');
+    positionTooltip();
+    requestAnimationFrame(() => tooltip.classList.add('visible'));
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(hideTooltip, 2600);
+    e && e.stopPropagation();
+  }
+
+  function hideTooltip() { tooltip.classList.remove('visible'); }
+
+  /* ── Generic sheet open/close ── */
+  function openSheet(el) { el.classList.add('open'); }
+  function closeSheet(el) { el.classList.remove('open'); }
+
+  /* ── Edit sheet ── */
+  const editSheet   = document.getElementById('edit-sheet');
+  const editBackdrop= document.getElementById('edit-backdrop');
+  const titleInput  = document.getElementById('sheet-title-input');
+  const iconDisplay = document.getElementById('sheet-icon-display');
+
+  function openEditSheet(item) {
+    activeItem = item;
+    hideTooltip();
+    titleInput.value = item.querySelector('.item-text')?.textContent?.trim() || '';
+    const currentIcon = item.querySelector('.item-icon')?.textContent?.trim() || '🤝';
+    iconDisplay.textContent = currentIcon;
+
+    // Sync customer
+    const colorCls = [...item.classList].find(c => c.startsWith('c-')) || 'c-slate';
+    document.querySelectorAll('.cust-chip').forEach(c => {
+      c.classList.toggle('selected', c.dataset.colorCls === colorCls);
+    });
+    // Sync type
+    const isMeeting = item.classList.contains('item-meeting');
+    document.getElementById(isMeeting ? 'sh-meeting' : 'sh-task').checked = true;
+    // Sync icon
+    document.querySelectorAll('.sh-icon').forEach(c => {
+      c.classList.toggle('selected', c.textContent === currentIcon);
+    });
+    // Sync private
+    document.getElementById('sh-private').checked = item.classList.contains('item-hidden');
+
+    openSheet(editSheet);
+  }
+
+  document.getElementById('sheet-close').addEventListener('click', () => closeSheet(editSheet));
+  editBackdrop.addEventListener('click', () => closeSheet(editSheet));
+
+  tipEdit.addEventListener('click', (e) => {
+    e.stopPropagation();
+    hideTooltip();
+    if (activeItem) openEditSheet(activeItem);
+  });
+
+  // Icon chips in sheet
+  document.querySelectorAll('.sh-icon').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.sh-icon').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      iconDisplay.textContent = chip.textContent;
+    });
+  });
+
+  // Customer chips in sheet
+  document.querySelectorAll('.cust-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.cust-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+    });
+  });
+
+  // Save
+  document.getElementById('sheet-save').addEventListener('click', () => {
+    if (!activeItem) { closeSheet(editSheet); return; }
+    // Label
+    const textEl = activeItem.querySelector('.item-text');
+    if (textEl) textEl.textContent = titleInput.value;
+    // Icon
+    const selIcon = document.querySelector('.sh-icon.selected');
+    const iconEl  = activeItem.querySelector('.item-icon');
+    if (selIcon && iconEl) { iconEl.textContent = selIcon.textContent; iconDisplay.textContent = selIcon.textContent; }
+    // Customer color
+    const selCust = document.querySelector('.cust-chip.selected');
+    if (selCust) {
+      activeItem.classList.forEach(c => { if (c.startsWith('c-')) activeItem.classList.remove(c); });
+      activeItem.classList.add(selCust.dataset.colorCls);
+    }
+    // Type
+    const type = document.querySelector('input[name="sh-type"]:checked').value;
+    activeItem.classList.toggle('item-meeting', type === 'meeting');
+    activeItem.classList.toggle('item-task',    type === 'task');
+    // Private / hidden
+    activeItem.classList.toggle('item-hidden', document.getElementById('sh-private').checked);
+
+    closeSheet(editSheet);
+    updateHiddenBadge();
+  });
+
+  /* ── Hidden items badge ── */
+  function updateHiddenBadge() {
+    const count = document.querySelectorAll('.item.item-hidden').length;
+    const badge = document.getElementById('hidden-badge');
+    document.getElementById('hidden-count').textContent = count;
+    badge.classList.toggle('show', count > 0);
+  }
+
+  document.getElementById('hidden-badge').addEventListener('click', openHiddenPanel);
+
+  /* ── Hidden items panel ── */
+  const hiddenPanel = document.getElementById('hidden-panel');
+  document.getElementById('hidden-panel-close').addEventListener('click', () => closeSheet(hiddenPanel));
+  document.getElementById('hidden-panel-backdrop').addEventListener('click', () => closeSheet(hiddenPanel));
+
+  function openHiddenPanel() {
+    const list = document.getElementById('hidden-list');
+    const items = document.querySelectorAll('.item.item-hidden');
+
+    if (items.length === 0) {
+      list.innerHTML = '<div class="hidden-empty">No hidden items this week</div>';
+    } else {
+      list.innerHTML = '';
+      items.forEach(item => {
+        const icon   = item.querySelector('.item-icon')?.textContent?.trim() || '🔒';
+        const title  = item.querySelector('.item-text')?.textContent?.trim()  || '(untitled)';
+        const bgCls  = [...item.classList].find(c => c.startsWith('c-')) || 'c-slate';
+        // Map color class to background color for the swatch
+        const bgMap  = { 'c-purple':'#ede0ff','c-blue':'#dbeafe','c-green':'#dcfce7',
+                         'c-orange':'#ffedd5','c-pink':'#fce7f3','c-teal':'#ccfbf1',
+                         'c-red':'#fee2e2','c-slate':'#f1f5f9' };
+        const bg = bgMap[bgCls] || '#f1f5f9';
+
+        const row = document.createElement('div');
+        row.className = 'hidden-item-row';
+        row.innerHTML = `
+          <div class="hidden-item-swatch" style="background:${bg}">${icon}</div>
+          <span class="hidden-item-title">${title}</span>
+          <button class="btn-unhide">Unhide</button>
+        `;
+        row.querySelector('.btn-unhide').addEventListener('click', () => {
+          item.classList.remove('item-hidden');
+          row.remove();
+          updateHiddenBadge();
+          if (!document.querySelectorAll('.item.item-hidden').length) {
+            document.getElementById('hidden-list').innerHTML = '<div class="hidden-empty">No hidden items this week</div>';
+          }
+        });
+        list.appendChild(row);
+      });
+    }
+    openSheet(hiddenPanel);
+  }
+
+  // Init badge
+  updateHiddenBadge();
+
+  /* ── Version panel ── */
+  const versionPanel = document.getElementById('version-panel');
+  document.getElementById('version-badge').addEventListener('click', () => openSheet(versionPanel));
+  document.getElementById('version-panel-close').addEventListener('click', () => closeSheet(versionPanel));
+  document.getElementById('version-panel-backdrop').addEventListener('click', () => closeSheet(versionPanel));
+
+  /* ── Unified tap / long-press handler ── */
+  let lpTimer = null; let didLongPress = false;
+
+  document.addEventListener('touchstart', e => {
+    const item = e.target.closest('.item');
+    if (!item) return;
+    didLongPress = false;
+    lpTimer = setTimeout(() => { didLongPress = true; openEditSheet(item); }, 480);
+  }, { passive: true });
+
+  document.addEventListener('touchmove', () => clearTimeout(lpTimer), { passive: true });
+
+  document.addEventListener('touchend', e => {
+    clearTimeout(lpTimer);
+    if (didLongPress) { e.preventDefault(); return; }
+    const item = e.target.closest('.item');
+    if (item) { e.preventDefault(); showTooltip(item, e); }
+  }, { passive: false });
+
+  // Desktop click → tooltip; sheet opened via Edit button
+  document.addEventListener('click', e => {
+    if (e.target.closest('.bottom-sheet') || e.target.closest('#item-tooltip')) return;
+    const item = e.target.closest('.item');
+    if (item) { showTooltip(item, e); return; }
+    hideTooltip();
+  });
+})();
+</script>
+</body>
+</html>
