@@ -301,6 +301,62 @@
       font-size: 14px; font-weight: 800; cursor: pointer;
     }
     .btn-sheet-save:hover { filter: brightness(1.18); }
+
+    /* ── Recurring badge (tiny corner indicator) ── */
+    .item-recurring::after {
+      content: '🔁'; position: absolute; top: 2px; right: 3px;
+      font-size: 8px; line-height: 1; opacity: .65; pointer-events: none;
+    }
+
+    /* ── Reveal-hidden mode ── */
+    .reveal-mode .item-hidden { opacity: 1; }
+    .reveal-mode .item-hidden::before {
+      content: '👁 tap to unhide';
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800; color: #4f8ef7;
+      background: rgba(239,246,255,.85);
+      border: 2px dashed #93c5fd; border-radius: 9px;
+      white-space: nowrap; cursor: pointer;
+    }
+
+    /* ── Hidden items badge in legend ── */
+    #hidden-badge {
+      display: none; align-items: center; gap: 4px;
+      background: #f1f5f9; border: 1.5px solid #e2e8f0;
+      border-radius: 8px; padding: 3px 9px;
+      font-size: 10px; font-weight: 800; color: #64748b;
+      cursor: pointer; user-select: none;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    #hidden-badge.show { display: flex; }
+    #hidden-badge.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+
+    /* ── Toggle switch (sheet) ── */
+    .sh-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .sh-switch input { opacity: 0; width: 0; height: 0; }
+    .sh-slider {
+      position: absolute; inset: 0;
+      background: #dde0e8; border-radius: 22px; cursor: pointer;
+      transition: background .2s;
+    }
+    .sh-slider::before {
+      content: ''; position: absolute; width: 16px; height: 16px;
+      border-radius: 50%; background: #fff; left: 3px; top: 3px;
+      transition: transform .2s; box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    }
+    .sh-switch input:checked + .sh-slider { background: #4f8ef7; }
+    .sh-switch input:checked + .sh-slider::before { transform: translateX(18px); }
+
+    /* Toggle row in sheet */
+    .sh-toggle-row { display: flex; align-items: center; gap: 12px; padding: 2px 0; }
+    .sh-toggle-info { flex: 1; }
+    .sh-toggle-label { font-size: 13px; font-weight: 700; color: #1a1a2e; }
+    .sh-toggle-sub   { font-size: 11px; color: #aaa; margin-top: 1px; }
+
+    /* Recurring frequency row */
+    #sh-recur-freq { display: none; flex-direction: column; gap: 6px; }
+    #sh-recur-freq.visible { display: flex; }
   </style>
 </head>
 <body>
@@ -342,7 +398,8 @@
       <span class="legend-key-item">✉️ 📋 💻 📝 = task</span>
     </div>
 
-    <span class="legend-hint">Tap / hover to see title</span>
+    <span id="hidden-badge">🔒 <span id="hidden-count">0</span> hidden</span>
+    <span class="legend-hint">Tap · hold to edit</span>
   </div>
 
   <!-- Week grid -->
@@ -572,6 +629,41 @@
         </div>
       </div>
 
+      <!-- Private -->
+      <div class="sh-toggle-row">
+        <div class="sh-toggle-info">
+          <div class="sh-toggle-label">🔒 Private / hidden</div>
+          <div class="sh-toggle-sub">Hidden from share link — tap the badge in the legend to reveal &amp; unhide</div>
+        </div>
+        <label class="sh-switch">
+          <input type="checkbox" id="sh-private" />
+          <span class="sh-slider"></span>
+        </label>
+      </div>
+
+      <!-- Recurring -->
+      <div class="sh-toggle-row">
+        <div class="sh-toggle-info">
+          <div class="sh-toggle-label">🔁 Recurring</div>
+          <div class="sh-toggle-sub">Repeats on a regular schedule</div>
+        </div>
+        <label class="sh-switch">
+          <input type="checkbox" id="sh-recurring" />
+          <span class="sh-slider"></span>
+        </label>
+      </div>
+      <div id="sh-recur-freq">
+        <div class="sheet-label">Frequency</div>
+        <div class="type-seg">
+          <input type="radio" name="sh-freq" id="sh-daily"   value="daily" />
+          <label for="sh-daily">Daily</label>
+          <input type="radio" name="sh-freq" id="sh-weekly"  value="weekly" checked />
+          <label for="sh-weekly">Weekly</label>
+          <input type="radio" name="sh-freq" id="sh-monthly" value="monthly" />
+          <label for="sh-monthly">Monthly</label>
+        </div>
+      </div>
+
       <button class="btn-sheet-save" id="sheet-save">Save changes</button>
     </div>
   </div>
@@ -642,6 +734,13 @@
       c.classList.toggle('selected', c.textContent === currentIcon);
     });
 
+    // Sync private
+    document.getElementById('sh-private').checked = item.classList.contains('item-hidden');
+    // Sync recurring
+    const isRecurring = item.classList.contains('item-recurring');
+    document.getElementById('sh-recurring').checked = isRecurring;
+    document.getElementById('sh-recur-freq').classList.toggle('visible', isRecurring);
+
     sheet.classList.add('open');
   }
 
@@ -693,8 +792,45 @@
     const type = document.querySelector('input[name="sh-type"]:checked').value;
     activeItem.classList.toggle('item-meeting', type === 'meeting');
     activeItem.classList.toggle('item-task',    type === 'task');
+    // Private / hidden
+    activeItem.classList.toggle('item-hidden', document.getElementById('sh-private').checked);
+    // Recurring
+    activeItem.classList.toggle('item-recurring', document.getElementById('sh-recurring').checked);
     closeSheet();
+    updateHiddenBadge();
   });
+
+  /* ── Recurring frequency show/hide ── */
+  document.getElementById('sh-recurring').addEventListener('change', function () {
+    document.getElementById('sh-recur-freq').classList.toggle('visible', this.checked);
+  });
+
+  /* ── Hidden badge + reveal mode ── */
+  function updateHiddenBadge() {
+    const count = document.querySelectorAll('.item.item-hidden').length;
+    const badge = document.getElementById('hidden-badge');
+    document.getElementById('hidden-count').textContent = count;
+    badge.classList.toggle('show', count > 0);
+    if (count === 0) { badge.classList.remove('active'); document.body.classList.remove('reveal-mode'); }
+  }
+
+  document.getElementById('hidden-badge').addEventListener('click', () => {
+    const isActive = document.body.classList.toggle('reveal-mode');
+    document.getElementById('hidden-badge').classList.toggle('active', isActive);
+  });
+
+  // Click a hidden item in reveal mode → unhide it
+  document.addEventListener('click', e => {
+    if (!document.body.classList.contains('reveal-mode')) return;
+    const item = e.target.closest('.item.item-hidden');
+    if (!item) return;
+    e.stopPropagation();
+    item.classList.remove('item-hidden');
+    updateHiddenBadge();
+  }, true); // capture so it fires before tooltip handler
+
+  // Init badge count on load
+  updateHiddenBadge();
 
   /* ── Unified tap / long-press handler ── */
   let lpTimer = null; let didLongPress = false;
