@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Session Prompt – My Week App</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5; color: #1a1a2e; min-height: 100vh;
+      padding: 32px 20px 64px;
+    }
+    .card {
+      max-width: 740px; margin: 0 auto;
+      background: #fff; border-radius: 18px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.09); overflow: hidden;
+    }
+    .card-header {
+      background: #1a1a2e; color: #fff;
+      padding: 18px 24px; display: flex; align-items: center; gap: 12px;
+    }
+    .card-header-title { flex: 1; font-size: 16px; font-weight: 800; }
+    .card-header-sub { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 2px; }
+    #btn-copy {
+      display: flex; align-items: center; gap: 7px;
+      background: #4f8ef7; border: none; color: #fff;
+      padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: filter .15s; white-space: nowrap; flex-shrink: 0;
+    }
+    #btn-copy:hover { filter: brightness(1.12); }
+    #btn-copy.copied { background: #22c55e; }
+    .copy-icon { font-size: 14px; }
+    pre#prompt-text {
+      padding: 24px;
+      font-family: 'Menlo', 'Consolas', 'Monaco', monospace;
+      font-size: 12.5px; line-height: 1.7;
+      color: #1a1a2e; white-space: pre-wrap; word-break: break-word;
+      background: #fafafa; border-top: 1px solid #f0f0f5;
+    }
+    .footer-note {
+      max-width: 740px; margin: 16px auto 0;
+      font-size: 11px; color: #aaa; text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div>
+      <div class="card-header-title">📅 My Week – Continuation Prompt</div>
+      <div class="card-header-sub">v0.3.0 · 2026-03-01 · Paste at the start of a new session</div>
+    </div>
+    <button id="btn-copy">
+      <span class="copy-icon">📋</span>
+      <span id="btn-copy-label">Copy</span>
+    </button>
+  </div>
+  <pre id="prompt-text">
+I'm building a personal weekly agenda overview app called "My Week".
+It is a pure HTML/CSS/vanilla JS app — no framework, no build step.
+Repo: Agenda-overview- on GitHub.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CONCEPT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Color = WHO  (customer / client the item belongs to)
+• Icon  = WHAT (meeting vs task)
+• Compact icon tiles — label hidden, reveals on hover/tap
+• Week shown as a 2-row × 6-column CSS grid:
+    Mon–Fri  = 2 columns each (wide blocks)
+    Sat–Sun  = 1 column each (half-width)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+mockup.html    — main weekly view (fully interactive prototype)
+customize.html — settings page
+prompt.html    — this file (continuation prompt with copy button)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DESIGN TOKENS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Primary blue     #4f8ef7
+Dark navy        #1a1a2e
+Page background  #f0f2f5
+Card background  #ffffff
+Font             system stack (-apple-system, BlinkMacSystemFont, 'Segoe UI')
+Card radius      14px
+Item radius      9px
+Transitions      0.15s – 0.28s
+
+Customer colors (pastel backgrounds):
+  c-purple  #ede0ff   Acme Corp
+  c-blue    #dbeafe   BrightCo
+  c-green   #dcfce7   GreenTech
+  c-orange  #ffedd5   OrangeLabel
+  c-pink    #fce7f3
+  c-teal    #ccfbf1
+  c-red     #fee2e2
+  c-slate   #f1f5f9   (no customer / internal)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FEATURES BUILT (mockup.html)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Layout
+  • 2×6 day grid, each day has header / body (2-col icon grid) / footer
+  • Meetings block (top) + divider line + tasks block (bottom) within each day
+  • "Dog day" 🐕 banner on personal days (orange strip above header)
+
+Item tiles
+  • Color tile with centered emoji icon
+  • Hover/tap slides in the label text (max-width transition)
+  • Meetings get a 3px left border; tasks don't
+  • Upcoming pulse animation for imminent items
+
+Top bar
+  • "📅 My Week" title
+  • Week nav (‹ Week 9 · Feb 23 – Mar 1, 2026 ›)
+  • 🔗 Share button + v0.3 version badge + ⚙️ settings icon
+
+Legend bar (below top bar)
+  • Color → customer name mapping
+  • Icon key: 🤝 🏢 🖥️ 💬 = meeting / ✉️ 📋 💻 📝 = task
+  • "🔒 N hidden" badge — click to open hidden items panel
+  • "Tap · hold to edit" hint
+
+Hidden / private items
+  • Hidden items are COMPLETELY INVISIBLE in the main grid (display:none)
+  • The 🔒 N hidden badge in the legend shows the count
+  • Clicking the badge opens the HIDDEN ITEMS PANEL (bottom sheet):
+      - Lists all hidden items: icon + title + Unhide button
+      - Clicking Unhide makes the item visible again in the grid
+      - Badge disappears when count reaches 0
+
+Version tracking
+  • APP_VERSION constant in JS (e.g. 'v0.3.0') + APP_VERSION_DATE
+  • Subtle version badge in the top bar (v0.3)
+  • Clicking it opens the VERSION HISTORY PANEL (bottom sheet):
+      - Lists all versions with tag / date / description
+  • Always update version + date when making significant changes
+
+Tooltip (tap/click)
+  • Floating dark tooltip: label + ✏️ Edit button
+  • Auto-hides after 2.6 seconds
+
+Edit bottom sheet (tap Edit or long-press 480ms on touch)
+  • Title input
+  • Customer selector (color chips)
+  • Type: Meeting / Task (segmented)
+  • Icon picker (16 emoji grid)
+  • Private toggle (hides item completely — managed via legend badge)
+  • Google Calendar note:
+      "🔁 Recurring events — managed via Google Calendar, syncs here automatically"
+      [Open →] link to calendar.google.com
+  • NO in-app recurring settings (frequency, etc.) — all done in Google Calendar
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FEATURES BUILT (customize.html)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Section 1 — Customers 🎨
+  • Add / edit / remove customer rows
+  • Each row: color swatch (native color picker) + name input + icon picker + remove ×
+
+Section 2 — Event type icons 🗂️
+  • Two-column grid: Meetings | Tasks
+  • Toggleable icon chips — click to assign to meeting or task type
+  • Default meetings: 🤝 🏢 🖥️ 💬
+  • Default tasks:    ✉️ 📋 💻 📝
+
+Section 3 — Google Calendar 📅
+  • Info note: recurring events managed in Google Calendar
+  • Connection status dot (grey = not connected, green = connected)
+  • "Connect Google Calendar" button (mock OAuth toggle in prototype)
+
+Section 4 — Display options 👁️
+  • Week starts on: Mon / Sun (segmented)
+  • Show legend bar: toggle
+  • Show weekend columns: toggle
+  • Highlight today: toggle
+  • Dark mode: toggle
+
+Section 5 — Sharing 🔗
+  • Enable share link: toggle
+  • Hide private items: toggle
+  • Share URL field + Copy + Regenerate
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VERSION HISTORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+v0.3.0  2026-03-01  Hidden items panel, version log, Google Calendar integration
+v0.2.0  2026-02-28  Hide/private toggle, recurring events, reveal-to-unhide flow
+v0.1.2  2026-02-27  Event edit bottom sheet — customer & icon assignment
+v0.1.1  2026-02-26  Customize settings page
+v0.1.0  2026-02-25  Initial weekly overview layout
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT I WANT TO WORK ON NEXT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[DESCRIBE YOUR NEXT TASK HERE]
+</pre>
+</div>
+
+<p class="footer-note">Open this file in a browser · click Copy · paste into a new Claude session</p>
+
+<script>
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    const text = document.getElementById('prompt-text').textContent;
+    navigator.clipboard.writeText(text.trim()).then(() => {
+      this.classList.add('copied');
+      document.getElementById('btn-copy-label').textContent = 'Copied!';
+      setTimeout(() => {
+        this.classList.remove('copied');
+        document.getElementById('btn-copy-label').textContent = 'Copy';
+      }, 1800);
+    }).catch(() => {
+      // Fallback for browsers that block clipboard without https
+      const ta = document.createElement('textarea');
+      ta.value = text.trim();
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      this.classList.add('copied');
+      document.getElementById('btn-copy-label').textContent = 'Copied!';
+      setTimeout(() => {
+        this.classList.remove('copied');
+        document.getElementById('btn-copy-label').textContent = 'Copy';
+      }, 1800);
+    });
+  });
+</script>
+</body>
+</html>

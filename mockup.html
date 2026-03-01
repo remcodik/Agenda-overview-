@@ -36,6 +36,12 @@
       background: #4f8ef7; border: none; color: #fff;
       padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
     }
+    #version-badge {
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.6);
+      padding: 4px 9px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer;
+      letter-spacing: .3px; transition: background .15s, color .15s;
+    }
+    #version-badge:hover { background: rgba(255,255,255,.2); color: #fff; }
     .btn-settings {
       background: rgba(255,255,255,.12); border: none; color: #fff;
       width: 34px; height: 34px; border-radius: 8px; font-size: 16px; cursor: pointer;
@@ -110,7 +116,6 @@
       overflow-y: auto; min-height: 0;
     }
 
-
     /* ── Item tile ──
        Color tells you WHO (customer).
        Icon tells you WHAT (type of event/task).
@@ -145,8 +150,8 @@
     .item:hover .item-text,
     .item.active .item-text { max-width: 180px; opacity: 1; }
 
-    /* Private/hidden item */
-    .item-hidden { opacity: .38; }
+    /* Private/hidden item — completely invisible */
+    .item-hidden { display: none; }
 
     /* Upcoming pulse */
     .upcoming { animation: pulse 2s infinite; }
@@ -222,20 +227,20 @@
     }
     #tooltip-edit:hover { background: rgba(255,255,255,.28); }
 
-    /* ── Event edit bottom sheet ── */
-    #edit-sheet {
+    /* ── Shared bottom-sheet pattern ── */
+    .bottom-sheet {
       position: fixed; inset: 0;
       z-index: 10000; display: flex; align-items: flex-end;
       pointer-events: none;
     }
-    #edit-sheet.open { pointer-events: all; }
-    #edit-backdrop {
+    .bottom-sheet.open { pointer-events: all; }
+    .bs-backdrop {
       position: absolute; inset: 0;
       background: rgba(0,0,0,0);
       transition: background .25s;
     }
-    #edit-sheet.open #edit-backdrop { background: rgba(0,0,0,.38); }
-    #edit-panel {
+    .bottom-sheet.open .bs-backdrop { background: rgba(0,0,0,.38); }
+    .bs-panel {
       position: relative; width: 100%; max-width: 480px; margin: 0 auto;
       background: #fff; border-radius: 20px 20px 0 0;
       box-shadow: 0 -4px 32px rgba(0,0,0,.2);
@@ -243,7 +248,7 @@
       transition: transform .28s cubic-bezier(.32,1,.56,1);
       overflow: hidden;
     }
-    #edit-sheet.open #edit-panel { transform: translateY(0); }
+    .bottom-sheet.open .bs-panel { transform: translateY(0); }
     .sheet-handle {
       width: 36px; height: 4px; background: #ddd;
       border-radius: 2px; margin: 10px auto 0;
@@ -253,14 +258,16 @@
       padding: 14px 18px 12px; border-bottom: 1px solid #f0f0f5;
     }
     .sheet-event-icon { font-size: 22px; flex-shrink: 0; }
-    #sheet-title-input {
-      flex: 1; font-size: 15px; font-weight: 800; color: #1a1a2e;
-      border: none; outline: none; background: transparent;
-    }
     .sheet-close {
       width: 28px; height: 28px; border: none; background: #f0f0f5;
       border-radius: 50%; font-size: 18px; cursor: pointer; color: #888;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    /* ── Edit sheet ── */
+    #sheet-title-input {
+      flex: 1; font-size: 15px; font-weight: 800; color: #1a1a2e;
+      border: none; outline: none; background: transparent;
     }
     .sheet-body { padding: 14px 18px 20px; display: flex; flex-direction: column; gap: 16px; }
     .sheet-label {
@@ -302,37 +309,7 @@
     }
     .btn-sheet-save:hover { filter: brightness(1.18); }
 
-    /* ── Recurring badge (tiny corner indicator) ── */
-    .item-recurring::after {
-      content: '🔁'; position: absolute; top: 2px; right: 3px;
-      font-size: 8px; line-height: 1; opacity: .65; pointer-events: none;
-    }
-
-    /* ── Reveal-hidden mode ── */
-    .reveal-mode .item-hidden { opacity: 1; }
-    .reveal-mode .item-hidden::before {
-      content: '👁 tap to unhide';
-      position: absolute; inset: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 800; color: #4f8ef7;
-      background: rgba(239,246,255,.85);
-      border: 2px dashed #93c5fd; border-radius: 9px;
-      white-space: nowrap; cursor: pointer;
-    }
-
-    /* ── Hidden items badge in legend ── */
-    #hidden-badge {
-      display: none; align-items: center; gap: 4px;
-      background: #f1f5f9; border: 1.5px solid #e2e8f0;
-      border-radius: 8px; padding: 3px 9px;
-      font-size: 10px; font-weight: 800; color: #64748b;
-      cursor: pointer; user-select: none;
-      transition: background .15s, color .15s, border-color .15s;
-    }
-    #hidden-badge.show { display: flex; }
-    #hidden-badge.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
-
-    /* ── Toggle switch (sheet) ── */
+    /* Toggle switch (sheet) */
     .sh-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
     .sh-switch input { opacity: 0; width: 0; height: 0; }
     .sh-slider {
@@ -354,9 +331,69 @@
     .sh-toggle-label { font-size: 13px; font-weight: 700; color: #1a1a2e; }
     .sh-toggle-sub   { font-size: 11px; color: #aaa; margin-top: 1px; }
 
-    /* Recurring frequency row */
-    #sh-recur-freq { display: none; flex-direction: column; gap: 6px; }
-    #sh-recur-freq.visible { display: flex; }
+    /* Google Calendar note in edit sheet */
+    .sh-gcal-note {
+      display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+      background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px;
+    }
+    .sh-gcal-note-icon { font-size: 18px; flex-shrink: 0; }
+    .btn-gcal-open {
+      color: #16a34a; font-size: 11px; font-weight: 700; text-decoration: none; white-space: nowrap;
+      padding: 4px 10px; border-radius: 7px; background: #dcfce7; border: 1px solid #bbf7d0;
+      transition: background .15s;
+    }
+    .btn-gcal-open:hover { background: #bbf7d0; }
+
+    /* ── Hidden items badge in legend ── */
+    #hidden-badge {
+      display: none; align-items: center; gap: 4px;
+      background: #f1f5f9; border: 1.5px solid #e2e8f0;
+      border-radius: 8px; padding: 3px 9px;
+      font-size: 10px; font-weight: 800; color: #64748b;
+      cursor: pointer; user-select: none;
+      transition: background .15s, color .15s;
+    }
+    #hidden-badge.show { display: flex; }
+    #hidden-badge:hover { background: #e2e8f0; }
+
+    /* ── Hidden items panel ── */
+    #hidden-list {
+      padding: 12px 18px 24px; display: flex; flex-direction: column;
+      gap: 8px; max-height: 60vh; overflow-y: auto;
+    }
+    .hidden-item-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 10px;
+      background: #f8f8fc; border: 1.5px solid #f0f0f5;
+    }
+    .hidden-item-swatch {
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .hidden-item-title { flex: 1; font-size: 13px; font-weight: 700; color: #1a1a2e; }
+    .btn-unhide {
+      background: #eff6ff; border: 1.5px solid #bfdbfe; color: #3b82f6;
+      border-radius: 7px; padding: 5px 12px; font-size: 12px; font-weight: 700;
+      cursor: pointer; white-space: nowrap; transition: background .15s;
+    }
+    .btn-unhide:hover { background: #dbeafe; }
+    .hidden-empty {
+      text-align: center; padding: 24px; color: #bbb; font-size: 13px; font-weight: 600;
+    }
+
+    /* ── Version history panel ── */
+    #version-list {
+      padding: 8px 18px 24px; display: flex; flex-direction: column;
+    }
+    .version-entry {
+      display: grid; grid-template-columns: 52px 92px 1fr;
+      gap: 8px; padding: 11px 0; border-bottom: 1px solid #f0f0f5;
+      align-items: start;
+    }
+    .version-entry:last-child { border-bottom: none; }
+    .version-tag { font-size: 12px; font-weight: 800; color: #4f8ef7; }
+    .version-date { font-size: 11px; color: #aaa; padding-top: 1px; }
+    .version-desc { font-size: 12px; color: #1a1a2e; line-height: 1.45; }
   </style>
 </head>
 <body>
@@ -372,6 +409,7 @@
     </div>
     <div class="topbar-actions">
       <button class="btn-share">🔗 Share</button>
+      <button id="version-badge" title="Version history">v0.3</button>
       <button class="btn-settings">⚙️</button>
     </div>
   </header>
@@ -569,10 +607,10 @@
   <button id="tooltip-edit">✏️ Edit</button>
 </div>
 
-<!-- Event edit bottom sheet -->
-<div id="edit-sheet">
-  <div id="edit-backdrop"></div>
-  <div id="edit-panel">
+<!-- ── Event edit bottom sheet ── -->
+<div id="edit-sheet" class="bottom-sheet">
+  <div class="bs-backdrop" id="edit-backdrop"></div>
+  <div class="bs-panel">
     <div class="sheet-handle"></div>
     <div class="sheet-title-row">
       <span class="sheet-event-icon" id="sheet-icon-display">🤝</span>
@@ -633,7 +671,7 @@
       <div class="sh-toggle-row">
         <div class="sh-toggle-info">
           <div class="sh-toggle-label">🔒 Private / hidden</div>
-          <div class="sh-toggle-sub">Hidden from share link — tap the badge in the legend to reveal &amp; unhide</div>
+          <div class="sh-toggle-sub">Invisible in the main view — manage via the 🔒 badge in the legend</div>
         </div>
         <label class="sh-switch">
           <input type="checkbox" id="sh-private" />
@@ -641,27 +679,14 @@
         </label>
       </div>
 
-      <!-- Recurring -->
-      <div class="sh-toggle-row">
+      <!-- Recurring — Google Calendar note -->
+      <div class="sh-gcal-note">
+        <span class="sh-gcal-note-icon">🔁</span>
         <div class="sh-toggle-info">
-          <div class="sh-toggle-label">🔁 Recurring</div>
-          <div class="sh-toggle-sub">Repeats on a regular schedule</div>
+          <div class="sh-toggle-label">Recurring events</div>
+          <div class="sh-toggle-sub">Set up repeating events in Google Calendar — they sync here automatically</div>
         </div>
-        <label class="sh-switch">
-          <input type="checkbox" id="sh-recurring" />
-          <span class="sh-slider"></span>
-        </label>
-      </div>
-      <div id="sh-recur-freq">
-        <div class="sheet-label">Frequency</div>
-        <div class="type-seg">
-          <input type="radio" name="sh-freq" id="sh-daily"   value="daily" />
-          <label for="sh-daily">Daily</label>
-          <input type="radio" name="sh-freq" id="sh-weekly"  value="weekly" checked />
-          <label for="sh-weekly">Weekly</label>
-          <input type="radio" name="sh-freq" id="sh-monthly" value="monthly" />
-          <label for="sh-monthly">Monthly</label>
-        </div>
+        <a class="btn-gcal-open" href="https://calendar.google.com" target="_blank" rel="noopener">Open →</a>
       </div>
 
       <button class="btn-sheet-save" id="sheet-save">Save changes</button>
@@ -669,8 +694,66 @@
   </div>
 </div>
 
+<!-- ── Hidden items panel ── -->
+<div id="hidden-panel" class="bottom-sheet">
+  <div class="bs-backdrop" id="hidden-panel-backdrop"></div>
+  <div class="bs-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title-row">
+      <span style="font-size:20px">🔒</span>
+      <span style="flex:1; font-size:15px; font-weight:800; color:#1a1a2e">Hidden items</span>
+      <button class="sheet-close" id="hidden-panel-close">×</button>
+    </div>
+    <div id="hidden-list"></div>
+  </div>
+</div>
+
+<!-- ── Version history panel ── -->
+<div id="version-panel" class="bottom-sheet">
+  <div class="bs-backdrop" id="version-panel-backdrop"></div>
+  <div class="bs-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title-row">
+      <span style="font-size:20px">📋</span>
+      <span style="flex:1; font-size:15px; font-weight:800; color:#1a1a2e">Version history</span>
+      <button class="sheet-close" id="version-panel-close">×</button>
+    </div>
+    <div id="version-list">
+      <div class="version-entry">
+        <span class="version-tag">v0.3.0</span>
+        <span class="version-date">2026-03-01</span>
+        <span class="version-desc">Hidden items panel, version log, Google Calendar integration for recurring events</span>
+      </div>
+      <div class="version-entry">
+        <span class="version-tag">v0.2.0</span>
+        <span class="version-date">2026-02-28</span>
+        <span class="version-desc">Hide / private toggle, recurring events, reveal-to-unhide flow</span>
+      </div>
+      <div class="version-entry">
+        <span class="version-tag">v0.1.2</span>
+        <span class="version-date">2026-02-27</span>
+        <span class="version-desc">Event edit bottom sheet — customer &amp; icon assignment</span>
+      </div>
+      <div class="version-entry">
+        <span class="version-tag">v0.1.1</span>
+        <span class="version-date">2026-02-26</span>
+        <span class="version-desc">Customize settings page added</span>
+      </div>
+      <div class="version-entry">
+        <span class="version-tag">v0.1.0</span>
+        <span class="version-date">2026-02-25</span>
+        <span class="version-desc">Initial weekly overview layout — icon + color grid</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 (function () {
+  /* ── App version ── */
+  const APP_VERSION = 'v0.3.0';
+  const APP_VERSION_DATE = '2026-03-01';
+
   /* ── Tooltip ── */
   const tooltip   = document.getElementById('item-tooltip');
   const tipLabel  = document.getElementById('tooltip-label');
@@ -708,20 +791,24 @@
 
   function hideTooltip() { tooltip.classList.remove('visible'); }
 
-  /* ── Edit sheet ── */
-  const sheet      = document.getElementById('edit-sheet');
-  const backdrop   = document.getElementById('edit-backdrop');
-  const titleInput = document.getElementById('sheet-title-input');
-  const iconDisplay= document.getElementById('sheet-icon-display');
+  /* ── Generic sheet open/close ── */
+  function openSheet(el) { el.classList.add('open'); }
+  function closeSheet(el) { el.classList.remove('open'); }
 
-  function openSheet(item) {
+  /* ── Edit sheet ── */
+  const editSheet   = document.getElementById('edit-sheet');
+  const editBackdrop= document.getElementById('edit-backdrop');
+  const titleInput  = document.getElementById('sheet-title-input');
+  const iconDisplay = document.getElementById('sheet-icon-display');
+
+  function openEditSheet(item) {
     activeItem = item;
     hideTooltip();
     titleInput.value = item.querySelector('.item-text')?.textContent?.trim() || '';
     const currentIcon = item.querySelector('.item-icon')?.textContent?.trim() || '🤝';
     iconDisplay.textContent = currentIcon;
 
-    // Sync customer selection
+    // Sync customer
     const colorCls = [...item.classList].find(c => c.startsWith('c-')) || 'c-slate';
     document.querySelectorAll('.cust-chip').forEach(c => {
       c.classList.toggle('selected', c.dataset.colorCls === colorCls);
@@ -733,26 +820,19 @@
     document.querySelectorAll('.sh-icon').forEach(c => {
       c.classList.toggle('selected', c.textContent === currentIcon);
     });
-
     // Sync private
     document.getElementById('sh-private').checked = item.classList.contains('item-hidden');
-    // Sync recurring
-    const isRecurring = item.classList.contains('item-recurring');
-    document.getElementById('sh-recurring').checked = isRecurring;
-    document.getElementById('sh-recur-freq').classList.toggle('visible', isRecurring);
 
-    sheet.classList.add('open');
+    openSheet(editSheet);
   }
 
-  function closeSheet() { sheet.classList.remove('open'); }
-
-  document.getElementById('sheet-close').addEventListener('click', closeSheet);
-  backdrop.addEventListener('click', closeSheet);
+  document.getElementById('sheet-close').addEventListener('click', () => closeSheet(editSheet));
+  editBackdrop.addEventListener('click', () => closeSheet(editSheet));
 
   tipEdit.addEventListener('click', (e) => {
     e.stopPropagation();
     hideTooltip();
-    if (activeItem) openSheet(activeItem);
+    if (activeItem) openEditSheet(activeItem);
   });
 
   // Icon chips in sheet
@@ -774,7 +854,7 @@
 
   // Save
   document.getElementById('sheet-save').addEventListener('click', () => {
-    if (!activeItem) { closeSheet(); return; }
+    if (!activeItem) { closeSheet(editSheet); return; }
     // Label
     const textEl = activeItem.querySelector('.item-text');
     if (textEl) textEl.textContent = titleInput.value;
@@ -794,43 +874,73 @@
     activeItem.classList.toggle('item-task',    type === 'task');
     // Private / hidden
     activeItem.classList.toggle('item-hidden', document.getElementById('sh-private').checked);
-    // Recurring
-    activeItem.classList.toggle('item-recurring', document.getElementById('sh-recurring').checked);
-    closeSheet();
+
+    closeSheet(editSheet);
     updateHiddenBadge();
   });
 
-  /* ── Recurring frequency show/hide ── */
-  document.getElementById('sh-recurring').addEventListener('change', function () {
-    document.getElementById('sh-recur-freq').classList.toggle('visible', this.checked);
-  });
-
-  /* ── Hidden badge + reveal mode ── */
+  /* ── Hidden items badge ── */
   function updateHiddenBadge() {
     const count = document.querySelectorAll('.item.item-hidden').length;
     const badge = document.getElementById('hidden-badge');
     document.getElementById('hidden-count').textContent = count;
     badge.classList.toggle('show', count > 0);
-    if (count === 0) { badge.classList.remove('active'); document.body.classList.remove('reveal-mode'); }
   }
 
-  document.getElementById('hidden-badge').addEventListener('click', () => {
-    const isActive = document.body.classList.toggle('reveal-mode');
-    document.getElementById('hidden-badge').classList.toggle('active', isActive);
-  });
+  document.getElementById('hidden-badge').addEventListener('click', openHiddenPanel);
 
-  // Click a hidden item in reveal mode → unhide it
-  document.addEventListener('click', e => {
-    if (!document.body.classList.contains('reveal-mode')) return;
-    const item = e.target.closest('.item.item-hidden');
-    if (!item) return;
-    e.stopPropagation();
-    item.classList.remove('item-hidden');
-    updateHiddenBadge();
-  }, true); // capture so it fires before tooltip handler
+  /* ── Hidden items panel ── */
+  const hiddenPanel = document.getElementById('hidden-panel');
+  document.getElementById('hidden-panel-close').addEventListener('click', () => closeSheet(hiddenPanel));
+  document.getElementById('hidden-panel-backdrop').addEventListener('click', () => closeSheet(hiddenPanel));
 
-  // Init badge count on load
+  function openHiddenPanel() {
+    const list = document.getElementById('hidden-list');
+    const items = document.querySelectorAll('.item.item-hidden');
+
+    if (items.length === 0) {
+      list.innerHTML = '<div class="hidden-empty">No hidden items this week</div>';
+    } else {
+      list.innerHTML = '';
+      items.forEach(item => {
+        const icon   = item.querySelector('.item-icon')?.textContent?.trim() || '🔒';
+        const title  = item.querySelector('.item-text')?.textContent?.trim()  || '(untitled)';
+        const bgCls  = [...item.classList].find(c => c.startsWith('c-')) || 'c-slate';
+        // Map color class to background color for the swatch
+        const bgMap  = { 'c-purple':'#ede0ff','c-blue':'#dbeafe','c-green':'#dcfce7',
+                         'c-orange':'#ffedd5','c-pink':'#fce7f3','c-teal':'#ccfbf1',
+                         'c-red':'#fee2e2','c-slate':'#f1f5f9' };
+        const bg = bgMap[bgCls] || '#f1f5f9';
+
+        const row = document.createElement('div');
+        row.className = 'hidden-item-row';
+        row.innerHTML = `
+          <div class="hidden-item-swatch" style="background:${bg}">${icon}</div>
+          <span class="hidden-item-title">${title}</span>
+          <button class="btn-unhide">Unhide</button>
+        `;
+        row.querySelector('.btn-unhide').addEventListener('click', () => {
+          item.classList.remove('item-hidden');
+          row.remove();
+          updateHiddenBadge();
+          if (!document.querySelectorAll('.item.item-hidden').length) {
+            document.getElementById('hidden-list').innerHTML = '<div class="hidden-empty">No hidden items this week</div>';
+          }
+        });
+        list.appendChild(row);
+      });
+    }
+    openSheet(hiddenPanel);
+  }
+
+  // Init badge
   updateHiddenBadge();
+
+  /* ── Version panel ── */
+  const versionPanel = document.getElementById('version-panel');
+  document.getElementById('version-badge').addEventListener('click', () => openSheet(versionPanel));
+  document.getElementById('version-panel-close').addEventListener('click', () => closeSheet(versionPanel));
+  document.getElementById('version-panel-backdrop').addEventListener('click', () => closeSheet(versionPanel));
 
   /* ── Unified tap / long-press handler ── */
   let lpTimer = null; let didLongPress = false;
@@ -839,7 +949,7 @@
     const item = e.target.closest('.item');
     if (!item) return;
     didLongPress = false;
-    lpTimer = setTimeout(() => { didLongPress = true; openSheet(item); }, 480);
+    lpTimer = setTimeout(() => { didLongPress = true; openEditSheet(item); }, 480);
   }, { passive: true });
 
   document.addEventListener('touchmove', () => clearTimeout(lpTimer), { passive: true });
@@ -853,7 +963,7 @@
 
   // Desktop click → tooltip; sheet opened via Edit button
   document.addEventListener('click', e => {
-    if (e.target.closest('#edit-sheet') || e.target.closest('#item-tooltip')) return;
+    if (e.target.closest('.bottom-sheet') || e.target.closest('#item-tooltip')) return;
     const item = e.target.closest('.item');
     if (item) { showTooltip(item, e); return; }
     hideTooltip();

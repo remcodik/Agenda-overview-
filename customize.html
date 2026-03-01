@@ -186,6 +186,30 @@
     .seg input[type=radio] { display: none; }
     .seg input:checked + label { background: #4f8ef7; color: #fff; }
 
+    /* ── Google Calendar section ── */
+    .gcal-inner { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+    .gcal-info-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px; background: #f0fdf4;
+      border: 1.5px solid #bbf7d0; border-radius: 10px;
+    }
+    .gcal-info-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .gcal-info-text { font-size: 12px; color: #166534; line-height: 1.5; }
+    .gcal-status-row {
+      display: flex; align-items: center; gap: 10px; padding: 2px 0;
+    }
+    .gcal-status-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #d1d5db; flex-shrink: 0;
+    }
+    .gcal-status-dot.connected { background: #22c55e; }
+    .gcal-status-label { font-size: 12px; color: #888; flex: 1; }
+    .btn-gcal-connect {
+      background: #4f8ef7; border: none; color: #fff;
+      padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: filter .15s; align-self: flex-start;
+    }
+    .btn-gcal-connect:hover { filter: brightness(1.1); }
+
     /* ── Share section ── */
     .share-inner { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
     .share-link-row {
@@ -317,7 +341,32 @@
       </div>
     </div>
 
-    <!-- ── 3. Display options ── -->
+    <!-- ── 3. Google Calendar ── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">📅</span>
+        <div>
+          <div class="section-title">Google Calendar</div>
+          <div class="section-desc">Sync recurring events from your Google account</div>
+        </div>
+      </div>
+      <div class="gcal-inner">
+        <div class="gcal-info-row">
+          <span class="gcal-info-icon">🔁</span>
+          <div class="gcal-info-text">
+            Recurring events are managed in Google Calendar — set up repeating events there and they will appear here automatically. No in-app recurring settings needed.
+          </div>
+        </div>
+        <div class="gcal-status-row">
+          <span class="gcal-status-dot" id="gcal-dot"></span>
+          <span class="gcal-status-label" id="gcal-status-label">Not connected</span>
+        </div>
+        <button class="btn-gcal-connect" id="btn-gcal-connect">Connect Google Calendar</button>
+      </div>
+    </div>
+
+    <!-- ── 4. Display options ── -->
+
     <div class="section">
       <div class="section-header">
         <span class="section-icon">👁️</span>
@@ -387,7 +436,7 @@
       </div>
     </div>
 
-    <!-- ── 4. Sharing ── -->
+    <!-- ── 5. Sharing ── -->
     <div class="section">
       <div class="section-header">
         <span class="section-icon">🔗</span>
@@ -441,6 +490,17 @@
     input.addEventListener('input', () => {
       input.parentElement.style.background = input.value;
     });
+  });
+
+  // Google Calendar connect (mock toggle)
+  let gcalConnected = false;
+  document.getElementById('btn-gcal-connect').addEventListener('click', function () {
+    gcalConnected = !gcalConnected;
+    document.getElementById('gcal-dot').classList.toggle('connected', gcalConnected);
+    document.getElementById('gcal-status-label').textContent = gcalConnected ? 'Connected as user@gmail.com' : 'Not connected';
+    this.textContent = gcalConnected ? 'Disconnect' : 'Connect Google Calendar';
+    this.style.background = gcalConnected ? '#e2e8f0' : '#4f8ef7';
+    this.style.color = gcalConnected ? '#64748b' : '#fff';
   });
 
   // Copy button
