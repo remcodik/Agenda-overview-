@@ -196,26 +196,111 @@
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: #d0d0e0; border-radius: 2px; }
 
-    /* ── Tap tooltip (mobile & fallback for desktop click) ── */
+    /* ── Tap tooltip ── */
     #item-tooltip {
       position: fixed;
       background: rgba(20,20,20,.9);
       color: #fff;
       font-size: 12px; font-weight: 700;
-      padding: 6px 11px;
+      padding: 5px 10px 5px 11px;
       border-radius: 8px;
       white-space: nowrap;
-      pointer-events: none;
       z-index: 9999;
       box-shadow: 0 4px 16px rgba(0,0,0,.28);
       opacity: 0;
+      display: flex; align-items: center; gap: 8px;
       transition: opacity .15s ease, transform .15s ease;
       transform: translateY(4px);
     }
-    #item-tooltip.visible {
-      opacity: 1;
-      transform: translateY(0);
+    #item-tooltip.visible { opacity: 1; transform: translateY(0); }
+    #tooltip-label { pointer-events: none; }
+    #tooltip-edit {
+      pointer-events: all;
+      background: rgba(255,255,255,.15); border: none; color: #fff;
+      font-size: 11px; font-weight: 700; padding: 2px 7px;
+      border-radius: 5px; cursor: pointer; white-space: nowrap;
     }
+    #tooltip-edit:hover { background: rgba(255,255,255,.28); }
+
+    /* ── Event edit bottom sheet ── */
+    #edit-sheet {
+      position: fixed; inset: 0;
+      z-index: 10000; display: flex; align-items: flex-end;
+      pointer-events: none;
+    }
+    #edit-sheet.open { pointer-events: all; }
+    #edit-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0);
+      transition: background .25s;
+    }
+    #edit-sheet.open #edit-backdrop { background: rgba(0,0,0,.38); }
+    #edit-panel {
+      position: relative; width: 100%; max-width: 480px; margin: 0 auto;
+      background: #fff; border-radius: 20px 20px 0 0;
+      box-shadow: 0 -4px 32px rgba(0,0,0,.2);
+      transform: translateY(100%);
+      transition: transform .28s cubic-bezier(.32,1,.56,1);
+      overflow: hidden;
+    }
+    #edit-sheet.open #edit-panel { transform: translateY(0); }
+    .sheet-handle {
+      width: 36px; height: 4px; background: #ddd;
+      border-radius: 2px; margin: 10px auto 0;
+    }
+    .sheet-title-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 18px 12px; border-bottom: 1px solid #f0f0f5;
+    }
+    .sheet-event-icon { font-size: 22px; flex-shrink: 0; }
+    #sheet-title-input {
+      flex: 1; font-size: 15px; font-weight: 800; color: #1a1a2e;
+      border: none; outline: none; background: transparent;
+    }
+    .sheet-close {
+      width: 28px; height: 28px; border: none; background: #f0f0f5;
+      border-radius: 50%; font-size: 18px; cursor: pointer; color: #888;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .sheet-body { padding: 14px 18px 20px; display: flex; flex-direction: column; gap: 16px; }
+    .sheet-label {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .6px; color: #aaa; margin-bottom: 8px;
+    }
+    /* Customer chips */
+    .cust-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .cust-chip {
+      display: flex; align-items: center; gap: 5px;
+      border: 2px solid transparent; border-radius: 10px;
+      padding: 5px 9px; cursor: pointer; font-size: 12px; font-weight: 700;
+      transition: border-color .15s;
+    }
+    .cust-chip.selected { border-color: rgba(0,0,0,.5); }
+    .cust-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    /* Type segmented */
+    .type-seg {
+      display: flex; border: 1.5px solid #e8e8f0; border-radius: 9px;
+      overflow: hidden; align-self: flex-start;
+    }
+    .type-seg label { padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; color: #aaa; }
+    .type-seg input { display: none; }
+    .type-seg input:checked + label { background: #1a1a2e; color: #fff; }
+    /* Icon grid */
+    .sh-icon-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .sh-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      border: 2px solid transparent; background: #f6f6fb;
+      font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sh-icon.selected { border-color: #4f8ef7; background: #eff6ff; }
+    .sh-icon:hover { background: #eff6ff; }
+    .btn-sheet-save {
+      width: 100%; background: #1a1a2e; color: #fff;
+      border: none; border-radius: 10px; padding: 13px;
+      font-size: 14px; font-weight: 800; cursor: pointer;
+    }
+    .btn-sheet-save:hover { filter: brightness(1.18); }
   </style>
 </head>
 <body>
@@ -422,72 +507,222 @@
 </div>
 
 <!-- Floating tap tooltip -->
-<div id="item-tooltip"></div>
+<div id="item-tooltip">
+  <span id="tooltip-label"></span>
+  <button id="tooltip-edit">✏️ Edit</button>
+</div>
+
+<!-- Event edit bottom sheet -->
+<div id="edit-sheet">
+  <div id="edit-backdrop"></div>
+  <div id="edit-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title-row">
+      <span class="sheet-event-icon" id="sheet-icon-display">🤝</span>
+      <input class="sheet-title" id="sheet-title-input" type="text" value="" />
+      <button class="sheet-close" id="sheet-close">×</button>
+    </div>
+    <div class="sheet-body">
+
+      <!-- Customer -->
+      <div>
+        <div class="sheet-label">Customer</div>
+        <div class="cust-chips">
+          <div class="cust-chip" style="background:#ede0ff" data-color-cls="c-purple">
+            <span class="cust-dot" style="background:#9333ea"></span>Acme Corp
+          </div>
+          <div class="cust-chip" style="background:#dbeafe" data-color-cls="c-blue">
+            <span class="cust-dot" style="background:#3b82f6"></span>BrightCo
+          </div>
+          <div class="cust-chip" style="background:#dcfce7" data-color-cls="c-green">
+            <span class="cust-dot" style="background:#22c55e"></span>GreenTech
+          </div>
+          <div class="cust-chip" style="background:#ffedd5" data-color-cls="c-orange">
+            <span class="cust-dot" style="background:#f97316"></span>OrangeLabel
+          </div>
+          <div class="cust-chip" style="background:#f1f5f9" data-color-cls="c-slate">
+            <span class="cust-dot" style="background:#94a3b8"></span>None
+          </div>
+        </div>
+      </div>
+
+      <!-- Type -->
+      <div>
+        <div class="sheet-label">Type</div>
+        <div class="type-seg">
+          <input type="radio" name="sh-type" id="sh-meeting" value="meeting" checked />
+          <label for="sh-meeting">🤝 Meeting</label>
+          <input type="radio" name="sh-type" id="sh-task" value="task" />
+          <label for="sh-task">✅ Task</label>
+        </div>
+      </div>
+
+      <!-- Icon -->
+      <div>
+        <div class="sheet-label">Icon</div>
+        <div class="sh-icon-grid">
+          <div class="sh-icon">🤝</div><div class="sh-icon">🏢</div>
+          <div class="sh-icon">🖥️</div><div class="sh-icon">💬</div>
+          <div class="sh-icon">📞</div><div class="sh-icon">🎤</div>
+          <div class="sh-icon">✉️</div><div class="sh-icon">📋</div>
+          <div class="sh-icon">💻</div><div class="sh-icon">📝</div>
+          <div class="sh-icon">✅</div><div class="sh-icon">📦</div>
+          <div class="sh-icon">🎯</div><div class="sh-icon">🗂️</div>
+          <div class="sh-icon">🗺️</div><div class="sh-icon">🔒</div>
+        </div>
+      </div>
+
+      <button class="btn-sheet-save" id="sheet-save">Save changes</button>
+    </div>
+  </div>
+</div>
 
 <script>
-  (function () {
-    const tooltip = document.getElementById('item-tooltip');
-    let hideTimer = null;
+(function () {
+  /* ── Tooltip ── */
+  const tooltip   = document.getElementById('item-tooltip');
+  const tipLabel  = document.getElementById('tooltip-label');
+  const tipEdit   = document.getElementById('tooltip-edit');
+  let hideTimer   = null;
+  let activeItem  = null;
 
-    function showTooltip(item, e) {
-      const text = item.querySelector('.item-text');
-      if (!text) return;
-      const label = text.textContent.trim();
-      if (!label) return;
+  function positionTooltip() {
+    if (!activeItem) return;
+    const r  = activeItem.getBoundingClientRect();
+    const vw = window.innerWidth;
+    tooltip.style.left = '0'; tooltip.style.top = '0'; tooltip.style.opacity = '0';
+    const tw = tooltip.offsetWidth;
+    let left = r.left + r.width / 2 - tw / 2;
+    left = Math.max(8, Math.min(left, vw - tw - 8));
+    const top = r.top - tooltip.offsetHeight - 8;
+    tooltip.style.left = left + 'px';
+    tooltip.style.top  = (top < 8 ? r.bottom + 8 : top) + 'px';
+    tooltip.style.opacity = '';
+  }
 
-      tooltip.textContent = label;
-      tooltip.classList.remove('visible');
+  function showTooltip(item, e) {
+    const textEl = item.querySelector('.item-text');
+    const label  = textEl ? textEl.textContent.trim() : '';
+    if (!label) return;
+    activeItem = item;
+    tipLabel.textContent = label;
+    tooltip.classList.remove('visible');
+    positionTooltip();
+    requestAnimationFrame(() => tooltip.classList.add('visible'));
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(hideTooltip, 2600);
+    e && e.stopPropagation();
+  }
 
-      // Position above the tapped item, centred horizontally
-      const r = item.getBoundingClientRect();
-      const vw = window.innerWidth;
-      tooltip.style.left = '0';
-      tooltip.style.top  = '0';
-      tooltip.style.transform = 'none';
-      // Temporarily make visible to measure width
-      tooltip.style.opacity = '0';
-      tooltip.style.display = 'block';
-      const tw = tooltip.offsetWidth;
+  function hideTooltip() { tooltip.classList.remove('visible'); }
 
-      let left = r.left + r.width / 2 - tw / 2;
-      // Clamp to viewport with 8px margin
-      left = Math.max(8, Math.min(left, vw - tw - 8));
-      const top = r.top - tooltip.offsetHeight - 8;
+  /* ── Edit sheet ── */
+  const sheet      = document.getElementById('edit-sheet');
+  const backdrop   = document.getElementById('edit-backdrop');
+  const titleInput = document.getElementById('sheet-title-input');
+  const iconDisplay= document.getElementById('sheet-icon-display');
 
-      tooltip.style.left = left + 'px';
-      tooltip.style.top  = (top < 8 ? r.bottom + 8 : top) + 'px';
-      tooltip.style.transform = 'translateY(4px)';
-      tooltip.style.opacity = '';
+  function openSheet(item) {
+    activeItem = item;
+    hideTooltip();
+    titleInput.value = item.querySelector('.item-text')?.textContent?.trim() || '';
+    const currentIcon = item.querySelector('.item-icon')?.textContent?.trim() || '🤝';
+    iconDisplay.textContent = currentIcon;
 
-      // Trigger transition
-      requestAnimationFrame(() => tooltip.classList.add('visible'));
-
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(hide, 2600);
-
-      e.stopPropagation();
-    }
-
-    function hide() {
-      tooltip.classList.remove('visible');
-    }
-
-    // Delegated listener on all .item elements
-    document.addEventListener('click', function (e) {
-      const item = e.target.closest('.item');
-      if (item) { showTooltip(item, e); return; }
-      hide();
+    // Sync customer selection
+    const colorCls = [...item.classList].find(c => c.startsWith('c-')) || 'c-slate';
+    document.querySelectorAll('.cust-chip').forEach(c => {
+      c.classList.toggle('selected', c.dataset.colorCls === colorCls);
+    });
+    // Sync type
+    const isMeeting = item.classList.contains('item-meeting');
+    document.getElementById(isMeeting ? 'sh-meeting' : 'sh-task').checked = true;
+    // Sync icon
+    document.querySelectorAll('.sh-icon').forEach(c => {
+      c.classList.toggle('selected', c.textContent === currentIcon);
     });
 
-    // Touch: prevent ghost-click delay on mobile
-    document.addEventListener('touchend', function (e) {
-      const item = e.target.closest('.item');
-      if (item) {
-        e.preventDefault();
-        showTooltip(item, e);
-      }
-    }, { passive: false });
-  })();
+    sheet.classList.add('open');
+  }
+
+  function closeSheet() { sheet.classList.remove('open'); }
+
+  document.getElementById('sheet-close').addEventListener('click', closeSheet);
+  backdrop.addEventListener('click', closeSheet);
+
+  tipEdit.addEventListener('click', (e) => {
+    e.stopPropagation();
+    hideTooltip();
+    if (activeItem) openSheet(activeItem);
+  });
+
+  // Icon chips in sheet
+  document.querySelectorAll('.sh-icon').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.sh-icon').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      iconDisplay.textContent = chip.textContent;
+    });
+  });
+
+  // Customer chips in sheet
+  document.querySelectorAll('.cust-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.cust-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+    });
+  });
+
+  // Save
+  document.getElementById('sheet-save').addEventListener('click', () => {
+    if (!activeItem) { closeSheet(); return; }
+    // Label
+    const textEl = activeItem.querySelector('.item-text');
+    if (textEl) textEl.textContent = titleInput.value;
+    // Icon
+    const selIcon = document.querySelector('.sh-icon.selected');
+    const iconEl  = activeItem.querySelector('.item-icon');
+    if (selIcon && iconEl) { iconEl.textContent = selIcon.textContent; iconDisplay.textContent = selIcon.textContent; }
+    // Customer color
+    const selCust = document.querySelector('.cust-chip.selected');
+    if (selCust) {
+      activeItem.classList.forEach(c => { if (c.startsWith('c-')) activeItem.classList.remove(c); });
+      activeItem.classList.add(selCust.dataset.colorCls);
+    }
+    // Type
+    const type = document.querySelector('input[name="sh-type"]:checked').value;
+    activeItem.classList.toggle('item-meeting', type === 'meeting');
+    activeItem.classList.toggle('item-task',    type === 'task');
+    closeSheet();
+  });
+
+  /* ── Unified tap / long-press handler ── */
+  let lpTimer = null; let didLongPress = false;
+
+  document.addEventListener('touchstart', e => {
+    const item = e.target.closest('.item');
+    if (!item) return;
+    didLongPress = false;
+    lpTimer = setTimeout(() => { didLongPress = true; openSheet(item); }, 480);
+  }, { passive: true });
+
+  document.addEventListener('touchmove', () => clearTimeout(lpTimer), { passive: true });
+
+  document.addEventListener('touchend', e => {
+    clearTimeout(lpTimer);
+    if (didLongPress) { e.preventDefault(); return; }
+    const item = e.target.closest('.item');
+    if (item) { e.preventDefault(); showTooltip(item, e); }
+  }, { passive: false });
+
+  // Desktop click → tooltip; sheet opened via Edit button
+  document.addEventListener('click', e => {
+    if (e.target.closest('#edit-sheet') || e.target.closest('#item-tooltip')) return;
+    const item = e.target.closest('.item');
+    if (item) { showTooltip(item, e); return; }
+    hideTooltip();
+  });
+})();
 </script>
 </body>
 </html>
