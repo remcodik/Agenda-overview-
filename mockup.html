@@ -19,22 +19,28 @@
     /* ── Top bar ── */
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 24px; background: #1a1a2e; color: #fff;
-      flex-shrink: 0; gap: 16px;
+      padding: 10px 16px; background: #1a1a2e; color: #fff;
+      flex-shrink: 0; gap: 8px;
     }
-    .topbar-title { font-size: 18px; font-weight: 700; }
-    .week-nav { display: flex; align-items: center; gap: 12px; }
+    .topbar-title { font-size: 16px; font-weight: 700; white-space: nowrap; }
+    .week-nav { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; min-width: 0; }
     .week-nav button {
       background: rgba(255,255,255,.12); border: none; color: #fff;
-      width: 32px; height: 32px; border-radius: 8px; font-size: 16px;
+      width: 30px; height: 30px; border-radius: 8px; font-size: 16px;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
     .week-nav button:hover { background: rgba(255,255,255,.22); }
-    .week-label { font-size: 14px; font-weight: 600; min-width: 220px; text-align: center; }
-    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .week-label { font-size: 12px; font-weight: 600; text-align: center; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .topbar-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     .btn-share {
       background: #4f8ef7; border: none; color: #fff;
-      padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+      padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+      white-space: nowrap;
+    }
+    @media (max-width: 480px) {
+      .btn-share { display: none; }
+      .topbar-title { font-size: 14px; }
     }
     #version-badge {
       background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.6);
