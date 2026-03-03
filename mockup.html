@@ -40,7 +40,9 @@
     }
     @media (max-width: 480px) {
       .btn-share { display: none; }
-      .topbar-title { font-size: 14px; }
+      #version-badge { display: none; }
+      .topbar-title-text { display: none; }
+      .week-label { font-size: 11px; }
     }
     #version-badge {
       background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.6);
@@ -407,7 +409,7 @@
 
   <!-- Top bar -->
   <header class="topbar">
-    <span class="topbar-title">📅 My Week</span>
+    <span class="topbar-title">📅 <span class="topbar-title-text">My Week</span></span>
     <div class="week-nav">
       <button>&#8249;</button>
       <span class="week-label">Week 9 &nbsp;·&nbsp; Feb 23 – Mar 1, 2026</span>
