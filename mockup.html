@@ -56,6 +56,18 @@
       display: flex; align-items: center; justify-content: center;
     }
 
+    /* ── Connect calendar button ── */
+    .btn-cal-connect {
+      background: rgba(255,255,255,.12); border: none; color: #fff;
+      padding: 6px 11px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      transition: background .15s;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .btn-cal-connect:hover { background: rgba(255,255,255,.22); }
+    .btn-cal-connect.connected { background: #14532d; color: #86efac; }
+    .btn-cal-connect.connected:hover { background: #166534; }
+
     /* ── Legend ── */
     .legend {
       display: flex; align-items: center; gap: 16px;
@@ -73,11 +85,10 @@
     }
     .legend-hint { margin-left: auto; color: #bbb; font-size: 10px; font-style: italic; }
 
-    /* Key icons */
     .legend-key { display: flex; align-items: center; gap: 12px; margin-left: 8px; padding-left: 12px; border-left: 1px solid #f0f0f5; }
     .legend-key-item { display: flex; align-items: center; gap: 4px; color: #888; font-size: 10px; }
 
-    /* ── Week grid: 6 cols × 2 rows fills the whole viewport ── */
+    /* ── Week grid ── */
     .week-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -110,13 +121,7 @@
     .day-col.today .day-date { color: #4f8ef7; }
     .day-col.weekend .day-date { color: #ccc; }
 
-    /* ── Dog badge ── */
-    .dog-badge {
-      background: #fff8f0; border-bottom: 1px solid #ffe0b2;
-      padding: 3px 10px; font-size: 10px; font-weight: 700; color: #e65100; flex-shrink: 0;
-    }
-
-    /* ── Day body: 2-col icon grid, scrollable per day ── */
+    /* ── Day body ── */
     .day-body {
       flex: 1; padding: 8px 6px;
       display: grid; grid-template-columns: 1fr 1fr;
@@ -124,11 +129,7 @@
       overflow-y: auto; min-height: 0;
     }
 
-    /* ── Item tile ──
-       Color tells you WHO (customer).
-       Icon tells you WHAT (type of event/task).
-       Text is hidden — reveal on hover / tap for detail.
-    ── */
+    /* ── Item tile ── */
     .item {
       display: flex; align-items: center; justify-content: center; gap: 6px;
       border-radius: 9px; padding: 6px 4px;
@@ -142,13 +143,8 @@
       transform: translateY(-1px);
     }
     .item:active { transform: scale(.97); }
-
-    /* Meeting: slightly stronger left indicator */
     .item-meeting { border-left: 3px solid rgba(0,0,0,.18); }
-
     .item-icon { font-size: 15px; flex-shrink: 0; line-height: 1; }
-
-    /* Text hidden until hover / tap */
     .item-text {
       font-size: 11px; font-weight: 700;
       white-space: nowrap; overflow: hidden;
@@ -157,21 +153,19 @@
     }
     .item:hover .item-text,
     .item.active .item-text { max-width: 180px; opacity: 1; }
-
-    /* Private/hidden item — completely invisible */
     .item-hidden { display: none; }
-
-    /* Upcoming pulse */
     .upcoming { animation: pulse 2s infinite; }
     @keyframes pulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,.25); }
       50%       { box-shadow: 0 0 0 5px rgba(0,0,0,0); }
     }
-
-    /* Divider between meetings block and tasks block */
     .day-divider { grid-column: 1 / -1; height: 1px; background: rgba(0,0,0,.06); margin: 2px 0; }
+    .day-empty {
+      grid-column: 1 / -1; padding: 10px 4px;
+      font-size: 10px; color: #d0d0e0; text-align: center; font-weight: 600;
+    }
 
-    /* ── Customer color classes (background of tile) ── */
+    /* ── Customer color classes ── */
     .c-purple { background: #ede0ff; color: #4c1d95; }
     .c-blue   { background: #dbeafe; color: #1e3a8a; }
     .c-green  { background: #dcfce7; color: #14532d; }
@@ -282,7 +276,6 @@
       font-size: 10px; font-weight: 800; text-transform: uppercase;
       letter-spacing: .6px; color: #aaa; margin-bottom: 8px;
     }
-    /* Customer chips */
     .cust-chips { display: flex; gap: 6px; flex-wrap: wrap; }
     .cust-chip {
       display: flex; align-items: center; gap: 5px;
@@ -292,7 +285,6 @@
     }
     .cust-chip.selected { border-color: rgba(0,0,0,.5); }
     .cust-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-    /* Type segmented */
     .type-seg {
       display: flex; border: 1.5px solid #e8e8f0; border-radius: 9px;
       overflow: hidden; align-self: flex-start;
@@ -300,7 +292,6 @@
     .type-seg label { padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; color: #aaa; }
     .type-seg input { display: none; }
     .type-seg input:checked + label { background: #1a1a2e; color: #fff; }
-    /* Icon grid */
     .sh-icon-grid { display: flex; flex-wrap: wrap; gap: 6px; }
     .sh-icon {
       width: 36px; height: 36px; border-radius: 9px;
@@ -317,7 +308,6 @@
     }
     .btn-sheet-save:hover { filter: brightness(1.18); }
 
-    /* Toggle switch (sheet) */
     .sh-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
     .sh-switch input { opacity: 0; width: 0; height: 0; }
     .sh-slider {
@@ -333,26 +323,50 @@
     .sh-switch input:checked + .sh-slider { background: #4f8ef7; }
     .sh-switch input:checked + .sh-slider::before { transform: translateX(18px); }
 
-    /* Toggle row in sheet */
     .sh-toggle-row { display: flex; align-items: center; gap: 12px; padding: 2px 0; }
     .sh-toggle-info { flex: 1; }
     .sh-toggle-label { font-size: 13px; font-weight: 700; color: #1a1a2e; }
     .sh-toggle-sub   { font-size: 11px; color: #aaa; margin-top: 1px; }
 
-    /* Google Calendar note in edit sheet */
-    .sh-gcal-note {
-      display: flex; align-items: center; gap: 12px; padding: 10px 12px;
-      background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px;
+    /* ── Setup sheet ── */
+    .setup-step {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 10px 0; border-bottom: 1px solid #f5f5f8;
     }
-    .sh-gcal-note-icon { font-size: 18px; flex-shrink: 0; }
-    .btn-gcal-open {
-      color: #16a34a; font-size: 11px; font-weight: 700; text-decoration: none; white-space: nowrap;
-      padding: 4px 10px; border-radius: 7px; background: #dcfce7; border: 1px solid #bbf7d0;
-      transition: background .15s;
+    .setup-step:last-child { border-bottom: none; }
+    .setup-step-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #1a1a2e; color: #fff;
+      font-size: 11px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
     }
-    .btn-gcal-open:hover { background: #bbf7d0; }
+    .setup-step-text { font-size: 12px; color: #555; line-height: 1.55; }
+    .setup-step-text strong { color: #1a1a2e; }
+    .setup-code {
+      display: inline-block; background: #f0f0f8; padding: 2px 7px;
+      border-radius: 5px; font-family: monospace; font-size: 11px;
+      color: #4f8ef7; margin-top: 3px;
+    }
+    .setup-client-id-input {
+      width: 100%; border: 1.5px solid #e0e0f0; border-radius: 8px;
+      padding: 10px 12px; font-size: 12px; font-family: monospace;
+      outline: none; transition: border-color .15s; margin-top: 8px;
+    }
+    .setup-client-id-input:focus { border-color: #4f8ef7; }
+    .setup-note {
+      font-size: 10px; color: #aaa; margin-top: 6px; line-height: 1.5;
+    }
+    .setup-link { color: #4f8ef7; text-decoration: none; }
+    .setup-link:hover { text-decoration: underline; }
+    .btn-setup-disconnect {
+      width: 100%; margin-top: 8px; background: none;
+      border: 1.5px solid #fee2e2; color: #ef4444; border-radius: 10px;
+      padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+    .btn-setup-disconnect:hover { background: #fff0f0; }
 
-    /* ── Hidden items badge in legend ── */
+    /* ── Hidden items badge ── */
     #hidden-badge {
       display: none; align-items: center; gap: 4px;
       background: #f1f5f9; border: 1.5px solid #e2e8f0;
@@ -411,20 +425,20 @@
   <header class="topbar">
     <span class="topbar-title">📅 <span class="topbar-title-text">My Week</span></span>
     <div class="week-nav">
-      <button>&#8249;</button>
-      <span class="week-label">Week 9 &nbsp;·&nbsp; Feb 23 – Mar 1, 2026</span>
-      <button>&#8250;</button>
+      <button id="btn-prev-week">&#8249;</button>
+      <span class="week-label">Laden…</span>
+      <button id="btn-next-week">&#8250;</button>
     </div>
     <div class="topbar-actions">
-      <button class="btn-share">🔗 Share</button>
-      <button id="version-badge" title="Version history">v0.3</button>
+      <button id="btn-cal-connect" class="btn-cal-connect">🗓️ Koppel</button>
+      <button id="version-badge" title="Versiegeschiedenis">v0.4</button>
       <button class="btn-settings" onclick="location.href='customize.html'">⚙️</button>
     </div>
   </header>
 
-  <!-- Legend: color = customer, icon = type -->
+  <!-- Legend -->
   <div class="legend">
-    <span class="legend-title">Color = customer</span>
+    <span class="legend-title">Kleur = klant</span>
     <span class="legend-item">
       <span class="legend-chip" style="background:#ede0ff">🟣</span>Acme Corp
     </span>
@@ -437,174 +451,23 @@
     <span class="legend-item">
       <span class="legend-chip" style="background:#ffedd5">🟠</span>OrangeLabel
     </span>
-
-    <!-- Icon key -->
     <div class="legend-key">
       <span class="legend-key-item">🤝 🏢 🖥️ 💬 = meeting</span>
-      <span class="legend-key-item">✉️ 📋 💻 📝 = task</span>
+      <span class="legend-key-item">✉️ 📋 💻 📝 = taak</span>
     </div>
-
-    <span id="hidden-badge">🔒 <span id="hidden-count">0</span> hidden</span>
-    <span class="legend-hint">Tap · hold to edit</span>
+    <span id="hidden-badge">🔒 <span id="hidden-count">0</span> verborgen</span>
+    <span class="legend-hint">Tik · houd ingedrukt om te bewerken</span>
   </div>
 
-  <!-- Week grid -->
-  <main class="week-grid">
-
-    <!-- Monday 23 -->
-    <div class="day-col" style="grid-column:1/3;grid-row:1">
-      <div class="day-header">
-        <div class="day-name">Mon</div>
-        <div class="day-date">23</div>
-      </div>
-      <div class="day-body">
-        <!-- meetings -->
-        <div class="item item-meeting c-purple upcoming">
-          <span class="item-icon">🤝</span>
-          <span class="item-text">Sprint planning</span>
-        </div>
-        <div class="day-divider"></div>
-        <!-- tasks -->
-        <div class="item item-task c-slate">
-          <span class="item-icon">✉️</span>
-          <span class="item-text">Reply to client emails</span>
-        </div>
-        <div class="item item-task c-blue">
-          <span class="item-icon">📋</span>
-          <span class="item-text">Weekly report</span>
-        </div>
-      </div>
-      <div class="day-footer"><button class="btn-add">＋</button></div>
-    </div>
-
-    <!-- Tuesday 24 -->
-    <div class="day-col" style="grid-column:3/5;grid-row:1">
-      <div class="dog-badge">🐕 Dog day</div>
-      <div class="day-header">
-        <div class="day-name">Tue</div>
-        <div class="day-date">24</div>
-      </div>
-      <div class="day-body">
-        <div class="item item-meeting c-blue">
-          <span class="item-icon">🏢</span>
-          <span class="item-text">Stakeholder update</span>
-        </div>
-        <div class="day-divider"></div>
-        <div class="item item-task c-purple">
-          <span class="item-icon">💻</span>
-          <span class="item-text">Code review PR #47</span>
-        </div>
-      </div>
-      <div class="day-footer"><button class="btn-add">＋</button></div>
-    </div>
-
-    <!-- Wednesday 25 – Today -->
-    <div class="day-col today" style="grid-column:5/7;grid-row:1">
-      <div class="day-header">
-        <div class="day-name">Wed · Today</div>
-        <div class="day-date">25</div>
-      </div>
-      <div class="day-body">
-        <div class="item item-meeting c-green">
-          <span class="item-icon">🖥️</span>
-          <span class="item-text">Design review</span>
-        </div>
-        <div class="item item-meeting c-slate">
-          <span class="item-icon">💬</span>
-          <span class="item-text">1-on-1 with manager</span>
-        </div>
-        <div class="day-divider"></div>
-        <div class="item item-task c-green">
-          <span class="item-icon">📝</span>
-          <span class="item-text">Prepare agenda</span>
-        </div>
-        <div class="item item-task item-hidden c-teal">
-          <span class="item-icon">🔒</span>
-          <span class="item-text">Private task</span>
-        </div>
-      </div>
-      <div class="day-footer"><button class="btn-add">＋</button></div>
-    </div>
-
-    <!-- Thursday 26 -->
-    <div class="day-col" style="grid-column:1/3;grid-row:2">
-      <div class="day-header">
-        <div class="day-name">Thu</div>
-        <div class="day-date">26</div>
-      </div>
-      <div class="day-body">
-        <div class="item item-meeting c-orange">
-          <span class="item-icon">🗺️</span>
-          <span class="item-text">Workshop: Q2 roadmap</span>
-        </div>
-        <div class="day-divider"></div>
-        <div class="item item-task c-orange">
-          <span class="item-icon">🗂️</span>
-          <span class="item-text">Organise slides</span>
-        </div>
-      </div>
-      <div class="day-footer"><button class="btn-add">＋</button></div>
-    </div>
-
-    <!-- Friday 27 -->
-    <div class="day-col" style="grid-column:3/5;grid-row:2">
-      <div class="dog-badge">🐕 Dog day</div>
-      <div class="day-header">
-        <div class="day-name">Fri</div>
-        <div class="day-date">27</div>
-      </div>
-      <div class="day-body">
-        <div class="item item-meeting c-purple">
-          <span class="item-icon">🖥️</span>
-          <span class="item-text">Retro &amp; planning</span>
-        </div>
-        <div class="day-divider"></div>
-        <div class="item item-task c-pink">
-          <span class="item-icon">✅</span>
-          <span class="item-text">EOW status update</span>
-        </div>
-        <div class="item item-task c-slate">
-          <span class="item-icon">📦</span>
-          <span class="item-text">Archive old tickets</span>
-        </div>
-      </div>
-      <div class="day-footer"><button class="btn-add">＋</button></div>
-    </div>
-
-    <!-- Saturday 28 – half-width -->
-    <div class="day-col weekend" style="grid-column:5/6;grid-row:2">
-      <div class="day-header">
-        <div class="day-name">Sat</div>
-        <div class="day-date">28</div>
-      </div>
-      <div class="day-body"></div>
-      <div class="day-footer"><button class="btn-add">＋</button></div>
-    </div>
-
-    <!-- Sunday 1 – half-width -->
-    <div class="day-col weekend" style="grid-column:6/7;grid-row:2">
-      <div class="day-header">
-        <div class="day-name">Sun</div>
-        <div class="day-date">1</div>
-      </div>
-      <div class="day-body">
-        <div class="day-divider"></div>
-        <div class="item item-task c-red">
-          <span class="item-icon">🎯</span>
-          <span class="item-text">Plan next week</span>
-        </div>
-      </div>
-      <div class="day-footer"><button class="btn-add">＋</button></div>
-    </div>
-
-  </main>
+  <!-- Week grid – dynamically rendered by JS -->
+  <main class="week-grid"></main>
 
   <!-- Share bar -->
   <div class="share-bar">
-    🔗 Shareable link:
-    <span class="share-url">localhost:5173/share/a8f3k2x9</span>
-    <span style="color:#93c5fd; cursor:pointer">Copy</span>
-    <span style="margin-left:auto; color:#93c5fd; font-size:10px">Hidden items invisible to others</span>
+    🔗 Deel:
+    <span class="share-url">remcodik.github.io/Agenda-overview-</span>
+    <span style="color:#93c5fd; cursor:pointer" onclick="navigator.clipboard?.writeText('https://remcodik.github.io/Agenda-overview-/')">Kopieer</span>
+    <span style="margin-left:auto; color:#93c5fd; font-size:10px">Verborgen items onzichtbaar voor anderen</span>
   </div>
 
 </div>
@@ -612,7 +475,7 @@
 <!-- Floating tap tooltip -->
 <div id="item-tooltip">
   <span id="tooltip-label"></span>
-  <button id="tooltip-edit">✏️ Edit</button>
+  <button id="tooltip-edit">✏️ Bewerk</button>
 </div>
 
 <!-- ── Event edit bottom sheet ── -->
@@ -629,7 +492,7 @@
 
       <!-- Customer -->
       <div>
-        <div class="sheet-label">Customer</div>
+        <div class="sheet-label">Klant</div>
         <div class="cust-chips">
           <div class="cust-chip" style="background:#ede0ff" data-color-cls="c-purple">
             <span class="cust-dot" style="background:#9333ea"></span>Acme Corp
@@ -644,7 +507,7 @@
             <span class="cust-dot" style="background:#f97316"></span>OrangeLabel
           </div>
           <div class="cust-chip" style="background:#f1f5f9" data-color-cls="c-slate">
-            <span class="cust-dot" style="background:#94a3b8"></span>None
+            <span class="cust-dot" style="background:#94a3b8"></span>Geen
           </div>
         </div>
       </div>
@@ -656,13 +519,13 @@
           <input type="radio" name="sh-type" id="sh-meeting" value="meeting" checked />
           <label for="sh-meeting">🤝 Meeting</label>
           <input type="radio" name="sh-type" id="sh-task" value="task" />
-          <label for="sh-task">✅ Task</label>
+          <label for="sh-task">✅ Taak</label>
         </div>
       </div>
 
       <!-- Icon -->
       <div>
-        <div class="sheet-label">Icon</div>
+        <div class="sheet-label">Icoon</div>
         <div class="sh-icon-grid">
           <div class="sh-icon">🤝</div><div class="sh-icon">🏢</div>
           <div class="sh-icon">🖥️</div><div class="sh-icon">💬</div>
@@ -678,8 +541,8 @@
       <!-- Private -->
       <div class="sh-toggle-row">
         <div class="sh-toggle-info">
-          <div class="sh-toggle-label">🔒 Private / hidden</div>
-          <div class="sh-toggle-sub">Invisible in the main view — manage via the 🔒 badge in the legend</div>
+          <div class="sh-toggle-label">🔒 Privé / verborgen</div>
+          <div class="sh-toggle-sub">Onzichtbaar in de hoofdweergave</div>
         </div>
         <label class="sh-switch">
           <input type="checkbox" id="sh-private" />
@@ -687,17 +550,72 @@
         </label>
       </div>
 
-      <!-- Recurring — Google Calendar note -->
-      <div class="sh-gcal-note">
-        <span class="sh-gcal-note-icon">🔁</span>
-        <div class="sh-toggle-info">
-          <div class="sh-toggle-label">Recurring events</div>
-          <div class="sh-toggle-sub">Set up repeating events in Google Calendar — they sync here automatically</div>
+      <button class="btn-sheet-save" id="sheet-save">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Calendar setup bottom sheet ── -->
+<div id="setup-sheet" class="bottom-sheet">
+  <div class="bs-backdrop" id="setup-backdrop"></div>
+  <div class="bs-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title-row">
+      <span style="font-size:20px">🗓️</span>
+      <span style="flex:1; font-size:15px; font-weight:800; color:#1a1a2e">Google Agenda koppelen</span>
+      <button class="sheet-close" id="setup-close">×</button>
+    </div>
+    <div style="padding:14px 18px 28px; overflow-y:auto; max-height:72vh; display:flex; flex-direction:column; gap:0;">
+      <div class="setup-step">
+        <div class="setup-step-num">1</div>
+        <div class="setup-step-text">
+          Ga naar <a href="https://console.cloud.google.com" class="setup-link" target="_blank" rel="noopener">console.cloud.google.com</a>
+          en maak een nieuw project aan.
         </div>
-        <a class="btn-gcal-open" href="https://calendar.google.com" target="_blank" rel="noopener">Open →</a>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">2</div>
+        <div class="setup-step-text">
+          Ga naar <strong>APIs &amp; services → Bibliotheek</strong> en activeer de <strong>Google Calendar API</strong>.
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">3</div>
+        <div class="setup-step-text">
+          Ga naar <strong>APIs &amp; services → Inloggegevens → Inloggegevens maken → OAuth 2.0-client-ID</strong>.<br>
+          Kies als type: <strong>Webtoepassing</strong>.
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">4</div>
+        <div class="setup-step-text">
+          Voeg toe bij <strong>Geautoriseerde JavaScript-herkomsten</strong>:<br>
+          <span class="setup-code">https://remcodik.github.io</span>
+        </div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">5</div>
+        <div class="setup-step-text">
+          Kopieer je <strong>Client ID</strong> en plak hem hieronder.
+        </div>
       </div>
 
-      <button class="btn-sheet-save" id="sheet-save">Save changes</button>
+      <div style="margin-top:8px;">
+        <div class="sheet-label">Client ID</div>
+        <input id="setup-client-id-input" class="setup-client-id-input"
+          type="text" placeholder="123456789-abc….apps.googleusercontent.com"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        <div class="setup-note">
+          Wordt alleen lokaal opgeslagen op dit apparaat — nooit gedeeld.
+        </div>
+      </div>
+
+      <button class="btn-sheet-save" id="btn-setup-save" style="margin-top:16px">
+        Opslaan &amp; verbinden →
+      </button>
+      <button class="btn-setup-disconnect" id="btn-setup-disconnect">
+        Ontkoppelen &amp; Client ID verwijderen
+      </button>
     </div>
   </div>
 </div>
@@ -709,7 +627,7 @@
     <div class="sheet-handle"></div>
     <div class="sheet-title-row">
       <span style="font-size:20px">🔒</span>
-      <span style="flex:1; font-size:15px; font-weight:800; color:#1a1a2e">Hidden items</span>
+      <span style="flex:1; font-size:15px; font-weight:800; color:#1a1a2e">Verborgen items</span>
       <button class="sheet-close" id="hidden-panel-close">×</button>
     </div>
     <div id="hidden-list"></div>
@@ -723,34 +641,34 @@
     <div class="sheet-handle"></div>
     <div class="sheet-title-row">
       <span style="font-size:20px">📋</span>
-      <span style="flex:1; font-size:15px; font-weight:800; color:#1a1a2e">Version history</span>
+      <span style="flex:1; font-size:15px; font-weight:800; color:#1a1a2e">Versiegeschiedenis</span>
       <button class="sheet-close" id="version-panel-close">×</button>
     </div>
     <div id="version-list">
       <div class="version-entry">
+        <span class="version-tag">v0.4.0</span>
+        <span class="version-date">2026-03-03</span>
+        <span class="version-desc">Google Agenda live-koppeling — echte meetings &amp; taken in het overzicht. Weeknavigatie werkt dynamisch.</span>
+      </div>
+      <div class="version-entry">
         <span class="version-tag">v0.3.0</span>
         <span class="version-date">2026-03-01</span>
-        <span class="version-desc">Hidden items panel, version log, Google Calendar integration for recurring events</span>
+        <span class="version-desc">Verborgen items panel, versielogboek, Google Calendar-link voor terugkerende events</span>
       </div>
       <div class="version-entry">
         <span class="version-tag">v0.2.0</span>
         <span class="version-date">2026-02-28</span>
-        <span class="version-desc">Hide / private toggle, recurring events, reveal-to-unhide flow</span>
+        <span class="version-desc">Privé/verbergen-schakelaar, terugkerende events, zichtbaar-maak-flow</span>
       </div>
       <div class="version-entry">
         <span class="version-tag">v0.1.2</span>
         <span class="version-date">2026-02-27</span>
-        <span class="version-desc">Event edit bottom sheet — customer &amp; icon assignment</span>
-      </div>
-      <div class="version-entry">
-        <span class="version-tag">v0.1.1</span>
-        <span class="version-date">2026-02-26</span>
-        <span class="version-desc">Customize settings page added</span>
+        <span class="version-desc">Bewerkscherm — klant &amp; icoon instellen per event</span>
       </div>
       <div class="version-entry">
         <span class="version-tag">v0.1.0</span>
         <span class="version-date">2026-02-25</span>
-        <span class="version-desc">Initial weekly overview layout — icon + color grid</span>
+        <span class="version-desc">Eerste weekoverzicht — icoon + kleur raster</span>
       </div>
     </div>
   </div>
@@ -758,26 +676,383 @@
 
 <script>
 (function () {
-  /* ── App version ── */
-  const APP_VERSION = 'v0.3.0';
-  const APP_VERSION_DATE = '2026-03-01';
+  'use strict';
 
-  /* ── Tooltip ── */
-  const tooltip   = document.getElementById('item-tooltip');
-  const tipLabel  = document.getElementById('tooltip-label');
-  const tipEdit   = document.getElementById('tooltip-edit');
-  let hideTimer   = null;
-  let activeItem  = null;
+  /* ═══════════════════════════════════════════════════
+     STATE
+  ═══════════════════════════════════════════════════ */
+  let gcalClientId = localStorage.getItem('gcal_client_id') || '';
+  let calToken     = null;
+  let calEvents    = [];
+  let isConnected  = false;
+  let weekOffset   = 0;
+  let tokenClient  = null;
+
+  /* ═══════════════════════════════════════════════════
+     WEEK HELPERS
+  ═══════════════════════════════════════════════════ */
+  function getMondayOfWeek(offset) {
+    const today = new Date();
+    const dow   = today.getDay();
+    const diff  = dow === 0 ? -6 : 1 - dow;
+    const mon   = new Date(today);
+    mon.setDate(today.getDate() + diff + offset * 7);
+    mon.setHours(0, 0, 0, 0);
+    return mon;
+  }
+
+  function getWeekDates(offset) {
+    const mon = getMondayOfWeek(offset);
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(mon);
+      d.setDate(mon.getDate() + i);
+      return d;
+    });
+  }
+
+  function getWeekNumber(d) {
+    const u = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    u.setUTCDate(u.getUTCDate() + 4 - (u.getUTCDay() || 7));
+    const y = new Date(Date.UTC(u.getUTCFullYear(), 0, 1));
+    return Math.ceil((((u - y) / 86400000) + 1) / 7);
+  }
+
+  function sameDay(a, b) {
+    return a.getFullYear() === b.getFullYear()
+        && a.getMonth()    === b.getMonth()
+        && a.getDate()     === b.getDate();
+  }
+
+  function isoDate(d) { return d.toISOString().split('T')[0]; }
+
+  const MONTHS = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+
+  function formatRange(mon, sun) {
+    if (mon.getMonth() === sun.getMonth())
+      return `${MONTHS[mon.getMonth()]} ${mon.getDate()} – ${sun.getDate()}, ${sun.getFullYear()}`;
+    return `${MONTHS[mon.getMonth()]} ${mon.getDate()} – ${MONTHS[sun.getMonth()]} ${sun.getDate()}, ${sun.getFullYear()}`;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     DEMO DATA (shown when no calendar is connected)
+  ═══════════════════════════════════════════════════ */
+  function getDemoEvents(dates) {
+    return [
+      { date:dates[0], type:'meeting', icon:'🤝', title:'Sprint planning',       colorCls:'c-purple' },
+      { date:dates[0], type:'task',    icon:'✉️', title:'Reply to client emails', colorCls:'c-slate'  },
+      { date:dates[0], type:'task',    icon:'📋', title:'Weekly report',          colorCls:'c-blue'   },
+      { date:dates[1], type:'meeting', icon:'🏢', title:'Stakeholder update',     colorCls:'c-blue'   },
+      { date:dates[1], type:'task',    icon:'💻', title:'Code review PR',         colorCls:'c-purple' },
+      { date:dates[2], type:'meeting', icon:'🖥️', title:'Design review',          colorCls:'c-green'  },
+      { date:dates[2], type:'meeting', icon:'💬', title:'1-on-1 with manager',    colorCls:'c-slate'  },
+      { date:dates[2], type:'task',    icon:'📝', title:'Prepare agenda',         colorCls:'c-green'  },
+      { date:dates[3], type:'meeting', icon:'🗺️', title:'Workshop: Q2 roadmap',   colorCls:'c-orange' },
+      { date:dates[3], type:'task',    icon:'🗂️', title:'Organise slides',         colorCls:'c-orange' },
+      { date:dates[4], type:'meeting', icon:'🖥️', title:'Retro & planning',       colorCls:'c-purple' },
+      { date:dates[4], type:'task',    icon:'✅', title:'EOW status update',      colorCls:'c-pink'   },
+      { date:dates[4], type:'task',    icon:'📦', title:'Archive old tickets',    colorCls:'c-slate'  },
+      { date:dates[6], type:'task',    icon:'🎯', title:'Plan next week',         colorCls:'c-red'    },
+    ];
+  }
+
+  /* ═══════════════════════════════════════════════════
+     RENDER WEEK
+  ═══════════════════════════════════════════════════ */
+  // [dayIndex, grid-column, grid-row]
+  const LAYOUT = [
+    [0,'1/3',1],[1,'3/5',1],[2,'5/7',1],
+    [3,'1/3',2],[4,'3/5',2],[5,'5/6',2],[6,'6/7',2],
+  ];
+  const DAY_NAMES = ['Zo','Ma','Di','Wo','Do','Vr','Za'];
+
+  function renderWeek() {
+    const dates  = getWeekDates(weekOffset);
+    const today  = new Date(); today.setHours(0,0,0,0);
+
+    document.querySelector('.week-label').textContent =
+      `Week ${getWeekNumber(dates[0])} · ${formatRange(dates[0], dates[6])}`;
+
+    const events = isConnected ? calEvents : getDemoEvents(dates);
+    const grid   = document.querySelector('.week-grid');
+    grid.innerHTML = '';
+
+    LAYOUT.forEach(([di, col, row]) => {
+      const date      = dates[di];
+      const isToday   = sameDay(date, today);
+      const isWeekend = di >= 5;
+      const dayEvts   = events.filter(e => sameDay(e.date, date));
+      grid.appendChild(buildDayCol(date, dayEvts, isToday, isWeekend, col, row));
+    });
+
+    updateHiddenBadge();
+  }
+
+  function buildDayCol(date, events, isToday, isWeekend, gridCol, gridRow) {
+    const col = document.createElement('div');
+    col.className = 'day-col' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
+    col.style.gridColumn = gridCol;
+    col.style.gridRow    = gridRow;
+    col.dataset.date     = isoDate(date);
+
+    const nameLabel = DAY_NAMES[date.getDay()] + (isToday ? ' · Vandaag' : '');
+    col.innerHTML = `
+      <div class="day-header">
+        <div class="day-name">${nameLabel}</div>
+        <div class="day-date">${date.getDate()}</div>
+      </div>
+      <div class="day-body"></div>
+      <div class="day-footer"><button class="btn-add">＋</button></div>
+    `;
+
+    const body     = col.querySelector('.day-body');
+    const meetings = events.filter(e => e.type === 'meeting');
+    const tasks    = events.filter(e => e.type === 'task');
+
+    meetings.forEach(e => body.appendChild(buildItem(e)));
+    if (meetings.length && tasks.length) {
+      const div = document.createElement('div');
+      div.className = 'day-divider';
+      body.appendChild(div);
+    }
+    tasks.forEach(e => body.appendChild(buildItem(e)));
+
+    if (isConnected && events.length === 0 && !isWeekend) {
+      const em = document.createElement('div');
+      em.className = 'day-empty';
+      em.textContent = 'Vrij';
+      body.appendChild(em);
+    }
+
+    return col;
+  }
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function buildItem(ev) {
+    const el = document.createElement('div');
+    el.className = `item ${ev.type === 'meeting' ? 'item-meeting' : 'item-task'} ${ev.colorCls}`;
+    if (ev.upcoming) el.classList.add('upcoming');
+    el.innerHTML = `
+      <span class="item-icon">${ev.icon}</span>
+      <span class="item-text">${escHtml(ev.title)}</span>
+    `;
+    return el;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     WEEK NAVIGATION
+  ═══════════════════════════════════════════════════ */
+  document.getElementById('btn-prev-week').addEventListener('click', () => {
+    weekOffset--;
+    onWeekChange();
+  });
+  document.getElementById('btn-next-week').addEventListener('click', () => {
+    weekOffset++;
+    onWeekChange();
+  });
+
+  async function onWeekChange() {
+    if (isConnected && calToken) {
+      await fetchCalendarEvents();
+    } else {
+      renderWeek();
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     GOOGLE CALENDAR – OAuth (Google Identity Services)
+  ═══════════════════════════════════════════════════ */
+  const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.events.readonly';
+
+  function loadGisScript() {
+    if (document.getElementById('gis-script')) return;
+    const s   = document.createElement('script');
+    s.id      = 'gis-script';
+    s.src     = 'https://accounts.google.com/gsi/client';
+    s.onload  = initGoogleAuth;
+    s.onerror = () => console.warn('Google Identity Services kon niet laden');
+    document.head.appendChild(s);
+  }
+
+  function initGoogleAuth() {
+    if (!window.google || !gcalClientId) return;
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: gcalClientId,
+      scope:     GCAL_SCOPES,
+      callback:  onTokenReceived,
+    });
+  }
+
+  async function onTokenReceived(resp) {
+    if (resp.error) {
+      alert('Google Agenda verbinding mislukt: ' + resp.error);
+      setConnectBtn(false);
+      return;
+    }
+    calToken = resp.access_token;
+    await fetchCalendarEvents();
+  }
+
+  async function fetchCalendarEvents() {
+    if (!calToken) return;
+
+    const dates = getWeekDates(weekOffset);
+    const tMin  = dates[0].toISOString();
+    const tEnd  = new Date(dates[6]);
+    tEnd.setDate(tEnd.getDate() + 1);
+    const tMax  = tEnd.toISOString();
+
+    try {
+      const resp = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/primary/events` +
+        `?timeMin=${encodeURIComponent(tMin)}&timeMax=${encodeURIComponent(tMax)}` +
+        `&singleEvents=true&orderBy=startTime&maxResults=200`,
+        { headers: { Authorization: `Bearer ${calToken}` } }
+      );
+
+      if (resp.status === 401) {
+        // Token verlopen – opnieuw verbinden
+        calToken    = null;
+        isConnected = false;
+        setConnectBtn(false);
+        renderWeek();
+        return;
+      }
+
+      const data  = await resp.json();
+      calEvents   = (data.items || []).map(mapGcalEvent);
+      isConnected = true;
+      setConnectBtn(true);
+      renderWeek();
+
+    } catch (err) {
+      console.error(err);
+      alert('Kon agenda niet laden. Controleer je verbinding en probeer opnieuw.');
+    }
+  }
+
+  /* ─ Google Calendar event → interne format ─ */
+  const GCAL_COLOR_MAP = {
+    '1':'c-blue', '2':'c-teal',   '3':'c-purple', '4':'c-pink',
+    '5':'c-orange','6':'c-orange','7':'c-teal',   '8':'c-slate',
+    '9':'c-blue', '10':'c-green','11':'c-red',
+  };
+
+  function mapGcalEvent(ev) {
+    const isAllDay = !ev.start.dateTime;
+    const date     = new Date(ev.start.dateTime || ev.start.date);
+    const type     = isAllDay ? 'task' : 'meeting';
+    return {
+      id:       ev.id,
+      date:     date,
+      type:     type,
+      icon:     type === 'meeting' ? '🤝' : '📋',
+      title:    ev.summary || '(geen titel)',
+      colorCls: GCAL_COLOR_MAP[ev.colorId] || 'c-blue',
+    };
+  }
+
+  /* ─ Connect button state ─ */
+  function setConnectBtn(connected) {
+    const btn = document.getElementById('btn-cal-connect');
+    if (!btn) return;
+    if (connected) {
+      btn.textContent = '✓ Agenda';
+      btn.classList.add('connected');
+    } else {
+      btn.textContent = '🗓️ Koppel';
+      btn.classList.remove('connected');
+    }
+  }
+
+  /* ─ Connect button click ─ */
+  document.getElementById('btn-cal-connect').addEventListener('click', () => {
+    if (isConnected) {
+      openSetupSheet(); // re-open setup for manage/disconnect
+    } else if (!gcalClientId) {
+      openSetupSheet(); // no client ID yet → show setup guide
+    } else {
+      startOAuth();
+    }
+  });
+
+  function startOAuth() {
+    if (!tokenClient) {
+      loadGisScript();
+      // Wait for script, then try
+      const t = setInterval(() => {
+        if (tokenClient) { clearInterval(t); tokenClient.requestAccessToken(); }
+      }, 200);
+      setTimeout(() => clearInterval(t), 5000);
+    } else {
+      tokenClient.requestAccessToken();
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     SETUP SHEET
+  ═══════════════════════════════════════════════════ */
+  const setupSheet = document.getElementById('setup-sheet');
+
+  function openSetupSheet() {
+    document.getElementById('setup-client-id-input').value = gcalClientId;
+    openSheet(setupSheet);
+  }
+
+  document.getElementById('setup-close').addEventListener('click',   () => closeSheet(setupSheet));
+  document.getElementById('setup-backdrop').addEventListener('click', () => closeSheet(setupSheet));
+
+  document.getElementById('btn-setup-save').addEventListener('click', () => {
+    const val = document.getElementById('setup-client-id-input').value.trim();
+    if (!val) { alert('Voer een geldig Client ID in.'); return; }
+
+    gcalClientId = val;
+    localStorage.setItem('gcal_client_id', val);
+    tokenClient = null; // force re-init with new client ID
+    closeSheet(setupSheet);
+    loadGisScript();
+
+    // Wait for init then kick off OAuth
+    const t = setInterval(() => {
+      if (tokenClient) { clearInterval(t); tokenClient.requestAccessToken(); }
+    }, 200);
+    setTimeout(() => clearInterval(t), 5000);
+  });
+
+  document.getElementById('btn-setup-disconnect').addEventListener('click', () => {
+    if (!confirm('Wil je de Google Agenda-koppeling verwijderen?')) return;
+    localStorage.removeItem('gcal_client_id');
+    gcalClientId = '';
+    calToken     = null;
+    calEvents    = [];
+    isConnected  = false;
+    tokenClient  = null;
+    setConnectBtn(false);
+    renderWeek();
+    closeSheet(setupSheet);
+  });
+
+  /* ═══════════════════════════════════════════════════
+     TOOLTIP
+  ═══════════════════════════════════════════════════ */
+  const tooltip  = document.getElementById('item-tooltip');
+  const tipLabel = document.getElementById('tooltip-label');
+  const tipEdit  = document.getElementById('tooltip-edit');
+  let hideTimer  = null;
+  let activeItem = null;
 
   function positionTooltip() {
     if (!activeItem) return;
     const r  = activeItem.getBoundingClientRect();
     const vw = window.innerWidth;
     tooltip.style.left = '0'; tooltip.style.top = '0'; tooltip.style.opacity = '0';
-    const tw = tooltip.offsetWidth;
-    let left = r.left + r.width / 2 - tw / 2;
-    left = Math.max(8, Math.min(left, vw - tw - 8));
-    const top = r.top - tooltip.offsetHeight - 8;
+    const tw   = tooltip.offsetWidth;
+    let left   = r.left + r.width / 2 - tw / 2;
+    left       = Math.max(8, Math.min(left, vw - tw - 8));
+    const top  = r.top - tooltip.offsetHeight - 8;
     tooltip.style.left = left + 'px';
     tooltip.style.top  = (top < 8 ? r.bottom + 8 : top) + 'px';
     tooltip.style.opacity = '';
@@ -799,15 +1074,13 @@
 
   function hideTooltip() { tooltip.classList.remove('visible'); }
 
-  /* ── Generic sheet open/close ── */
-  function openSheet(el) { el.classList.add('open'); }
-  function closeSheet(el) { el.classList.remove('open'); }
-
-  /* ── Edit sheet ── */
-  const editSheet   = document.getElementById('edit-sheet');
-  const editBackdrop= document.getElementById('edit-backdrop');
-  const titleInput  = document.getElementById('sheet-title-input');
-  const iconDisplay = document.getElementById('sheet-icon-display');
+  /* ═══════════════════════════════════════════════════
+     EDIT SHEET
+  ═══════════════════════════════════════════════════ */
+  const editSheet    = document.getElementById('edit-sheet');
+  const editBackdrop = document.getElementById('edit-backdrop');
+  const titleInput   = document.getElementById('sheet-title-input');
+  const iconDisplay  = document.getElementById('sheet-icon-display');
 
   function openEditSheet(item) {
     activeItem = item;
@@ -816,34 +1089,28 @@
     const currentIcon = item.querySelector('.item-icon')?.textContent?.trim() || '🤝';
     iconDisplay.textContent = currentIcon;
 
-    // Sync customer
     const colorCls = [...item.classList].find(c => c.startsWith('c-')) || 'c-slate';
     document.querySelectorAll('.cust-chip').forEach(c => {
       c.classList.toggle('selected', c.dataset.colorCls === colorCls);
     });
-    // Sync type
     const isMeeting = item.classList.contains('item-meeting');
     document.getElementById(isMeeting ? 'sh-meeting' : 'sh-task').checked = true;
-    // Sync icon
     document.querySelectorAll('.sh-icon').forEach(c => {
-      c.classList.toggle('selected', c.textContent === currentIcon);
+      c.classList.toggle('selected', c.textContent.trim() === currentIcon);
     });
-    // Sync private
     document.getElementById('sh-private').checked = item.classList.contains('item-hidden');
-
     openSheet(editSheet);
   }
 
   document.getElementById('sheet-close').addEventListener('click', () => closeSheet(editSheet));
   editBackdrop.addEventListener('click', () => closeSheet(editSheet));
 
-  tipEdit.addEventListener('click', (e) => {
+  tipEdit.addEventListener('click', e => {
     e.stopPropagation();
     hideTooltip();
     if (activeItem) openEditSheet(activeItem);
   });
 
-  // Icon chips in sheet
   document.querySelectorAll('.sh-icon').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.sh-icon').forEach(c => c.classList.remove('selected'));
@@ -852,7 +1119,6 @@
     });
   });
 
-  // Customer chips in sheet
   document.querySelectorAll('.cust-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.cust-chip').forEach(c => c.classList.remove('selected'));
@@ -860,80 +1126,76 @@
     });
   });
 
-  // Save
   document.getElementById('sheet-save').addEventListener('click', () => {
     if (!activeItem) { closeSheet(editSheet); return; }
-    // Label
     const textEl = activeItem.querySelector('.item-text');
     if (textEl) textEl.textContent = titleInput.value;
-    // Icon
+
     const selIcon = document.querySelector('.sh-icon.selected');
     const iconEl  = activeItem.querySelector('.item-icon');
-    if (selIcon && iconEl) { iconEl.textContent = selIcon.textContent; iconDisplay.textContent = selIcon.textContent; }
-    // Customer color
+    if (selIcon && iconEl) {
+      iconEl.textContent = selIcon.textContent;
+      iconDisplay.textContent = selIcon.textContent;
+    }
     const selCust = document.querySelector('.cust-chip.selected');
     if (selCust) {
       activeItem.classList.forEach(c => { if (c.startsWith('c-')) activeItem.classList.remove(c); });
       activeItem.classList.add(selCust.dataset.colorCls);
     }
-    // Type
     const type = document.querySelector('input[name="sh-type"]:checked').value;
     activeItem.classList.toggle('item-meeting', type === 'meeting');
     activeItem.classList.toggle('item-task',    type === 'task');
-    // Private / hidden
     activeItem.classList.toggle('item-hidden', document.getElementById('sh-private').checked);
 
     closeSheet(editSheet);
     updateHiddenBadge();
   });
 
-  /* ── Hidden items badge ── */
+  /* ═══════════════════════════════════════════════════
+     HIDDEN ITEMS
+  ═══════════════════════════════════════════════════ */
   function updateHiddenBadge() {
     const count = document.querySelectorAll('.item.item-hidden').length;
-    const badge = document.getElementById('hidden-badge');
     document.getElementById('hidden-count').textContent = count;
-    badge.classList.toggle('show', count > 0);
+    document.getElementById('hidden-badge').classList.toggle('show', count > 0);
   }
 
   document.getElementById('hidden-badge').addEventListener('click', openHiddenPanel);
 
-  /* ── Hidden items panel ── */
   const hiddenPanel = document.getElementById('hidden-panel');
-  document.getElementById('hidden-panel-close').addEventListener('click', () => closeSheet(hiddenPanel));
+  document.getElementById('hidden-panel-close').addEventListener('click',    () => closeSheet(hiddenPanel));
   document.getElementById('hidden-panel-backdrop').addEventListener('click', () => closeSheet(hiddenPanel));
 
   function openHiddenPanel() {
-    const list = document.getElementById('hidden-list');
+    const list  = document.getElementById('hidden-list');
     const items = document.querySelectorAll('.item.item-hidden');
-
-    if (items.length === 0) {
-      list.innerHTML = '<div class="hidden-empty">No hidden items this week</div>';
+    if (!items.length) {
+      list.innerHTML = '<div class="hidden-empty">Geen verborgen items deze week</div>';
     } else {
       list.innerHTML = '';
+      const bgMap = {
+        'c-purple':'#ede0ff','c-blue':'#dbeafe','c-green':'#dcfce7',
+        'c-orange':'#ffedd5','c-pink':'#fce7f3','c-teal':'#ccfbf1',
+        'c-red':'#fee2e2','c-slate':'#f1f5f9',
+      };
       items.forEach(item => {
-        const icon   = item.querySelector('.item-icon')?.textContent?.trim() || '🔒';
-        const title  = item.querySelector('.item-text')?.textContent?.trim()  || '(untitled)';
-        const bgCls  = [...item.classList].find(c => c.startsWith('c-')) || 'c-slate';
-        // Map color class to background color for the swatch
-        const bgMap  = { 'c-purple':'#ede0ff','c-blue':'#dbeafe','c-green':'#dcfce7',
-                         'c-orange':'#ffedd5','c-pink':'#fce7f3','c-teal':'#ccfbf1',
-                         'c-red':'#fee2e2','c-slate':'#f1f5f9' };
-        const bg = bgMap[bgCls] || '#f1f5f9';
-
-        const row = document.createElement('div');
+        const icon  = item.querySelector('.item-icon')?.textContent?.trim() || '🔒';
+        const title = item.querySelector('.item-text')?.textContent?.trim()  || '(untitled)';
+        const bgCls = [...item.classList].find(c => c.startsWith('c-')) || 'c-slate';
+        const bg    = bgMap[bgCls] || '#f1f5f9';
+        const row   = document.createElement('div');
         row.className = 'hidden-item-row';
         row.innerHTML = `
           <div class="hidden-item-swatch" style="background:${bg}">${icon}</div>
-          <span class="hidden-item-title">${title}</span>
-          <button class="btn-unhide">Unhide</button>
+          <span class="hidden-item-title">${escHtml(title)}</span>
+          <button class="btn-unhide">Toon</button>
         `;
         row.querySelector('.btn-unhide').addEventListener('click', () => {
           item.classList.remove('item-hidden');
           row.remove();
           updateHiddenBadge();
-          if (!document.querySelectorAll('.item.item-hidden').length) {
-            document.getElementById('hidden-list').innerHTML = '<div class="hidden-empty">No hidden items this week</div>';
-          }
+          if (!document.querySelectorAll('.item.item-hidden').length)
+            list.innerHTML = '<div class="hidden-empty">Geen verborgen items deze week</div>';
         });
         list.appendChild(row);
       });
@@ -941,17 +1203,25 @@
     openSheet(hiddenPanel);
   }
 
-  // Init badge
-  updateHiddenBadge();
-
-  /* ── Version panel ── */
+  /* ═══════════════════════════════════════════════════
+     VERSION PANEL
+  ═══════════════════════════════════════════════════ */
   const versionPanel = document.getElementById('version-panel');
-  document.getElementById('version-badge').addEventListener('click', () => openSheet(versionPanel));
-  document.getElementById('version-panel-close').addEventListener('click', () => closeSheet(versionPanel));
-  document.getElementById('version-panel-backdrop').addEventListener('click', () => closeSheet(versionPanel));
+  document.getElementById('version-badge').addEventListener('click',        () => openSheet(versionPanel));
+  document.getElementById('version-panel-close').addEventListener('click',  () => closeSheet(versionPanel));
+  document.getElementById('version-panel-backdrop').addEventListener('click',() => closeSheet(versionPanel));
 
-  /* ── Unified tap / long-press handler ── */
-  let lpTimer = null; let didLongPress = false;
+  /* ═══════════════════════════════════════════════════
+     SHEET HELPERS
+  ═══════════════════════════════════════════════════ */
+  function openSheet(el)  { el.classList.add('open'); }
+  function closeSheet(el) { el.classList.remove('open'); }
+
+  /* ═══════════════════════════════════════════════════
+     TAP / LONG-PRESS (event delegation)
+  ═══════════════════════════════════════════════════ */
+  let lpTimer = null;
+  let didLongPress = false;
 
   document.addEventListener('touchstart', e => {
     const item = e.target.closest('.item');
@@ -969,13 +1239,23 @@
     if (item) { e.preventDefault(); showTooltip(item, e); }
   }, { passive: false });
 
-  // Desktop click → tooltip; sheet opened via Edit button
   document.addEventListener('click', e => {
     if (e.target.closest('.bottom-sheet') || e.target.closest('#item-tooltip')) return;
     const item = e.target.closest('.item');
     if (item) { showTooltip(item, e); return; }
     hideTooltip();
   });
+
+  /* ═══════════════════════════════════════════════════
+     INIT
+  ═══════════════════════════════════════════════════ */
+  renderWeek();
+
+  // If a Client ID is already saved, pre-load the GIS script
+  if (gcalClientId) {
+    loadGisScript();
+  }
+
 })();
 </script>
 </body>
