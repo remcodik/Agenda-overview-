@@ -33,13 +33,7 @@
     .week-nav button:hover { background: rgba(255,255,255,.22); }
     .week-label { font-size: 12px; font-weight: 600; text-align: center; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .topbar-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    .btn-share {
-      background: #4f8ef7; border: none; color: #fff;
-      padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
-      white-space: nowrap;
-    }
     @media (max-width: 480px) {
-      .btn-share { display: none; }
       #version-badge { display: none; }
       .topbar-title-text { display: none; }
       .week-label { font-size: 11px; }
@@ -56,17 +50,16 @@
       display: flex; align-items: center; justify-content: center;
     }
 
-    /* ── Connect calendar button ── */
+    /* ── Connect button ── */
     .btn-cal-connect {
       background: rgba(255,255,255,.12); border: none; color: #fff;
       padding: 6px 11px; border-radius: 8px; font-size: 12px; font-weight: 600;
-      cursor: pointer; white-space: nowrap;
-      transition: background .15s;
-      display: flex; align-items: center; gap: 5px;
+      cursor: pointer; white-space: nowrap; transition: background .15s;
     }
-    .btn-cal-connect:hover { background: rgba(255,255,255,.22); }
+    .btn-cal-connect:hover  { background: rgba(255,255,255,.22); }
     .btn-cal-connect.connected { background: #14532d; color: #86efac; }
     .btn-cal-connect.connected:hover { background: #166534; }
+    .btn-cal-connect.loading { background: rgba(255,255,255,.08); color: rgba(255,255,255,.5); cursor: default; }
 
     /* ── Legend ── */
     .legend {
@@ -74,17 +67,10 @@
       padding: 7px 20px; background: #fff; border-bottom: 1px solid #f0f0f5;
       font-size: 11px; flex-shrink: 0; flex-wrap: wrap;
     }
-    .legend-title {
-      font-weight: 700; color: #888; text-transform: uppercase;
-      letter-spacing: .5px; font-size: 10px;
-    }
+    .legend-title { font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .5px; font-size: 10px; }
     .legend-item { display: flex; align-items: center; gap: 6px; font-weight: 600; color: #333; }
-    .legend-chip {
-      width: 18px; height: 18px; border-radius: 5px;
-      display: flex; align-items: center; justify-content: center; font-size: 10px;
-    }
+    .legend-chip { width: 18px; height: 18px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; }
     .legend-hint { margin-left: auto; color: #bbb; font-size: 10px; font-style: italic; }
-
     .legend-key { display: flex; align-items: center; gap: 12px; margin-left: 8px; padding-left: 12px; border-left: 1px solid #f0f0f5; }
     .legend-key-item { display: flex; align-items: center; gap: 4px; color: #888; font-size: 10px; }
 
@@ -104,30 +90,22 @@
       box-shadow: 0 1px 4px rgba(0,0,0,.07);
       border: 2px solid transparent; min-width: 0;
     }
-    .day-col.today { border-color: #4f8ef7; }
+    .day-col.today   { border-color: #4f8ef7; }
     .day-col.weekend { opacity: .7; }
-
-    /* ── Day header ── */
-    .day-header {
-      padding: 9px 10px 7px;
-      background: #fafafa; border-bottom: 1px solid #f0f0f5; flex-shrink: 0;
-    }
-    .day-name {
-      font-size: 10px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .8px; color: #888;
-    }
+    .day-header { padding: 9px 10px 7px; background: #fafafa; border-bottom: 1px solid #f0f0f5; flex-shrink: 0; }
+    .day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #888; }
     .day-col.weekend .day-name { color: #ccc; }
     .day-date { font-size: 20px; font-weight: 800; color: #1a1a2e; line-height: 1.1; margin-top: 1px; }
-    .day-col.today .day-date { color: #4f8ef7; }
+    .day-col.today   .day-date { color: #4f8ef7; }
     .day-col.weekend .day-date { color: #ccc; }
-
-    /* ── Day body ── */
     .day-body {
       flex: 1; padding: 8px 6px;
       display: grid; grid-template-columns: 1fr 1fr;
       gap: 5px; align-content: start;
       overflow-y: auto; min-height: 0;
     }
+    .day-footer { padding: 5px 6px 7px; flex-shrink: 0; }
+    .day-empty { grid-column:1/-1; padding:8px 4px; font-size:10px; color:#d0d0e0; text-align:center; font-weight:600; }
 
     /* ── Item tile ── */
     .item {
@@ -137,285 +115,164 @@
       transition: filter .15s, box-shadow .15s, transform .1s;
       user-select: none; min-width: 0; position: relative;
     }
-    .item:hover, .item.active {
-      filter: brightness(.94);
-      box-shadow: 0 2px 10px rgba(0,0,0,.14);
-      transform: translateY(-1px);
-    }
+    .item:hover, .item.active { filter: brightness(.94); box-shadow: 0 2px 10px rgba(0,0,0,.14); transform: translateY(-1px); }
     .item:active { transform: scale(.97); }
     .item-meeting { border-left: 3px solid rgba(0,0,0,.18); }
     .item-icon { font-size: 15px; flex-shrink: 0; line-height: 1; }
     .item-text {
-      font-size: 11px; font-weight: 700;
-      white-space: nowrap; overflow: hidden;
+      font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden;
       max-width: 0; opacity: 0;
       transition: max-width .25s ease, opacity .2s ease;
     }
-    .item:hover .item-text,
-    .item.active .item-text { max-width: 180px; opacity: 1; }
+    .item:hover .item-text, .item.active .item-text { max-width: 180px; opacity: 1; }
     .item-hidden { display: none; }
     .upcoming { animation: pulse 2s infinite; }
     @keyframes pulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,.25); }
       50%       { box-shadow: 0 0 0 5px rgba(0,0,0,0); }
     }
-    .day-divider { grid-column: 1 / -1; height: 1px; background: rgba(0,0,0,.06); margin: 2px 0; }
-    .day-empty {
-      grid-column: 1 / -1; padding: 10px 4px;
-      font-size: 10px; color: #d0d0e0; text-align: center; font-weight: 600;
-    }
+    .day-divider { grid-column:1/-1; height:1px; background:rgba(0,0,0,.06); margin:2px 0; }
 
-    /* ── Customer color classes ── */
-    .c-purple { background: #ede0ff; color: #4c1d95; }
-    .c-blue   { background: #dbeafe; color: #1e3a8a; }
-    .c-green  { background: #dcfce7; color: #14532d; }
-    .c-orange { background: #ffedd5; color: #7c2d12; }
-    .c-pink   { background: #fce7f3; color: #831843; }
-    .c-teal   { background: #ccfbf1; color: #134e4a; }
-    .c-red    { background: #fee2e2; color: #7f1d1d; }
-    .c-slate  { background: #f1f5f9; color: #1e293b; }
+    /* ── Customer colors ── */
+    .c-purple { background:#ede0ff; color:#4c1d95; }
+    .c-blue   { background:#dbeafe; color:#1e3a8a; }
+    .c-green  { background:#dcfce7; color:#14532d; }
+    .c-orange { background:#ffedd5; color:#7c2d12; }
+    .c-pink   { background:#fce7f3; color:#831843; }
+    .c-teal   { background:#ccfbf1; color:#134e4a; }
+    .c-red    { background:#fee2e2; color:#7f1d1d; }
+    .c-slate  { background:#f1f5f9; color:#1e293b; }
 
     /* ── Add button ── */
     .btn-add {
-      width: 100%; border: 1.5px dashed #d8d8e8;
-      background: transparent; border-radius: 7px; padding: 5px;
-      font-size: 13px; color: #c8c8d8; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; transition: border-color .15s, color .15s;
+      width:100%; border:1.5px dashed #d8d8e8; background:transparent;
+      border-radius:7px; padding:5px; font-size:13px; color:#c8c8d8;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      font-weight:700; transition:border-color .15s, color .15s;
     }
-    .btn-add:hover { border-color: #4f8ef7; color: #4f8ef7; }
+    .btn-add:hover { border-color:#4f8ef7; color:#4f8ef7; }
 
-    /* ── Day footer ── */
-    .day-footer { padding: 5px 6px 7px; flex-shrink: 0; }
-
-    /* ── Share bar ── */
-    .share-bar {
-      background: #eff6ff; border-top: 1px solid #bfdbfe;
-      padding: 7px 20px; font-size: 11px; color: #3b82f6; font-weight: 600;
-      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
-    }
-    .share-url {
-      background: #fff; border: 1px solid #bfdbfe; border-radius: 6px;
-      padding: 2px 8px; font-family: monospace; font-size: 11px; color: #1e40af; cursor: pointer;
-    }
-
-    /* Scrollbar */
+    /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: #d0d0e0; border-radius: 2px; }
 
-    /* ── Tap tooltip ── */
+    /* ── Tooltip ── */
     #item-tooltip {
-      position: fixed;
-      background: rgba(20,20,20,.9);
-      color: #fff;
-      font-size: 12px; font-weight: 700;
-      padding: 5px 10px 5px 11px;
-      border-radius: 8px;
-      white-space: nowrap;
-      z-index: 9999;
-      box-shadow: 0 4px 16px rgba(0,0,0,.28);
-      opacity: 0;
-      display: flex; align-items: center; gap: 8px;
-      transition: opacity .15s ease, transform .15s ease;
-      transform: translateY(4px);
+      position:fixed; background:rgba(20,20,20,.9); color:#fff;
+      font-size:12px; font-weight:700; padding:5px 10px 5px 11px;
+      border-radius:8px; white-space:nowrap; z-index:9999;
+      box-shadow:0 4px 16px rgba(0,0,0,.28); opacity:0;
+      display:flex; align-items:center; gap:8px;
+      transition:opacity .15s ease, transform .15s ease;
+      transform:translateY(4px);
     }
-    #item-tooltip.visible { opacity: 1; transform: translateY(0); }
-    #tooltip-label { pointer-events: none; }
+    #item-tooltip.visible { opacity:1; transform:translateY(0); }
+    #tooltip-label { pointer-events:none; }
     #tooltip-edit {
-      pointer-events: all;
-      background: rgba(255,255,255,.15); border: none; color: #fff;
-      font-size: 11px; font-weight: 700; padding: 2px 7px;
-      border-radius: 5px; cursor: pointer; white-space: nowrap;
+      pointer-events:all; background:rgba(255,255,255,.15); border:none; color:#fff;
+      font-size:11px; font-weight:700; padding:2px 7px; border-radius:5px;
+      cursor:pointer; white-space:nowrap;
     }
-    #tooltip-edit:hover { background: rgba(255,255,255,.28); }
+    #tooltip-edit:hover { background:rgba(255,255,255,.28); }
 
-    /* ── Shared bottom-sheet pattern ── */
+    /* ── Bottom sheet ── */
     .bottom-sheet {
-      position: fixed; inset: 0;
-      z-index: 10000; display: flex; align-items: flex-end;
-      pointer-events: none;
+      position:fixed; inset:0; z-index:10000;
+      display:flex; align-items:flex-end; pointer-events:none;
     }
-    .bottom-sheet.open { pointer-events: all; }
-    .bs-backdrop {
-      position: absolute; inset: 0;
-      background: rgba(0,0,0,0);
-      transition: background .25s;
-    }
-    .bottom-sheet.open .bs-backdrop { background: rgba(0,0,0,.38); }
+    .bottom-sheet.open { pointer-events:all; }
+    .bs-backdrop { position:absolute; inset:0; background:rgba(0,0,0,0); transition:background .25s; }
+    .bottom-sheet.open .bs-backdrop { background:rgba(0,0,0,.38); }
     .bs-panel {
-      position: relative; width: 100%; max-width: 480px; margin: 0 auto;
-      background: #fff; border-radius: 20px 20px 0 0;
-      box-shadow: 0 -4px 32px rgba(0,0,0,.2);
-      transform: translateY(100%);
-      transition: transform .28s cubic-bezier(.32,1,.56,1);
-      overflow: hidden;
+      position:relative; width:100%; max-width:480px; margin:0 auto;
+      background:#fff; border-radius:20px 20px 0 0;
+      box-shadow:0 -4px 32px rgba(0,0,0,.2);
+      transform:translateY(100%);
+      transition:transform .28s cubic-bezier(.32,1,.56,1);
+      overflow:hidden;
     }
-    .bottom-sheet.open .bs-panel { transform: translateY(0); }
-    .sheet-handle {
-      width: 36px; height: 4px; background: #ddd;
-      border-radius: 2px; margin: 10px auto 0;
-    }
+    .bottom-sheet.open .bs-panel { transform:translateY(0); }
+    .sheet-handle { width:36px; height:4px; background:#ddd; border-radius:2px; margin:10px auto 0; }
     .sheet-title-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 14px 18px 12px; border-bottom: 1px solid #f0f0f5;
+      display:flex; align-items:center; gap:10px;
+      padding:14px 18px 12px; border-bottom:1px solid #f0f0f5;
     }
-    .sheet-event-icon { font-size: 22px; flex-shrink: 0; }
     .sheet-close {
-      width: 28px; height: 28px; border: none; background: #f0f0f5;
-      border-radius: 50%; font-size: 18px; cursor: pointer; color: #888;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      width:28px; height:28px; border:none; background:#f0f0f5;
+      border-radius:50%; font-size:18px; cursor:pointer; color:#888;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
     }
 
-    /* ── Edit sheet ── */
-    #sheet-title-input {
-      flex: 1; font-size: 15px; font-weight: 800; color: #1a1a2e;
-      border: none; outline: none; background: transparent;
-    }
-    .sheet-body { padding: 14px 18px 20px; display: flex; flex-direction: column; gap: 16px; }
-    .sheet-label {
-      font-size: 10px; font-weight: 800; text-transform: uppercase;
-      letter-spacing: .6px; color: #aaa; margin-bottom: 8px;
-    }
-    .cust-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-    .cust-chip {
-      display: flex; align-items: center; gap: 5px;
-      border: 2px solid transparent; border-radius: 10px;
-      padding: 5px 9px; cursor: pointer; font-size: 12px; font-weight: 700;
-      transition: border-color .15s;
-    }
-    .cust-chip.selected { border-color: rgba(0,0,0,.5); }
-    .cust-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-    .type-seg {
-      display: flex; border: 1.5px solid #e8e8f0; border-radius: 9px;
-      overflow: hidden; align-self: flex-start;
-    }
-    .type-seg label { padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; color: #aaa; }
-    .type-seg input { display: none; }
-    .type-seg input:checked + label { background: #1a1a2e; color: #fff; }
-    .sh-icon-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-    .sh-icon {
-      width: 36px; height: 36px; border-radius: 9px;
-      border: 2px solid transparent; background: #f6f6fb;
-      font-size: 18px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .sh-icon.selected { border-color: #4f8ef7; background: #eff6ff; }
-    .sh-icon:hover { background: #eff6ff; }
-    .btn-sheet-save {
-      width: 100%; background: #1a1a2e; color: #fff;
-      border: none; border-radius: 10px; padding: 13px;
-      font-size: 14px; font-weight: 800; cursor: pointer;
-    }
-    .btn-sheet-save:hover { filter: brightness(1.18); }
-
-    .sh-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
-    .sh-switch input { opacity: 0; width: 0; height: 0; }
-    .sh-slider {
-      position: absolute; inset: 0;
-      background: #dde0e8; border-radius: 22px; cursor: pointer;
-      transition: background .2s;
-    }
-    .sh-slider::before {
-      content: ''; position: absolute; width: 16px; height: 16px;
-      border-radius: 50%; background: #fff; left: 3px; top: 3px;
-      transition: transform .2s; box-shadow: 0 1px 4px rgba(0,0,0,.2);
-    }
-    .sh-switch input:checked + .sh-slider { background: #4f8ef7; }
-    .sh-switch input:checked + .sh-slider::before { transform: translateX(18px); }
-
-    .sh-toggle-row { display: flex; align-items: center; gap: 12px; padding: 2px 0; }
-    .sh-toggle-info { flex: 1; }
-    .sh-toggle-label { font-size: 13px; font-weight: 700; color: #1a1a2e; }
-    .sh-toggle-sub   { font-size: 11px; color: #aaa; margin-top: 1px; }
+    /* ── Edit sheet specifics ── */
+    #sheet-title-input { flex:1; font-size:15px; font-weight:800; color:#1a1a2e; border:none; outline:none; background:transparent; }
+    .sheet-body { padding:14px 18px 20px; display:flex; flex-direction:column; gap:16px; }
+    .sheet-label { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:#aaa; margin-bottom:8px; }
+    .cust-chips { display:flex; gap:6px; flex-wrap:wrap; }
+    .cust-chip { display:flex; align-items:center; gap:5px; border:2px solid transparent; border-radius:10px; padding:5px 9px; cursor:pointer; font-size:12px; font-weight:700; transition:border-color .15s; }
+    .cust-chip.selected { border-color:rgba(0,0,0,.5); }
+    .cust-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+    .type-seg { display:flex; border:1.5px solid #e8e8f0; border-radius:9px; overflow:hidden; align-self:flex-start; }
+    .type-seg label { padding:6px 16px; font-size:12px; font-weight:700; cursor:pointer; color:#aaa; }
+    .type-seg input { display:none; }
+    .type-seg input:checked + label { background:#1a1a2e; color:#fff; }
+    .sh-icon-grid { display:flex; flex-wrap:wrap; gap:6px; }
+    .sh-icon { width:36px; height:36px; border-radius:9px; border:2px solid transparent; background:#f6f6fb; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .sh-icon.selected { border-color:#4f8ef7; background:#eff6ff; }
+    .sh-icon:hover { background:#eff6ff; }
+    .btn-sheet-save { width:100%; background:#1a1a2e; color:#fff; border:none; border-radius:10px; padding:13px; font-size:14px; font-weight:800; cursor:pointer; }
+    .btn-sheet-save:hover { filter:brightness(1.18); }
+    .sh-switch { position:relative; width:40px; height:22px; flex-shrink:0; }
+    .sh-switch input { opacity:0; width:0; height:0; }
+    .sh-slider { position:absolute; inset:0; background:#dde0e8; border-radius:22px; cursor:pointer; transition:background .2s; }
+    .sh-slider::before { content:''; position:absolute; width:16px; height:16px; border-radius:50%; background:#fff; left:3px; top:3px; transition:transform .2s; box-shadow:0 1px 4px rgba(0,0,0,.2); }
+    .sh-switch input:checked + .sh-slider { background:#4f8ef7; }
+    .sh-switch input:checked + .sh-slider::before { transform:translateX(18px); }
+    .sh-toggle-row { display:flex; align-items:center; gap:12px; padding:2px 0; }
+    .sh-toggle-info { flex:1; }
+    .sh-toggle-label { font-size:13px; font-weight:700; color:#1a1a2e; }
+    .sh-toggle-sub   { font-size:11px; color:#aaa; margin-top:1px; }
 
     /* ── Setup sheet ── */
-    .setup-step {
-      display: flex; gap: 12px; align-items: flex-start;
-      padding: 10px 0; border-bottom: 1px solid #f5f5f8;
+    .setup-step { display:flex; gap:12px; align-items:flex-start; padding:11px 0; border-bottom:1px solid #f5f5f8; }
+    .setup-step:last-child { border-bottom:none; }
+    .setup-step-num { width:24px; height:24px; border-radius:50%; background:#1a1a2e; color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+    .setup-step-text { font-size:12px; color:#555; line-height:1.6; }
+    .setup-step-text strong { color:#1a1a2e; }
+    .setup-code { display:inline-block; background:#f0f0f8; padding:2px 7px; border-radius:5px; font-family:monospace; font-size:11px; color:#4f8ef7; margin-top:2px; }
+    .setup-img { width:100%; border-radius:8px; border:1px solid #f0f0f5; margin-top:6px; }
+    .setup-ics-input {
+      width:100%; border:1.5px solid #e0e0f0; border-radius:8px;
+      padding:10px 12px; font-size:11px; font-family:monospace;
+      outline:none; transition:border-color .15s; margin-top:8px;
     }
-    .setup-step:last-child { border-bottom: none; }
-    .setup-step-num {
-      width: 24px; height: 24px; border-radius: 50%;
-      background: #1a1a2e; color: #fff;
-      font-size: 11px; font-weight: 800;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; margin-top: 1px;
-    }
-    .setup-step-text { font-size: 12px; color: #555; line-height: 1.55; }
-    .setup-step-text strong { color: #1a1a2e; }
-    .setup-code {
-      display: inline-block; background: #f0f0f8; padding: 2px 7px;
-      border-radius: 5px; font-family: monospace; font-size: 11px;
-      color: #4f8ef7; margin-top: 3px;
-    }
-    .setup-client-id-input {
-      width: 100%; border: 1.5px solid #e0e0f0; border-radius: 8px;
-      padding: 10px 12px; font-size: 12px; font-family: monospace;
-      outline: none; transition: border-color .15s; margin-top: 8px;
-    }
-    .setup-client-id-input:focus { border-color: #4f8ef7; }
-    .setup-note {
-      font-size: 10px; color: #aaa; margin-top: 6px; line-height: 1.5;
-    }
-    .setup-link { color: #4f8ef7; text-decoration: none; }
-    .setup-link:hover { text-decoration: underline; }
-    .btn-setup-disconnect {
-      width: 100%; margin-top: 8px; background: none;
-      border: 1.5px solid #fee2e2; color: #ef4444; border-radius: 10px;
-      padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer;
-    }
-    .btn-setup-disconnect:hover { background: #fff0f0; }
+    .setup-ics-input:focus { border-color:#4f8ef7; }
+    .setup-note { font-size:10px; color:#aaa; margin-top:6px; line-height:1.5; }
+    .setup-link { color:#4f8ef7; text-decoration:none; }
+    .setup-link:hover { text-decoration:underline; }
+    .btn-danger { width:100%; margin-top:8px; background:none; border:1.5px solid #fee2e2; color:#ef4444; border-radius:10px; padding:10px; font-size:13px; font-weight:700; cursor:pointer; }
+    .btn-danger:hover { background:#fff0f0; }
+    .error-banner { background:#fee2e2; border:1.5px solid #fca5a5; border-radius:10px; padding:10px 14px; font-size:12px; color:#b91c1c; font-weight:600; margin-bottom:4px; display:none; }
+    .error-banner.show { display:block; }
 
-    /* ── Hidden items badge ── */
-    #hidden-badge {
-      display: none; align-items: center; gap: 4px;
-      background: #f1f5f9; border: 1.5px solid #e2e8f0;
-      border-radius: 8px; padding: 3px 9px;
-      font-size: 10px; font-weight: 800; color: #64748b;
-      cursor: pointer; user-select: none;
-      transition: background .15s, color .15s;
-    }
-    #hidden-badge.show { display: flex; }
-    #hidden-badge:hover { background: #e2e8f0; }
+    /* ── Hidden items ── */
+    #hidden-badge { display:none; align-items:center; gap:4px; background:#f1f5f9; border:1.5px solid #e2e8f0; border-radius:8px; padding:3px 9px; font-size:10px; font-weight:800; color:#64748b; cursor:pointer; user-select:none; transition:background .15s, color .15s; }
+    #hidden-badge.show { display:flex; }
+    #hidden-badge:hover { background:#e2e8f0; }
+    #hidden-list { padding:12px 18px 24px; display:flex; flex-direction:column; gap:8px; max-height:60vh; overflow-y:auto; }
+    .hidden-item-row { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px; background:#f8f8fc; border:1.5px solid #f0f0f5; }
+    .hidden-item-swatch { width:32px; height:32px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; }
+    .hidden-item-title { flex:1; font-size:13px; font-weight:700; color:#1a1a2e; }
+    .btn-unhide { background:#eff6ff; border:1.5px solid #bfdbfe; color:#3b82f6; border-radius:7px; padding:5px 12px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; transition:background .15s; }
+    .btn-unhide:hover { background:#dbeafe; }
+    .hidden-empty { text-align:center; padding:24px; color:#bbb; font-size:13px; font-weight:600; }
 
-    /* ── Hidden items panel ── */
-    #hidden-list {
-      padding: 12px 18px 24px; display: flex; flex-direction: column;
-      gap: 8px; max-height: 60vh; overflow-y: auto;
-    }
-    .hidden-item-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 10px; border-radius: 10px;
-      background: #f8f8fc; border: 1.5px solid #f0f0f5;
-    }
-    .hidden-item-swatch {
-      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center; font-size: 16px;
-    }
-    .hidden-item-title { flex: 1; font-size: 13px; font-weight: 700; color: #1a1a2e; }
-    .btn-unhide {
-      background: #eff6ff; border: 1.5px solid #bfdbfe; color: #3b82f6;
-      border-radius: 7px; padding: 5px 12px; font-size: 12px; font-weight: 700;
-      cursor: pointer; white-space: nowrap; transition: background .15s;
-    }
-    .btn-unhide:hover { background: #dbeafe; }
-    .hidden-empty {
-      text-align: center; padding: 24px; color: #bbb; font-size: 13px; font-weight: 600;
-    }
-
-    /* ── Version history panel ── */
-    #version-list {
-      padding: 8px 18px 24px; display: flex; flex-direction: column;
-    }
-    .version-entry {
-      display: grid; grid-template-columns: 52px 92px 1fr;
-      gap: 8px; padding: 11px 0; border-bottom: 1px solid #f0f0f5;
-      align-items: start;
-    }
-    .version-entry:last-child { border-bottom: none; }
-    .version-tag { font-size: 12px; font-weight: 800; color: #4f8ef7; }
-    .version-date { font-size: 11px; color: #aaa; padding-top: 1px; }
-    .version-desc { font-size: 12px; color: #1a1a2e; line-height: 1.45; }
+    /* ── Version panel ── */
+    #version-list { padding:8px 18px 24px; display:flex; flex-direction:column; }
+    .version-entry { display:grid; grid-template-columns:52px 92px 1fr; gap:8px; padding:11px 0; border-bottom:1px solid #f0f0f5; align-items:start; }
+    .version-entry:last-child { border-bottom:none; }
+    .version-tag  { font-size:12px; font-weight:800; color:#4f8ef7; }
+    .version-date { font-size:11px; color:#aaa; padding-top:1px; }
+    .version-desc { font-size:12px; color:#1a1a2e; line-height:1.45; }
   </style>
 </head>
 <body>
@@ -431,7 +288,7 @@
     </div>
     <div class="topbar-actions">
       <button id="btn-cal-connect" class="btn-cal-connect">🗓️ Koppel</button>
-      <button id="version-badge" title="Versiegeschiedenis">v0.4</button>
+      <button id="version-badge" title="Versiegeschiedenis">v0.5</button>
       <button class="btn-settings" onclick="location.href='customize.html'">⚙️</button>
     </div>
   </header>
@@ -439,182 +296,135 @@
   <!-- Legend -->
   <div class="legend">
     <span class="legend-title">Kleur = klant</span>
-    <span class="legend-item">
-      <span class="legend-chip" style="background:#ede0ff">🟣</span>Acme Corp
-    </span>
-    <span class="legend-item">
-      <span class="legend-chip" style="background:#dbeafe">🔵</span>BrightCo
-    </span>
-    <span class="legend-item">
-      <span class="legend-chip" style="background:#dcfce7">🟢</span>GreenTech
-    </span>
-    <span class="legend-item">
-      <span class="legend-chip" style="background:#ffedd5">🟠</span>OrangeLabel
-    </span>
+    <span class="legend-item"><span class="legend-chip" style="background:#ede0ff">🟣</span>Acme Corp</span>
+    <span class="legend-item"><span class="legend-chip" style="background:#dbeafe">🔵</span>BrightCo</span>
+    <span class="legend-item"><span class="legend-chip" style="background:#dcfce7">🟢</span>GreenTech</span>
+    <span class="legend-item"><span class="legend-chip" style="background:#ffedd5">🟠</span>OrangeLabel</span>
     <div class="legend-key">
       <span class="legend-key-item">🤝 🏢 🖥️ 💬 = meeting</span>
-      <span class="legend-key-item">✉️ 📋 💻 📝 = taak</span>
+      <span class="legend-key-item">📋 💻 📝 ✅ = taak</span>
     </div>
     <span id="hidden-badge">🔒 <span id="hidden-count">0</span> verborgen</span>
     <span class="legend-hint">Tik · houd ingedrukt om te bewerken</span>
   </div>
 
-  <!-- Week grid – dynamically rendered by JS -->
+  <!-- Week grid – JS rendered -->
   <main class="week-grid"></main>
-
-  <!-- Share bar -->
-  <div class="share-bar">
-    🔗 Deel:
-    <span class="share-url">remcodik.github.io/Agenda-overview-</span>
-    <span style="color:#93c5fd; cursor:pointer" onclick="navigator.clipboard?.writeText('https://remcodik.github.io/Agenda-overview-/')">Kopieer</span>
-    <span style="margin-left:auto; color:#93c5fd; font-size:10px">Verborgen items onzichtbaar voor anderen</span>
-  </div>
 
 </div>
 
-<!-- Floating tap tooltip -->
+<!-- Tooltip -->
 <div id="item-tooltip">
   <span id="tooltip-label"></span>
   <button id="tooltip-edit">✏️ Bewerk</button>
 </div>
 
-<!-- ── Event edit bottom sheet ── -->
+<!-- ── Edit sheet ── -->
 <div id="edit-sheet" class="bottom-sheet">
   <div class="bs-backdrop" id="edit-backdrop"></div>
   <div class="bs-panel">
     <div class="sheet-handle"></div>
     <div class="sheet-title-row">
-      <span class="sheet-event-icon" id="sheet-icon-display">🤝</span>
-      <input class="sheet-title" id="sheet-title-input" type="text" value="" />
+      <span id="sheet-icon-display" style="font-size:22px;flex-shrink:0">🤝</span>
+      <input id="sheet-title-input" type="text" value="" />
       <button class="sheet-close" id="sheet-close">×</button>
     </div>
     <div class="sheet-body">
-
-      <!-- Customer -->
       <div>
         <div class="sheet-label">Klant</div>
         <div class="cust-chips">
-          <div class="cust-chip" style="background:#ede0ff" data-color-cls="c-purple">
-            <span class="cust-dot" style="background:#9333ea"></span>Acme Corp
-          </div>
-          <div class="cust-chip" style="background:#dbeafe" data-color-cls="c-blue">
-            <span class="cust-dot" style="background:#3b82f6"></span>BrightCo
-          </div>
-          <div class="cust-chip" style="background:#dcfce7" data-color-cls="c-green">
-            <span class="cust-dot" style="background:#22c55e"></span>GreenTech
-          </div>
-          <div class="cust-chip" style="background:#ffedd5" data-color-cls="c-orange">
-            <span class="cust-dot" style="background:#f97316"></span>OrangeLabel
-          </div>
-          <div class="cust-chip" style="background:#f1f5f9" data-color-cls="c-slate">
-            <span class="cust-dot" style="background:#94a3b8"></span>Geen
-          </div>
+          <div class="cust-chip" style="background:#ede0ff" data-color-cls="c-purple"><span class="cust-dot" style="background:#9333ea"></span>Acme Corp</div>
+          <div class="cust-chip" style="background:#dbeafe" data-color-cls="c-blue"><span class="cust-dot" style="background:#3b82f6"></span>BrightCo</div>
+          <div class="cust-chip" style="background:#dcfce7" data-color-cls="c-green"><span class="cust-dot" style="background:#22c55e"></span>GreenTech</div>
+          <div class="cust-chip" style="background:#ffedd5" data-color-cls="c-orange"><span class="cust-dot" style="background:#f97316"></span>OrangeLabel</div>
+          <div class="cust-chip" style="background:#f1f5f9" data-color-cls="c-slate"><span class="cust-dot" style="background:#94a3b8"></span>Geen</div>
         </div>
       </div>
-
-      <!-- Type -->
       <div>
         <div class="sheet-label">Type</div>
         <div class="type-seg">
-          <input type="radio" name="sh-type" id="sh-meeting" value="meeting" checked />
-          <label for="sh-meeting">🤝 Meeting</label>
-          <input type="radio" name="sh-type" id="sh-task" value="task" />
-          <label for="sh-task">✅ Taak</label>
+          <input type="radio" name="sh-type" id="sh-meeting" value="meeting" checked /><label for="sh-meeting">🤝 Meeting</label>
+          <input type="radio" name="sh-type" id="sh-task"    value="task"    /><label for="sh-task">✅ Taak</label>
         </div>
       </div>
-
-      <!-- Icon -->
       <div>
         <div class="sheet-label">Icoon</div>
         <div class="sh-icon-grid">
-          <div class="sh-icon">🤝</div><div class="sh-icon">🏢</div>
-          <div class="sh-icon">🖥️</div><div class="sh-icon">💬</div>
-          <div class="sh-icon">📞</div><div class="sh-icon">🎤</div>
-          <div class="sh-icon">✉️</div><div class="sh-icon">📋</div>
-          <div class="sh-icon">💻</div><div class="sh-icon">📝</div>
-          <div class="sh-icon">✅</div><div class="sh-icon">📦</div>
-          <div class="sh-icon">🎯</div><div class="sh-icon">🗂️</div>
-          <div class="sh-icon">🗺️</div><div class="sh-icon">🔒</div>
+          <div class="sh-icon">🤝</div><div class="sh-icon">🏢</div><div class="sh-icon">🖥️</div><div class="sh-icon">💬</div>
+          <div class="sh-icon">📞</div><div class="sh-icon">🎤</div><div class="sh-icon">✉️</div><div class="sh-icon">📋</div>
+          <div class="sh-icon">💻</div><div class="sh-icon">📝</div><div class="sh-icon">✅</div><div class="sh-icon">📦</div>
+          <div class="sh-icon">🎯</div><div class="sh-icon">🗂️</div><div class="sh-icon">🗺️</div><div class="sh-icon">🔒</div>
         </div>
       </div>
-
-      <!-- Private -->
       <div class="sh-toggle-row">
         <div class="sh-toggle-info">
           <div class="sh-toggle-label">🔒 Privé / verborgen</div>
           <div class="sh-toggle-sub">Onzichtbaar in de hoofdweergave</div>
         </div>
-        <label class="sh-switch">
-          <input type="checkbox" id="sh-private" />
-          <span class="sh-slider"></span>
-        </label>
+        <label class="sh-switch"><input type="checkbox" id="sh-private" /><span class="sh-slider"></span></label>
       </div>
-
       <button class="btn-sheet-save" id="sheet-save">Opslaan</button>
     </div>
   </div>
 </div>
 
-<!-- ── Calendar setup bottom sheet ── -->
+<!-- ── Agenda setup sheet ── -->
 <div id="setup-sheet" class="bottom-sheet">
   <div class="bs-backdrop" id="setup-backdrop"></div>
   <div class="bs-panel">
     <div class="sheet-handle"></div>
     <div class="sheet-title-row">
       <span style="font-size:20px">🗓️</span>
-      <span style="flex:1; font-size:15px; font-weight:800; color:#1a1a2e">Google Agenda koppelen</span>
+      <span style="flex:1;font-size:15px;font-weight:800;color:#1a1a2e">Google Agenda koppelen</span>
       <button class="sheet-close" id="setup-close">×</button>
     </div>
-    <div style="padding:14px 18px 28px; overflow-y:auto; max-height:72vh; display:flex; flex-direction:column; gap:0;">
+    <div style="padding:14px 18px 28px;overflow-y:auto;max-height:74vh;display:flex;flex-direction:column;">
+
+      <div id="setup-error" class="error-banner"></div>
+
       <div class="setup-step">
         <div class="setup-step-num">1</div>
         <div class="setup-step-text">
-          Ga naar <a href="https://console.cloud.google.com" class="setup-link" target="_blank" rel="noopener">console.cloud.google.com</a>
-          en maak een nieuw project aan.
+          Open <a href="https://calendar.google.com" class="setup-link" target="_blank" rel="noopener"><strong>Google Agenda</strong></a>
+          op je computer of telefoon.
         </div>
       </div>
       <div class="setup-step">
         <div class="setup-step-num">2</div>
         <div class="setup-step-text">
-          Ga naar <strong>APIs &amp; services → Bibliotheek</strong> en activeer de <strong>Google Calendar API</strong>.
+          Klik naast je agenda op <strong>⋮ → Instellingen en delen</strong>.
         </div>
       </div>
       <div class="setup-step">
         <div class="setup-step-num">3</div>
         <div class="setup-step-text">
-          Ga naar <strong>APIs &amp; services → Inloggegevens → Inloggegevens maken → OAuth 2.0-client-ID</strong>.<br>
-          Kies als type: <strong>Webtoepassing</strong>.
+          Scroll naar <strong>"Agenda integreren"</strong> en kopieer de
+          <strong>"Privéadres in iCal-indeling"</strong>.<br>
+          <span class="setup-code">https://calendar.google.com/calendar/ical/…/private-…/basic.ics</span>
         </div>
       </div>
       <div class="setup-step">
         <div class="setup-step-num">4</div>
         <div class="setup-step-text">
-          Voeg toe bij <strong>Geautoriseerde JavaScript-herkomsten</strong>:<br>
-          <span class="setup-code">https://remcodik.github.io</span>
-        </div>
-      </div>
-      <div class="setup-step">
-        <div class="setup-step-num">5</div>
-        <div class="setup-step-text">
-          Kopieer je <strong>Client ID</strong> en plak hem hieronder.
+          Plak de link hieronder en tik <strong>Verbinden</strong>.
         </div>
       </div>
 
-      <div style="margin-top:8px;">
-        <div class="sheet-label">Client ID</div>
-        <input id="setup-client-id-input" class="setup-client-id-input"
-          type="text" placeholder="123456789-abc….apps.googleusercontent.com"
+      <div style="margin-top:12px;">
+        <div class="sheet-label">ICS-link van jouw Google Agenda</div>
+        <input id="setup-ics-input" class="setup-ics-input"
+          type="url" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics"
           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
         <div class="setup-note">
-          Wordt alleen lokaal opgeslagen op dit apparaat — nooit gedeeld.
+          🔒 De link wordt alleen lokaal op dit apparaat opgeslagen. Je gegevens verlaten je browser niet — de app leest de agenda rechtstreeks.
         </div>
       </div>
 
       <button class="btn-sheet-save" id="btn-setup-save" style="margin-top:16px">
-        Opslaan &amp; verbinden →
+        Verbinden →
       </button>
-      <button class="btn-setup-disconnect" id="btn-setup-disconnect">
-        Ontkoppelen &amp; Client ID verwijderen
+      <button class="btn-danger" id="btn-setup-disconnect">
+        Koppeling verwijderen
       </button>
     </div>
   </div>
@@ -627,7 +437,7 @@
     <div class="sheet-handle"></div>
     <div class="sheet-title-row">
       <span style="font-size:20px">🔒</span>
-      <span style="flex:1; font-size:15px; font-weight:800; color:#1a1a2e">Verborgen items</span>
+      <span style="flex:1;font-size:15px;font-weight:800;color:#1a1a2e">Verborgen items</span>
       <button class="sheet-close" id="hidden-panel-close">×</button>
     </div>
     <div id="hidden-list"></div>
@@ -641,34 +451,34 @@
     <div class="sheet-handle"></div>
     <div class="sheet-title-row">
       <span style="font-size:20px">📋</span>
-      <span style="flex:1; font-size:15px; font-weight:800; color:#1a1a2e">Versiegeschiedenis</span>
+      <span style="flex:1;font-size:15px;font-weight:800;color:#1a1a2e">Versiegeschiedenis</span>
       <button class="sheet-close" id="version-panel-close">×</button>
     </div>
     <div id="version-list">
       <div class="version-entry">
+        <span class="version-tag">v0.5.0</span>
+        <span class="version-date">2026-03-04</span>
+        <span class="version-desc">Google Agenda koppeling via ICS-link — echte meetings &amp; taken, geen Google Cloud setup nodig.</span>
+      </div>
+      <div class="version-entry">
         <span class="version-tag">v0.4.0</span>
         <span class="version-date">2026-03-03</span>
-        <span class="version-desc">Google Agenda live-koppeling — echte meetings &amp; taken in het overzicht. Weeknavigatie werkt dynamisch.</span>
+        <span class="version-desc">Dynamische weeknavigatie; Google Calendar OAuth (vervangen door ICS-aanpak in v0.5).</span>
       </div>
       <div class="version-entry">
         <span class="version-tag">v0.3.0</span>
         <span class="version-date">2026-03-01</span>
-        <span class="version-desc">Verborgen items panel, versielogboek, Google Calendar-link voor terugkerende events</span>
+        <span class="version-desc">Verborgen items panel, versielogboek.</span>
       </div>
       <div class="version-entry">
         <span class="version-tag">v0.2.0</span>
         <span class="version-date">2026-02-28</span>
-        <span class="version-desc">Privé/verbergen-schakelaar, terugkerende events, zichtbaar-maak-flow</span>
-      </div>
-      <div class="version-entry">
-        <span class="version-tag">v0.1.2</span>
-        <span class="version-date">2026-02-27</span>
-        <span class="version-desc">Bewerkscherm — klant &amp; icoon instellen per event</span>
+        <span class="version-desc">Privé/verbergen-schakelaar.</span>
       </div>
       <div class="version-entry">
         <span class="version-tag">v0.1.0</span>
         <span class="version-date">2026-02-25</span>
-        <span class="version-desc">Eerste weekoverzicht — icoon + kleur raster</span>
+        <span class="version-desc">Eerste weekoverzicht — icoon + kleur raster.</span>
       </div>
     </div>
   </div>
@@ -678,19 +488,17 @@
 (function () {
   'use strict';
 
-  /* ═══════════════════════════════════════════════════
+  /* ═══════════════════════════════════════
      STATE
-  ═══════════════════════════════════════════════════ */
-  let gcalClientId = localStorage.getItem('gcal_client_id') || '';
-  let calToken     = null;
-  let calEvents    = [];
-  let isConnected  = false;
-  let weekOffset   = 0;
-  let tokenClient  = null;
+  ═══════════════════════════════════════ */
+  let icsUrl      = localStorage.getItem('gcal_ics_url') || '';
+  let calEvents   = [];
+  let isConnected = false;
+  let weekOffset  = 0;
 
-  /* ═══════════════════════════════════════════════════
+  /* ═══════════════════════════════════════
      WEEK HELPERS
-  ═══════════════════════════════════════════════════ */
+  ═══════════════════════════════════════ */
   function getMondayOfWeek(offset) {
     const today = new Date();
     const dow   = today.getDay();
@@ -704,9 +512,7 @@
   function getWeekDates(offset) {
     const mon = getMondayOfWeek(offset);
     return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(mon);
-      d.setDate(mon.getDate() + i);
-      return d;
+      const d = new Date(mon); d.setDate(mon.getDate() + i); return d;
     });
   }
 
@@ -733,9 +539,9 @@
     return `${MONTHS[mon.getMonth()]} ${mon.getDate()} – ${MONTHS[sun.getMonth()]} ${sun.getDate()}, ${sun.getFullYear()}`;
   }
 
-  /* ═══════════════════════════════════════════════════
-     DEMO DATA (shown when no calendar is connected)
-  ═══════════════════════════════════════════════════ */
+  /* ═══════════════════════════════════════
+     DEMO DATA
+  ═══════════════════════════════════════ */
   function getDemoEvents(dates) {
     return [
       { date:dates[0], type:'meeting', icon:'🤝', title:'Sprint planning',       colorCls:'c-purple' },
@@ -750,24 +556,209 @@
       { date:dates[3], type:'task',    icon:'🗂️', title:'Organise slides',         colorCls:'c-orange' },
       { date:dates[4], type:'meeting', icon:'🖥️', title:'Retro & planning',       colorCls:'c-purple' },
       { date:dates[4], type:'task',    icon:'✅', title:'EOW status update',      colorCls:'c-pink'   },
-      { date:dates[4], type:'task',    icon:'📦', title:'Archive old tickets',    colorCls:'c-slate'  },
       { date:dates[6], type:'task',    icon:'🎯', title:'Plan next week',         colorCls:'c-red'    },
     ];
   }
 
-  /* ═══════════════════════════════════════════════════
+  /* ═══════════════════════════════════════
+     ICS PARSER
+  ═══════════════════════════════════════ */
+  /**
+   * Fetch the ICS file via a CORS proxy and return parsed events
+   * for the given week dates.
+   */
+  async function fetchAndParseIcs(weekDates) {
+    // Use corsproxy.io to bypass CORS restriction on Google's ICS endpoint
+    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(icsUrl);
+
+    const resp = await fetch(proxyUrl);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text = await resp.text();
+
+    return parseIcsForWeek(text, weekDates);
+  }
+
+  /**
+   * Parse ICS text and return events that fall within the given week.
+   * Handles:
+   *  - DTSTART with VALUE=DATE  (all-day)
+   *  - DTSTART with TZID param  (local time)
+   *  - DTSTART ending in Z      (UTC)
+   *  - Basic RRULE FREQ=WEEKLY  (weekly recurring)
+   */
+  function parseIcsForWeek(icsText, weekDates) {
+    // Unfold lines (RFC 5545: CRLF + whitespace = continuation)
+    const text  = icsText.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
+    const lines = text.split(/\r\n|\n|\r/);
+
+    const weekStart = weekDates[0];
+    const weekEnd   = new Date(weekDates[6]); weekEnd.setHours(23, 59, 59, 999);
+
+    const events = [];
+    let ev = null;
+
+    for (const raw of lines) {
+      if (raw === 'BEGIN:VEVENT') {
+        ev = {};
+        continue;
+      }
+      if (raw === 'END:VEVENT' && ev) {
+        const parsed = interpretEvent(ev, weekStart, weekEnd);
+        if (parsed) events.push(parsed);
+        ev = null;
+        continue;
+      }
+      if (!ev) continue;
+
+      // Split key from value (first colon)
+      const ci  = raw.indexOf(':');
+      if (ci === -1) continue;
+      const key = raw.substring(0, ci);
+      const val = raw.substring(ci + 1);
+
+      // Base key without parameters (e.g. DTSTART;TZID=.. → DTSTART)
+      const baseKey = key.split(';')[0].toUpperCase();
+      const params  = key.split(';').slice(1).join(';').toUpperCase();
+
+      ev[baseKey]        = val;
+      ev[baseKey+'_RAW'] = key + ':' + val; // keep full line for DTSTART parsing
+      ev[baseKey+'_PARAMS'] = params;
+    }
+
+    return events;
+  }
+
+  function interpretEvent(ev, weekStart, weekEnd) {
+    const summary = unescapeIcs(ev['SUMMARY'] || '(geen titel)');
+    if (!ev['DTSTART']) return null;
+
+    const { date: startDate, allDay } = parseIcsDate(ev['DTSTART'], ev['DTSTART_PARAMS']);
+    if (!startDate || isNaN(startDate.getTime())) return null;
+
+    // Check if this event (or a recurring instance) falls in the week
+    const rrule = ev['RRULE'] || '';
+    let eventDate = null;
+
+    if (startDate >= weekStart && startDate <= weekEnd) {
+      eventDate = startDate;
+    } else if (rrule) {
+      // Handle simple weekly recurrence
+      eventDate = getRecurringInstanceInWeek(startDate, rrule, weekStart, weekEnd);
+    }
+
+    if (!eventDate) return null;
+
+    const type = allDay ? 'task' : 'meeting';
+    return {
+      date:     eventDate,
+      type:     type,
+      icon:     type === 'meeting' ? '🤝' : '📋',
+      title:    summary,
+      colorCls: 'c-blue',
+    };
+  }
+
+  function parseIcsDate(value, params) {
+    params = params || '';
+    const allDay = params.includes('VALUE=DATE') || (value.length === 8 && /^\d{8}$/.test(value));
+
+    if (allDay) {
+      const y = parseInt(value.substr(0, 4), 10);
+      const m = parseInt(value.substr(4, 2), 10) - 1;
+      const d = parseInt(value.substr(6, 2), 10);
+      return { date: new Date(y, m, d, 0, 0, 0), allDay: true };
+    }
+
+    // Strip TZID prefix if present in value (shouldn't happen but guard)
+    const clean = value.replace(/^[^:]*:/, '');
+    const isUTC = clean.endsWith('Z');
+    const s     = clean.replace('Z', '');
+
+    const y  = parseInt(s.substr(0, 4), 10);
+    const mo = parseInt(s.substr(4, 2), 10) - 1;
+    const d  = parseInt(s.substr(6, 2), 10);
+    const h  = parseInt(s.substr(9, 2), 10)  || 0;
+    const mi = parseInt(s.substr(11, 2), 10) || 0;
+    const se = parseInt(s.substr(13, 2), 10) || 0;
+
+    const date = isUTC
+      ? new Date(Date.UTC(y, mo, d, h, mi, se))
+      : new Date(y, mo, d, h, mi, se);
+
+    return { date, allDay: false };
+  }
+
+  function getRecurringInstanceInWeek(startDate, rrule, weekStart, weekEnd) {
+    const freqMatch = rrule.match(/FREQ=(\w+)/);
+    if (!freqMatch) return null;
+    const freq = freqMatch[1];
+
+    if (freq === 'WEEKLY') {
+      // Find the instance of this weekday within the target week
+      const targetDay = startDate.getDay(); // 0=Sun..6=Sat
+      for (const d of [0,1,2,3,4,5,6]) {
+        const candidate = new Date(weekStart);
+        candidate.setDate(weekStart.getDate() + d);
+        if (candidate.getDay() === targetDay && candidate >= weekStart && candidate <= weekEnd) {
+          // Check UNTIL / COUNT (simple: if UNTIL is before candidate, skip)
+          const untilMatch = rrule.match(/UNTIL=([^;]+)/);
+          if (untilMatch) {
+            const { date: until } = parseIcsDate(untilMatch[1], '');
+            if (candidate > until) return null;
+          }
+          // Must not be before the original start
+          if (candidate >= new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()))
+            return candidate;
+        }
+      }
+    } else if (freq === 'DAILY') {
+      // Return Monday of the week (or startDate if it's in the week)
+      const candidate = new Date(weekStart);
+      if (candidate >= startDate) return candidate;
+    }
+
+    return null;
+  }
+
+  function unescapeIcs(s) {
+    return s.replace(/\\n/g, '\n').replace(/\\,/g, ',').replace(/\\;/g, ';').replace(/\\\\/g, '\\');
+  }
+
+  /* ═══════════════════════════════════════
+     LOAD CALENDAR
+  ═══════════════════════════════════════ */
+  async function loadCalendar(showLoading) {
+    if (!icsUrl) return;
+
+    const btn = document.getElementById('btn-cal-connect');
+    if (showLoading) {
+      btn.textContent = '⟳ Laden…';
+      btn.className   = 'btn-cal-connect loading';
+    }
+
+    try {
+      const dates = getWeekDates(weekOffset);
+      calEvents   = await fetchAndParseIcs(dates);
+      isConnected = true;
+      renderWeek();
+      setConnectBtn(true);
+    } catch (err) {
+      console.error('Agenda laad fout:', err);
+      setConnectBtn(isConnected); // restore previous state
+      showSetupError('Kon agenda niet laden. Controleer de ICS-link en probeer opnieuw.\n(' + err.message + ')');
+      openSheet(document.getElementById('setup-sheet'));
+    }
+  }
+
+  /* ═══════════════════════════════════════
      RENDER WEEK
-  ═══════════════════════════════════════════════════ */
-  // [dayIndex, grid-column, grid-row]
-  const LAYOUT = [
-    [0,'1/3',1],[1,'3/5',1],[2,'5/7',1],
-    [3,'1/3',2],[4,'3/5',2],[5,'5/6',2],[6,'6/7',2],
-  ];
+  ═══════════════════════════════════════ */
+  const LAYOUT   = [[0,'1/3',1],[1,'3/5',1],[2,'5/7',1],[3,'1/3',2],[4,'3/5',2],[5,'5/6',2],[6,'6/7',2]];
   const DAY_NAMES = ['Zo','Ma','Di','Wo','Do','Vr','Za'];
 
   function renderWeek() {
-    const dates  = getWeekDates(weekOffset);
-    const today  = new Date(); today.setHours(0,0,0,0);
+    const dates = getWeekDates(weekOffset);
+    const today = new Date(); today.setHours(0,0,0,0);
 
     document.querySelector('.week-label').textContent =
       `Week ${getWeekNumber(dates[0])} · ${formatRange(dates[0], dates[6])}`;
@@ -789,7 +780,7 @@
 
   function buildDayCol(date, events, isToday, isWeekend, gridCol, gridRow) {
     const col = document.createElement('div');
-    col.className = 'day-col' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
+    col.className    = 'day-col' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
     col.style.gridColumn = gridCol;
     col.style.gridRow    = gridRow;
     col.dataset.date     = isoDate(date);
@@ -810,234 +801,110 @@
 
     meetings.forEach(e => body.appendChild(buildItem(e)));
     if (meetings.length && tasks.length) {
-      const div = document.createElement('div');
-      div.className = 'day-divider';
-      body.appendChild(div);
+      const div = document.createElement('div'); div.className = 'day-divider'; body.appendChild(div);
     }
     tasks.forEach(e => body.appendChild(buildItem(e)));
 
-    if (isConnected && events.length === 0 && !isWeekend) {
-      const em = document.createElement('div');
-      em.className = 'day-empty';
-      em.textContent = 'Vrij';
-      body.appendChild(em);
+    if (isConnected && !events.length && !isWeekend) {
+      const em = document.createElement('div'); em.className = 'day-empty'; em.textContent = 'Vrij'; body.appendChild(em);
     }
 
     return col;
   }
 
   function escHtml(s) {
-    return String(s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   function buildItem(ev) {
     const el = document.createElement('div');
     el.className = `item ${ev.type === 'meeting' ? 'item-meeting' : 'item-task'} ${ev.colorCls}`;
     if (ev.upcoming) el.classList.add('upcoming');
-    el.innerHTML = `
-      <span class="item-icon">${ev.icon}</span>
-      <span class="item-text">${escHtml(ev.title)}</span>
-    `;
+    el.innerHTML = `<span class="item-icon">${ev.icon}</span><span class="item-text">${escHtml(ev.title)}</span>`;
     return el;
   }
 
-  /* ═══════════════════════════════════════════════════
+  /* ═══════════════════════════════════════
      WEEK NAVIGATION
-  ═══════════════════════════════════════════════════ */
-  document.getElementById('btn-prev-week').addEventListener('click', () => {
-    weekOffset--;
-    onWeekChange();
-  });
-  document.getElementById('btn-next-week').addEventListener('click', () => {
-    weekOffset++;
-    onWeekChange();
-  });
+  ═══════════════════════════════════════ */
+  document.getElementById('btn-prev-week').addEventListener('click', () => { weekOffset--; onWeekChange(); });
+  document.getElementById('btn-next-week').addEventListener('click', () => { weekOffset++; onWeekChange(); });
 
-  async function onWeekChange() {
-    if (isConnected && calToken) {
-      await fetchCalendarEvents();
-    } else {
-      renderWeek();
-    }
+  function onWeekChange() {
+    if (isConnected && icsUrl) loadCalendar(true);
+    else renderWeek();
   }
 
-  /* ═══════════════════════════════════════════════════
-     GOOGLE CALENDAR – OAuth (Google Identity Services)
-  ═══════════════════════════════════════════════════ */
-  const GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.events.readonly';
-
-  function loadGisScript() {
-    if (document.getElementById('gis-script')) return;
-    const s   = document.createElement('script');
-    s.id      = 'gis-script';
-    s.src     = 'https://accounts.google.com/gsi/client';
-    s.onload  = initGoogleAuth;
-    s.onerror = () => console.warn('Google Identity Services kon niet laden');
-    document.head.appendChild(s);
-  }
-
-  function initGoogleAuth() {
-    if (!window.google || !gcalClientId) return;
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: gcalClientId,
-      scope:     GCAL_SCOPES,
-      callback:  onTokenReceived,
-    });
-  }
-
-  async function onTokenReceived(resp) {
-    if (resp.error) {
-      alert('Google Agenda verbinding mislukt: ' + resp.error);
-      setConnectBtn(false);
-      return;
-    }
-    calToken = resp.access_token;
-    await fetchCalendarEvents();
-  }
-
-  async function fetchCalendarEvents() {
-    if (!calToken) return;
-
-    const dates = getWeekDates(weekOffset);
-    const tMin  = dates[0].toISOString();
-    const tEnd  = new Date(dates[6]);
-    tEnd.setDate(tEnd.getDate() + 1);
-    const tMax  = tEnd.toISOString();
-
-    try {
-      const resp = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/primary/events` +
-        `?timeMin=${encodeURIComponent(tMin)}&timeMax=${encodeURIComponent(tMax)}` +
-        `&singleEvents=true&orderBy=startTime&maxResults=200`,
-        { headers: { Authorization: `Bearer ${calToken}` } }
-      );
-
-      if (resp.status === 401) {
-        // Token verlopen – opnieuw verbinden
-        calToken    = null;
-        isConnected = false;
-        setConnectBtn(false);
-        renderWeek();
-        return;
-      }
-
-      const data  = await resp.json();
-      calEvents   = (data.items || []).map(mapGcalEvent);
-      isConnected = true;
-      setConnectBtn(true);
-      renderWeek();
-
-    } catch (err) {
-      console.error(err);
-      alert('Kon agenda niet laden. Controleer je verbinding en probeer opnieuw.');
-    }
-  }
-
-  /* ─ Google Calendar event → interne format ─ */
-  const GCAL_COLOR_MAP = {
-    '1':'c-blue', '2':'c-teal',   '3':'c-purple', '4':'c-pink',
-    '5':'c-orange','6':'c-orange','7':'c-teal',   '8':'c-slate',
-    '9':'c-blue', '10':'c-green','11':'c-red',
-  };
-
-  function mapGcalEvent(ev) {
-    const isAllDay = !ev.start.dateTime;
-    const date     = new Date(ev.start.dateTime || ev.start.date);
-    const type     = isAllDay ? 'task' : 'meeting';
-    return {
-      id:       ev.id,
-      date:     date,
-      type:     type,
-      icon:     type === 'meeting' ? '🤝' : '📋',
-      title:    ev.summary || '(geen titel)',
-      colorCls: GCAL_COLOR_MAP[ev.colorId] || 'c-blue',
-    };
-  }
-
-  /* ─ Connect button state ─ */
+  /* ═══════════════════════════════════════
+     CONNECT BUTTON
+  ═══════════════════════════════════════ */
   function setConnectBtn(connected) {
     const btn = document.getElementById('btn-cal-connect');
-    if (!btn) return;
     if (connected) {
       btn.textContent = '✓ Agenda';
-      btn.classList.add('connected');
+      btn.className   = 'btn-cal-connect connected';
     } else {
       btn.textContent = '🗓️ Koppel';
-      btn.classList.remove('connected');
+      btn.className   = 'btn-cal-connect';
     }
   }
 
-  /* ─ Connect button click ─ */
   document.getElementById('btn-cal-connect').addEventListener('click', () => {
-    if (isConnected) {
-      openSetupSheet(); // re-open setup for manage/disconnect
-    } else if (!gcalClientId) {
-      openSetupSheet(); // no client ID yet → show setup guide
-    } else {
-      startOAuth();
-    }
+    clearSetupError();
+    openSheet(document.getElementById('setup-sheet'));
   });
 
-  function startOAuth() {
-    if (!tokenClient) {
-      loadGisScript();
-      // Wait for script, then try
-      const t = setInterval(() => {
-        if (tokenClient) { clearInterval(t); tokenClient.requestAccessToken(); }
-      }, 200);
-      setTimeout(() => clearInterval(t), 5000);
-    } else {
-      tokenClient.requestAccessToken();
-    }
-  }
-
-  /* ═══════════════════════════════════════════════════
+  /* ═══════════════════════════════════════
      SETUP SHEET
-  ═══════════════════════════════════════════════════ */
+  ═══════════════════════════════════════ */
   const setupSheet = document.getElementById('setup-sheet');
-
-  function openSetupSheet() {
-    document.getElementById('setup-client-id-input').value = gcalClientId;
-    openSheet(setupSheet);
-  }
 
   document.getElementById('setup-close').addEventListener('click',   () => closeSheet(setupSheet));
   document.getElementById('setup-backdrop').addEventListener('click', () => closeSheet(setupSheet));
 
-  document.getElementById('btn-setup-save').addEventListener('click', () => {
-    const val = document.getElementById('setup-client-id-input').value.trim();
-    if (!val) { alert('Voer een geldig Client ID in.'); return; }
+  // Pre-fill saved URL when opening
+  setupSheet.addEventListener('transitionend', () => {
+    if (setupSheet.classList.contains('open'))
+      document.getElementById('setup-ics-input').value = icsUrl;
+  });
 
-    gcalClientId = val;
-    localStorage.setItem('gcal_client_id', val);
-    tokenClient = null; // force re-init with new client ID
+  document.getElementById('btn-setup-save').addEventListener('click', async () => {
+    const val = document.getElementById('setup-ics-input').value.trim();
+    if (!val || !val.includes('calendar.google.com')) {
+      showSetupError('Plak een geldige Google Agenda ICS-link (begint met https://calendar.google.com/…).');
+      return;
+    }
+    clearSetupError();
+    icsUrl = val;
+    localStorage.setItem('gcal_ics_url', val);
     closeSheet(setupSheet);
-    loadGisScript();
-
-    // Wait for init then kick off OAuth
-    const t = setInterval(() => {
-      if (tokenClient) { clearInterval(t); tokenClient.requestAccessToken(); }
-    }, 200);
-    setTimeout(() => clearInterval(t), 5000);
+    await loadCalendar(true);
   });
 
   document.getElementById('btn-setup-disconnect').addEventListener('click', () => {
-    if (!confirm('Wil je de Google Agenda-koppeling verwijderen?')) return;
-    localStorage.removeItem('gcal_client_id');
-    gcalClientId = '';
-    calToken     = null;
-    calEvents    = [];
-    isConnected  = false;
-    tokenClient  = null;
+    if (!confirm('Agenda-koppeling verwijderen?')) return;
+    localStorage.removeItem('gcal_ics_url');
+    icsUrl      = '';
+    calEvents   = [];
+    isConnected = false;
     setConnectBtn(false);
     renderWeek();
     closeSheet(setupSheet);
   });
 
-  /* ═══════════════════════════════════════════════════
+  function showSetupError(msg) {
+    const el = document.getElementById('setup-error');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  function clearSetupError() {
+    document.getElementById('setup-error').classList.remove('show');
+  }
+
+  /* ═══════════════════════════════════════
      TOOLTIP
-  ═══════════════════════════════════════════════════ */
+  ═══════════════════════════════════════ */
   const tooltip  = document.getElementById('item-tooltip');
   const tipLabel = document.getElementById('tooltip-label');
   const tipEdit  = document.getElementById('tooltip-edit');
@@ -1046,7 +913,7 @@
 
   function positionTooltip() {
     if (!activeItem) return;
-    const r  = activeItem.getBoundingClientRect();
+    const r = activeItem.getBoundingClientRect();
     const vw = window.innerWidth;
     tooltip.style.left = '0'; tooltip.style.top = '0'; tooltip.style.opacity = '0';
     const tw   = tooltip.offsetWidth;
@@ -1074,9 +941,9 @@
 
   function hideTooltip() { tooltip.classList.remove('visible'); }
 
-  /* ═══════════════════════════════════════════════════
+  /* ═══════════════════════════════════════
      EDIT SHEET
-  ═══════════════════════════════════════════════════ */
+  ═══════════════════════════════════════ */
   const editSheet    = document.getElementById('edit-sheet');
   const editBackdrop = document.getElementById('edit-backdrop');
   const titleInput   = document.getElementById('sheet-title-input');
@@ -1090,14 +957,9 @@
     iconDisplay.textContent = currentIcon;
 
     const colorCls = [...item.classList].find(c => c.startsWith('c-')) || 'c-slate';
-    document.querySelectorAll('.cust-chip').forEach(c => {
-      c.classList.toggle('selected', c.dataset.colorCls === colorCls);
-    });
-    const isMeeting = item.classList.contains('item-meeting');
-    document.getElementById(isMeeting ? 'sh-meeting' : 'sh-task').checked = true;
-    document.querySelectorAll('.sh-icon').forEach(c => {
-      c.classList.toggle('selected', c.textContent.trim() === currentIcon);
-    });
+    document.querySelectorAll('.cust-chip').forEach(c => c.classList.toggle('selected', c.dataset.colorCls === colorCls));
+    document.getElementById(item.classList.contains('item-meeting') ? 'sh-meeting' : 'sh-task').checked = true;
+    document.querySelectorAll('.sh-icon').forEach(c => c.classList.toggle('selected', c.textContent.trim() === currentIcon));
     document.getElementById('sh-private').checked = item.classList.contains('item-hidden');
     openSheet(editSheet);
   }
@@ -1106,16 +968,14 @@
   editBackdrop.addEventListener('click', () => closeSheet(editSheet));
 
   tipEdit.addEventListener('click', e => {
-    e.stopPropagation();
-    hideTooltip();
+    e.stopPropagation(); hideTooltip();
     if (activeItem) openEditSheet(activeItem);
   });
 
   document.querySelectorAll('.sh-icon').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.sh-icon').forEach(c => c.classList.remove('selected'));
-      chip.classList.add('selected');
-      iconDisplay.textContent = chip.textContent;
+      chip.classList.add('selected'); iconDisplay.textContent = chip.textContent;
     });
   });
 
@@ -1130,13 +990,9 @@
     if (!activeItem) { closeSheet(editSheet); return; }
     const textEl = activeItem.querySelector('.item-text');
     if (textEl) textEl.textContent = titleInput.value;
-
     const selIcon = document.querySelector('.sh-icon.selected');
     const iconEl  = activeItem.querySelector('.item-icon');
-    if (selIcon && iconEl) {
-      iconEl.textContent = selIcon.textContent;
-      iconDisplay.textContent = selIcon.textContent;
-    }
+    if (selIcon && iconEl) { iconEl.textContent = selIcon.textContent; iconDisplay.textContent = selIcon.textContent; }
     const selCust = document.querySelector('.cust-chip.selected');
     if (selCust) {
       activeItem.classList.forEach(c => { if (c.startsWith('c-')) activeItem.classList.remove(c); });
@@ -1146,14 +1002,13 @@
     activeItem.classList.toggle('item-meeting', type === 'meeting');
     activeItem.classList.toggle('item-task',    type === 'task');
     activeItem.classList.toggle('item-hidden', document.getElementById('sh-private').checked);
-
     closeSheet(editSheet);
     updateHiddenBadge();
   });
 
-  /* ═══════════════════════════════════════════════════
+  /* ═══════════════════════════════════════
      HIDDEN ITEMS
-  ═══════════════════════════════════════════════════ */
+  ═══════════════════════════════════════ */
   function updateHiddenBadge() {
     const count = document.querySelectorAll('.item.item-hidden').length;
     document.getElementById('hidden-count').textContent = count;
@@ -1173,27 +1028,16 @@
       list.innerHTML = '<div class="hidden-empty">Geen verborgen items deze week</div>';
     } else {
       list.innerHTML = '';
-      const bgMap = {
-        'c-purple':'#ede0ff','c-blue':'#dbeafe','c-green':'#dcfce7',
-        'c-orange':'#ffedd5','c-pink':'#fce7f3','c-teal':'#ccfbf1',
-        'c-red':'#fee2e2','c-slate':'#f1f5f9',
-      };
+      const bgMap = {'c-purple':'#ede0ff','c-blue':'#dbeafe','c-green':'#dcfce7','c-orange':'#ffedd5','c-pink':'#fce7f3','c-teal':'#ccfbf1','c-red':'#fee2e2','c-slate':'#f1f5f9'};
       items.forEach(item => {
         const icon  = item.querySelector('.item-icon')?.textContent?.trim() || '🔒';
         const title = item.querySelector('.item-text')?.textContent?.trim()  || '(untitled)';
         const bgCls = [...item.classList].find(c => c.startsWith('c-')) || 'c-slate';
-        const bg    = bgMap[bgCls] || '#f1f5f9';
         const row   = document.createElement('div');
         row.className = 'hidden-item-row';
-        row.innerHTML = `
-          <div class="hidden-item-swatch" style="background:${bg}">${icon}</div>
-          <span class="hidden-item-title">${escHtml(title)}</span>
-          <button class="btn-unhide">Toon</button>
-        `;
+        row.innerHTML = `<div class="hidden-item-swatch" style="background:${bgMap[bgCls]||'#f1f5f9'}">${icon}</div><span class="hidden-item-title">${escHtml(title)}</span><button class="btn-unhide">Toon</button>`;
         row.querySelector('.btn-unhide').addEventListener('click', () => {
-          item.classList.remove('item-hidden');
-          row.remove();
-          updateHiddenBadge();
+          item.classList.remove('item-hidden'); row.remove(); updateHiddenBadge();
           if (!document.querySelectorAll('.item.item-hidden').length)
             list.innerHTML = '<div class="hidden-empty">Geen verborgen items deze week</div>';
         });
@@ -1203,25 +1047,24 @@
     openSheet(hiddenPanel);
   }
 
-  /* ═══════════════════════════════════════════════════
+  /* ═══════════════════════════════════════
      VERSION PANEL
-  ═══════════════════════════════════════════════════ */
+  ═══════════════════════════════════════ */
   const versionPanel = document.getElementById('version-panel');
-  document.getElementById('version-badge').addEventListener('click',        () => openSheet(versionPanel));
-  document.getElementById('version-panel-close').addEventListener('click',  () => closeSheet(versionPanel));
+  document.getElementById('version-badge').addEventListener('click',         () => openSheet(versionPanel));
+  document.getElementById('version-panel-close').addEventListener('click',   () => closeSheet(versionPanel));
   document.getElementById('version-panel-backdrop').addEventListener('click',() => closeSheet(versionPanel));
 
-  /* ═══════════════════════════════════════════════════
+  /* ═══════════════════════════════════════
      SHEET HELPERS
-  ═══════════════════════════════════════════════════ */
+  ═══════════════════════════════════════ */
   function openSheet(el)  { el.classList.add('open'); }
   function closeSheet(el) { el.classList.remove('open'); }
 
-  /* ═══════════════════════════════════════════════════
-     TAP / LONG-PRESS (event delegation)
-  ═══════════════════════════════════════════════════ */
-  let lpTimer = null;
-  let didLongPress = false;
+  /* ═══════════════════════════════════════
+     TAP / LONG-PRESS
+  ═══════════════════════════════════════ */
+  let lpTimer = null, didLongPress = false;
 
   document.addEventListener('touchstart', e => {
     const item = e.target.closest('.item');
@@ -1246,15 +1089,13 @@
     hideTooltip();
   });
 
-  /* ═══════════════════════════════════════════════════
+  /* ═══════════════════════════════════════
      INIT
-  ═══════════════════════════════════════════════════ */
+  ═══════════════════════════════════════ */
   renderWeek();
 
-  // If a Client ID is already saved, pre-load the GIS script
-  if (gcalClientId) {
-    loadGisScript();
-  }
+  // Auto-load calendar if URL was saved previously
+  if (icsUrl) loadCalendar(true);
 
 })();
 </script>
