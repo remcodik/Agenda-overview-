@@ -1,238 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Customize – Weekly Agenda</title>
+  <title>Customize – My Week</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f0f2f5;
-      color: #1a1a2e;
-      min-height: 100vh;
-    }
-
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a2e; min-height: 100vh; }
     .app { display: flex; flex-direction: column; min-height: 100vh; }
 
-    /* ── Top bar (same as main) ── */
-    .topbar {
-      display: flex; align-items: center;
-      padding: 12px 24px; background: #1a1a2e; color: #fff;
-      flex-shrink: 0; gap: 16px;
-    }
-    .btn-back {
-      background: rgba(255,255,255,.12); border: none; color: #fff;
-      width: 34px; height: 34px; border-radius: 8px; font-size: 18px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .15s;
-    }
+    /* ── Topbar ── */
+    .topbar { display: flex; align-items: center; padding: 12px 20px; background: #1a1a2e; color: #fff; gap: 14px; }
+    .btn-back { background: rgba(255,255,255,.12); border: none; color: #fff; width: 34px; height: 34px; border-radius: 8px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .btn-back:hover { background: rgba(255,255,255,.22); }
-    .topbar-title { font-size: 18px; font-weight: 700; flex: 1; }
-    .btn-save {
-      background: #4f8ef7; border: none; color: #fff;
-      padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;
-      transition: filter .15s;
-    }
+    .topbar-title { font-size: 17px; font-weight: 700; flex: 1; }
+    .btn-save { background: #4f8ef7; border: none; color: #fff; padding: 8px 22px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
     .btn-save:hover { filter: brightness(1.1); }
+    .btn-save.saved { background: #16a34a; }
 
-    /* ── Scrollable content ── */
-    .content {
-      flex: 1; overflow-y: auto;
-      padding: 24px 20px 48px;
-      display: flex; flex-direction: column; gap: 24px;
-      max-width: 620px; margin: 0 auto; width: 100%;
-    }
+    /* ── Content ── */
+    .content { flex: 1; overflow-y: auto; padding: 20px 16px 56px; display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; width: 100%; }
 
     /* ── Section card ── */
-    .section {
-      background: #fff; border-radius: 16px;
-      box-shadow: 0 1px 4px rgba(0,0,0,.07);
-      overflow: hidden;
-    }
-    .section-header {
-      padding: 14px 18px 12px;
-      border-bottom: 1px solid #f0f0f5;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .section-icon { font-size: 18px; line-height: 1; }
+    .section { background: #fff; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.07); overflow: hidden; }
+    .section-header { padding: 14px 18px 12px; border-bottom: 1px solid #f0f0f5; display: flex; align-items: center; gap: 10px; }
+    .section-icon { font-size: 18px; }
     .section-title { font-size: 14px; font-weight: 800; color: #1a1a2e; }
     .section-desc  { font-size: 11px; color: #999; margin-top: 1px; }
 
-    /* ── Customer rows ── */
-    .customer-list { display: flex; flex-direction: column; }
-    .customer-row {
-      display: flex; align-items: center; gap: 12px;
-      padding: 11px 18px; border-bottom: 1px solid #f6f6fb;
-    }
-    .customer-row:last-child { border-bottom: none; }
+    /* ── Rows ── */
+    .row-list { display: flex; flex-direction: column; }
+    .data-row { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #f6f6fb; }
+    .data-row:last-child { border-bottom: none; }
 
-    /* Color swatch / picker trigger */
-    .color-swatch {
-      width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
-      border: 2px solid rgba(0,0,0,.08); cursor: pointer;
-      position: relative; overflow: hidden;
-      transition: transform .1s;
-    }
-    .color-swatch:hover { transform: scale(1.12); }
-    .color-swatch input[type=color] {
-      position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px);
-      opacity: 0; cursor: pointer; border: none; padding: 0;
-    }
+    /* Color swatch */
+    .color-swatch { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; border: 2px solid rgba(0,0,0,.08); cursor: pointer; position: relative; overflow: hidden; transition: transform .1s; }
+    .color-swatch:hover { transform: scale(1.1); }
+    .color-swatch input[type=color] { position: absolute; inset: -4px; width: calc(100%+8px); height: calc(100%+8px); opacity: 0; cursor: pointer; border: none; }
 
-    .customer-name {
-      flex: 1; border: 1.5px solid #e8e8f0; border-radius: 8px;
-      padding: 6px 10px; font-size: 13px; font-weight: 600; color: #1a1a2e;
-      outline: none; transition: border-color .15s;
-    }
-    .customer-name:focus { border-color: #4f8ef7; }
+    .field-name { flex: 1; border: 1.5px solid #e8e8f0; border-radius: 8px; padding: 7px 10px; font-size: 13px; font-weight: 600; color: #1a1a2e; outline: none; transition: border-color .15s; min-width: 0; }
+    .field-name:focus { border-color: #4f8ef7; }
+    .field-url  { flex: 2; border: 1.5px solid #e8e8f0; border-radius: 8px; padding: 7px 10px; font-size: 11px; font-family: monospace; color: #1e40af; outline: none; transition: border-color .15s; min-width: 0; }
+    .field-url:focus { border-color: #4f8ef7; }
 
-    /* Icon picker */
-    .icon-pick {
-      width: 32px; height: 32px; border: 1.5px solid #e8e8f0; border-radius: 8px;
-      background: #fafafa; font-size: 16px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: border-color .15s, background .15s; flex-shrink: 0;
-    }
-    .icon-pick:hover { border-color: #4f8ef7; background: #eff6ff; }
-
-    .btn-remove {
-      width: 28px; height: 28px; border: none; background: none;
-      color: #e0b0b0; font-size: 18px; cursor: pointer; border-radius: 6px;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      transition: color .15s, background .15s;
-    }
+    .btn-remove { width: 28px; height: 28px; border: none; background: none; color: #e0b0b0; font-size: 18px; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: color .15s, background .15s; }
     .btn-remove:hover { color: #e53e3e; background: #fff5f5; }
 
-    /* Add row */
-    .add-row {
-      padding: 10px 18px;
-    }
-    .btn-add-customer {
-      width: 100%; border: 1.5px dashed #d8d8e8;
-      background: transparent; border-radius: 8px; padding: 8px;
-      font-size: 13px; color: #aaa; cursor: pointer;
-      font-weight: 700; transition: border-color .15s, color .15s;
-    }
-    .btn-add-customer:hover { border-color: #4f8ef7; color: #4f8ef7; }
+    .add-row { padding: 10px 16px; }
+    .btn-add-row { width: 100%; border: 1.5px dashed #d8d8e8; background: transparent; border-radius: 8px; padding: 8px; font-size: 13px; color: #aaa; cursor: pointer; font-weight: 700; transition: border-color .15s, color .15s; }
+    .btn-add-row:hover { border-color: #4f8ef7; color: #4f8ef7; }
 
-    /* ── Icon type mapping ── */
-    .type-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-    }
-    .type-col {
-      padding: 14px 18px;
-      border-right: 1px solid #f0f0f5;
-    }
-    .type-col:last-child { border-right: none; }
-    .type-label {
-      font-size: 10px; font-weight: 800; text-transform: uppercase;
-      letter-spacing: .6px; color: #aaa; margin-bottom: 10px;
-    }
-    .icon-chips {
-      display: flex; flex-wrap: wrap; gap: 6px;
-    }
-    .icon-chip {
-      width: 34px; height: 34px; border-radius: 9px;
-      border: 2px solid transparent; background: #f6f6fb;
-      font-size: 17px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: border-color .15s, background .15s;
-    }
-    .icon-chip.selected {
-      border-color: #4f8ef7; background: #eff6ff;
-    }
-    .icon-chip:hover { background: #eff6ff; }
+    /* Calendar rows have two lines */
+    .cal-fields { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 
-    /* ── Toggle rows ── */
-    .toggle-list { display: flex; flex-direction: column; }
-    .toggle-row {
-      display: flex; align-items: center; gap: 14px;
-      padding: 13px 18px; border-bottom: 1px solid #f6f6fb;
-    }
-    .toggle-row:last-child { border-bottom: none; }
-    .toggle-info { flex: 1; }
-    .toggle-label { font-size: 13px; font-weight: 700; color: #1a1a2e; }
-    .toggle-sub   { font-size: 11px; color: #aaa; margin-top: 1px; }
+    /* ── Custom icons grid ── */
+    .icons-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 16px; }
+    .icon-thumb { position: relative; width: 52px; height: 52px; border-radius: 10px; overflow: hidden; border: 2px solid #e8e8f0; }
+    .icon-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .icon-thumb-del { position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,.5); color: #fff; border: none; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+    .icon-upload-label { width: 52px; height: 52px; border-radius: 10px; border: 1.5px dashed #d8d8e8; display: flex; align-items: center; justify-content: center; flex-direction: column; cursor: pointer; font-size: 20px; transition: border-color .15s, background .15s; }
+    .icon-upload-label:hover { border-color: #4f8ef7; background: #eff6ff; }
+    .icon-upload-label input[type=file] { display: none; }
 
-    /* Toggle switch */
-    .switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute; inset: 0;
-      background: #dde0e8; border-radius: 22px; cursor: pointer;
-      transition: background .2s;
-    }
-    .slider::before {
-      content: ''; position: absolute;
-      width: 16px; height: 16px; border-radius: 50%;
-      background: #fff; left: 3px; top: 3px;
-      transition: transform .2s;
-      box-shadow: 0 1px 4px rgba(0,0,0,.2);
-    }
-    .switch input:checked + .slider { background: #4f8ef7; }
-    .switch input:checked + .slider::before { transform: translateX(18px); }
+    /* ── ICS help ── */
+    .ics-help { margin: 0 16px 14px; padding: 10px 14px; background: #f8faff; border: 1.5px solid #dbeafe; border-radius: 10px; font-size: 11px; color: #1e40af; line-height: 1.6; }
+    .ics-help a { color: #3b82f6; }
+    .ics-code { display: inline-block; background: #eff6ff; padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 10px; }
 
-    /* Week start segmented control */
-    .seg {
-      display: flex; border: 1.5px solid #e8e8f0; border-radius: 9px; overflow: hidden;
-    }
-    .seg label {
-      flex: 1; text-align: center; padding: 5px 10px;
-      font-size: 12px; font-weight: 700; cursor: pointer;
-      color: #aaa; transition: background .15s, color .15s;
-    }
-    .seg input[type=radio] { display: none; }
-    .seg input:checked + label { background: #4f8ef7; color: #fff; }
-
-    /* ── Google Calendar section ── */
-    .gcal-inner { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
-    .gcal-info-row {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 10px 12px; background: #f0fdf4;
-      border: 1.5px solid #bbf7d0; border-radius: 10px;
-    }
-    .gcal-info-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-    .gcal-info-text { font-size: 12px; color: #166534; line-height: 1.5; }
-    .gcal-status-row {
-      display: flex; align-items: center; gap: 10px; padding: 2px 0;
-    }
-    .gcal-status-dot {
-      width: 8px; height: 8px; border-radius: 50%; background: #d1d5db; flex-shrink: 0;
-    }
-    .gcal-status-dot.connected { background: #22c55e; }
-    .gcal-status-label { font-size: 12px; color: #888; flex: 1; }
-    .btn-gcal-connect {
-      background: #4f8ef7; border: none; color: #fff;
-      padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 700;
-      cursor: pointer; transition: filter .15s; align-self: flex-start;
-    }
-    .btn-gcal-connect:hover { filter: brightness(1.1); }
-
-    /* ── Share section ── */
-    .share-inner { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
-    .share-link-row {
-      display: flex; align-items: center; gap: 8px;
-    }
-    .share-url-box {
-      flex: 1; border: 1.5px solid #e8e8f0; border-radius: 8px;
-      padding: 7px 11px; font-family: monospace; font-size: 12px; color: #1e40af;
-      background: #f8faff; outline: none;
-    }
-    .btn-copy {
-      background: #eff6ff; border: 1.5px solid #bfdbfe; color: #3b82f6;
-      border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
-      white-space: nowrap; transition: background .15s;
-    }
-    .btn-copy:hover { background: #dbeafe; }
-    .btn-regen {
-      background: none; border: none; color: #aaa; font-size: 11px;
-      cursor: pointer; text-decoration: underline; align-self: flex-start;
-    }
-    .btn-regen:hover { color: #e53e3e; }
-
-    /* Scrollbar */
+    /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: #d0d0e0; border-radius: 2px; }
   </style>
@@ -240,276 +75,260 @@
 <body>
 <div class="app">
 
-  <!-- Top bar -->
   <header class="topbar">
-    <button class="btn-back" title="Back to week view" onclick="location.href='mockup.html'">&#8592;</button>
-    <span class="topbar-title">Customize</span>
-    <button class="btn-save">Save</button>
+    <button class="btn-back" onclick="location.href='mockup.html'">&#8592;</button>
+    <span class="topbar-title">Instellingen</span>
+    <button class="btn-save" id="btn-save">Opslaan</button>
   </header>
 
   <div class="content">
 
-    <!-- ── 1. Customers ── -->
+    <!-- ── 1. Klanten ── -->
     <div class="section">
       <div class="section-header">
         <span class="section-icon">🎨</span>
         <div>
-          <div class="section-title">Customers</div>
-          <div class="section-desc">Color chip identifies who an item belongs to</div>
+          <div class="section-title">Klanten</div>
+          <div class="section-desc">Kleurcodering per klant — zichtbaar als gekleurde tegel</div>
         </div>
       </div>
-      <div class="customer-list">
+      <div class="row-list" id="customer-list"></div>
+      <div class="add-row">
+        <button class="btn-add-row" id="btn-add-customer">＋ Klant toevoegen</button>
+      </div>
+    </div>
 
-        <div class="customer-row">
-          <div class="color-swatch" style="background:#ede0ff">
-            <input type="color" value="#ede0ff" />
-          </div>
-          <input class="customer-name" type="text" value="Acme Corp" />
-          <div class="icon-pick" title="Pick default icon">🟣</div>
-          <button class="btn-remove" title="Remove">×</button>
+    <!-- ── 2. Agenda's ── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">🗓️</span>
+        <div>
+          <div class="section-title">Agenda's</div>
+          <div class="section-desc">Koppel een of meerdere Google Agenda's via ICS-link</div>
         </div>
-
-        <div class="customer-row">
-          <div class="color-swatch" style="background:#dbeafe">
-            <input type="color" value="#dbeafe" />
-          </div>
-          <input class="customer-name" type="text" value="BrightCo" />
-          <div class="icon-pick" title="Pick default icon">🔵</div>
-          <button class="btn-remove" title="Remove">×</button>
-        </div>
-
-        <div class="customer-row">
-          <div class="color-swatch" style="background:#dcfce7">
-            <input type="color" value="#dcfce7" />
-          </div>
-          <input class="customer-name" type="text" value="GreenTech" />
-          <div class="icon-pick" title="Pick default icon">🟢</div>
-          <button class="btn-remove" title="Remove">×</button>
-        </div>
-
-        <div class="customer-row">
-          <div class="color-swatch" style="background:#ffedd5">
-            <input type="color" value="#ffedd5" />
-          </div>
-          <input class="customer-name" type="text" value="OrangeLabel" />
-          <div class="icon-pick" title="Pick default icon">🟠</div>
-          <button class="btn-remove" title="Remove">×</button>
-        </div>
-
+      </div>
+      <div class="row-list" id="calendar-list"></div>
+      <div class="ics-help">
+        <strong>Hoe ICS-link ophalen:</strong> Open <a href="https://calendar.google.com" target="_blank" rel="noopener">calendar.google.com</a> →
+        klik ⋮ naast je agenda → <em>Instellingen en delen</em> → scroll naar
+        <em>"Agenda integreren"</em> → kopieer <span class="ics-code">Privéadres in iCal-indeling</span>.
       </div>
       <div class="add-row">
-        <button class="btn-add-customer">＋ Add customer</button>
+        <button class="btn-add-row" id="btn-add-calendar">＋ Agenda toevoegen</button>
       </div>
     </div>
 
-    <!-- ── 2. Event type icons ── -->
+    <!-- ── 3. Aangepaste iconen (foto's) ── -->
     <div class="section">
       <div class="section-header">
-        <span class="section-icon">🗂️</span>
+        <span class="section-icon">🖼️</span>
         <div>
-          <div class="section-title">Event type icons</div>
-          <div class="section-desc">Choose which icons mean meeting vs task</div>
+          <div class="section-title">Eigen iconen</div>
+          <div class="section-desc">Upload foto's — gebruik ze als icoon bij events</div>
         </div>
       </div>
-      <div class="type-grid">
-        <div class="type-col">
-          <div class="type-label">🤝 Meetings</div>
-          <div class="icon-chips">
-            <div class="icon-chip selected">🤝</div>
-            <div class="icon-chip selected">🏢</div>
-            <div class="icon-chip selected">🖥️</div>
-            <div class="icon-chip selected">💬</div>
-            <div class="icon-chip">📞</div>
-            <div class="icon-chip">🎤</div>
-            <div class="icon-chip">🗣️</div>
-            <div class="icon-chip">🎥</div>
-          </div>
-        </div>
-        <div class="type-col">
-          <div class="type-label">✅ Tasks</div>
-          <div class="icon-chips">
-            <div class="icon-chip selected">✉️</div>
-            <div class="icon-chip selected">📋</div>
-            <div class="icon-chip selected">💻</div>
-            <div class="icon-chip selected">📝</div>
-            <div class="icon-chip">✅</div>
-            <div class="icon-chip">📦</div>
-            <div class="icon-chip">🎯</div>
-            <div class="icon-chip">🗂️</div>
-          </div>
-        </div>
-      </div>
+      <div class="icons-grid" id="icons-grid"></div>
     </div>
 
-    <!-- ── 3. Google Calendar ── -->
-    <div class="section">
-      <div class="section-header">
-        <span class="section-icon">📅</span>
-        <div>
-          <div class="section-title">Google Calendar</div>
-          <div class="section-desc">Sync recurring events from your Google account</div>
-        </div>
-      </div>
-      <div class="gcal-inner">
-        <div class="gcal-info-row">
-          <span class="gcal-info-icon">🔁</span>
-          <div class="gcal-info-text">
-            Recurring events are managed in Google Calendar — set up repeating events there and they will appear here automatically. No in-app recurring settings needed.
-          </div>
-        </div>
-        <div class="gcal-status-row">
-          <span class="gcal-status-dot" id="gcal-dot"></span>
-          <span class="gcal-status-label" id="gcal-status-label">Not connected</span>
-        </div>
-        <button class="btn-gcal-connect" id="btn-gcal-connect">Connect Google Calendar</button>
-      </div>
-    </div>
-
-    <!-- ── 4. Display options ── -->
-
-    <div class="section">
-      <div class="section-header">
-        <span class="section-icon">👁️</span>
-        <div>
-          <div class="section-title">Display</div>
-          <div class="section-desc">Layout and visibility preferences</div>
-        </div>
-      </div>
-      <div class="toggle-list">
-
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="toggle-label">Week starts on</div>
-          </div>
-          <div class="seg">
-            <input type="radio" name="week-start" id="ws-mon" checked />
-            <label for="ws-mon">Mon</label>
-            <input type="radio" name="week-start" id="ws-sun" />
-            <label for="ws-sun">Sun</label>
-          </div>
-        </div>
-
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="toggle-label">Show legend bar</div>
-            <div class="toggle-sub">Color key shown below the top bar</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" checked />
-            <span class="slider"></span>
-          </label>
-        </div>
-
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="toggle-label">Show weekend columns</div>
-            <div class="toggle-sub">Sat & Sun in the grid</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" checked />
-            <span class="slider"></span>
-          </label>
-        </div>
-
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="toggle-label">Highlight today</div>
-            <div class="toggle-sub">Blue border on today's column</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" checked />
-            <span class="slider"></span>
-          </label>
-        </div>
-
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="toggle-label">Dark mode</div>
-            <div class="toggle-sub">Easier on the eyes at night</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" />
-            <span class="slider"></span>
-          </label>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ── 5. Sharing ── -->
-    <div class="section">
-      <div class="section-header">
-        <span class="section-icon">🔗</span>
-        <div>
-          <div class="section-title">Sharing</div>
-          <div class="section-desc">Control who can see your week</div>
-        </div>
-      </div>
-      <div class="toggle-list">
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="toggle-label">Enable share link</div>
-            <div class="toggle-sub">Anyone with the link can view your week</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" checked />
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="toggle-label">Hide private items</div>
-            <div class="toggle-sub">🔒 items invisible to link viewers</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" checked />
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-      <div class="share-inner">
-        <div class="share-link-row">
-          <input class="share-url-box" type="text" readonly value="localhost:5173/share/a8f3k2x9" />
-          <button class="btn-copy">Copy</button>
-        </div>
-        <button class="btn-regen">⚠ Regenerate link (invalidates old link)</button>
-      </div>
-    </div>
-
-  </div><!-- /content -->
-</div><!-- /app -->
+  </div>
+</div>
 
 <script>
-  // Icon chip toggle
-  document.querySelectorAll('.icon-chip').forEach(chip => {
-    chip.addEventListener('click', () => chip.classList.toggle('selected'));
-  });
+(function () {
+  'use strict';
 
-  // Color swatch: sync background to chosen color
-  document.querySelectorAll('.color-swatch input[type=color]').forEach(input => {
-    input.addEventListener('input', () => {
-      input.parentElement.style.background = input.value;
+  const KEY_CALS      = 'gcal_calendars';
+  const KEY_CUSTOMERS = 'app_customers';
+  const KEY_ICONS     = 'custom_icons';
+
+  function loadJson(key, fallback) {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+    catch { return fallback; }
+  }
+
+  const DEFAULT_CUSTOMERS = [
+    {id:'c1', name:'Acme Corp',   bg:'#ede0ff', text:'#4c1d95'},
+    {id:'c2', name:'BrightCo',   bg:'#dbeafe', text:'#1e3a8a'},
+    {id:'c3', name:'GreenTech',  bg:'#dcfce7', text:'#14532d'},
+    {id:'c4', name:'OrangeLabel',bg:'#ffedd5', text:'#7c2d12'},
+  ];
+
+  let customers   = loadJson(KEY_CUSTOMERS, null) || DEFAULT_CUSTOMERS;
+  let calendars   = loadJson(KEY_CALS,      []);
+  let customIcons = loadJson(KEY_ICONS,     []);
+
+  /* ═══════════════════
+     CUSTOMERS
+  ═══════════════════ */
+  function renderCustomers() {
+    const list = document.getElementById('customer-list');
+    list.innerHTML = '';
+    customers.forEach((c, i) => {
+      const row = document.createElement('div');
+      row.className = 'data-row';
+      row.innerHTML = `
+        <div class="color-swatch" style="background:${c.bg}" title="Achtergrondkleur">
+          <input type="color" value="${c.bg}" data-role="bg" data-idx="${i}">
+        </div>
+        <div class="color-swatch" style="background:${c.text};border-color:rgba(0,0,0,.15)" title="Tekstkleur">
+          <input type="color" value="${c.text}" data-role="text" data-idx="${i}">
+        </div>
+        <input class="field-name" type="text" value="${escHtml(c.name)}" data-idx="${i}" placeholder="Klantnaam" />
+        <button class="btn-remove" data-idx="${i}" title="Verwijderen">×</button>
+      `;
+
+      // Color swatch live update
+      row.querySelectorAll('input[type=color]').forEach(inp => {
+        inp.addEventListener('input', () => {
+          const idx  = +inp.dataset.idx;
+          const role = inp.dataset.role;
+          customers[idx][role] = inp.value;
+          inp.parentElement.style.background = inp.value;
+        });
+      });
+
+      // Name update
+      row.querySelector('.field-name').addEventListener('input', e => {
+        customers[+e.target.dataset.idx].name = e.target.value;
+      });
+
+      // Remove
+      row.querySelector('.btn-remove').addEventListener('click', e => {
+        customers.splice(+e.target.dataset.idx, 1);
+        renderCustomers();
+      });
+
+      list.appendChild(row);
     });
+  }
+
+  document.getElementById('btn-add-customer').addEventListener('click', () => {
+    customers.push({id:'c_'+Date.now(), name:'Nieuwe klant', bg:'#e0f2fe', text:'#0c4a6e'});
+    renderCustomers();
+    // Focus the new name field
+    const rows = document.querySelectorAll('#customer-list .field-name');
+    rows[rows.length-1]?.focus();
+    rows[rows.length-1]?.select();
   });
 
-  // Google Calendar connect (mock toggle)
-  let gcalConnected = false;
-  document.getElementById('btn-gcal-connect').addEventListener('click', function () {
-    gcalConnected = !gcalConnected;
-    document.getElementById('gcal-dot').classList.toggle('connected', gcalConnected);
-    document.getElementById('gcal-status-label').textContent = gcalConnected ? 'Connected as user@gmail.com' : 'Not connected';
-    this.textContent = gcalConnected ? 'Disconnect' : 'Connect Google Calendar';
-    this.style.background = gcalConnected ? '#e2e8f0' : '#4f8ef7';
-    this.style.color = gcalConnected ? '#64748b' : '#fff';
+  /* ═══════════════════
+     CALENDARS
+  ═══════════════════ */
+  function renderCalendars() {
+    const list = document.getElementById('calendar-list');
+    list.innerHTML = '';
+    calendars.forEach((cal, i) => {
+      const row = document.createElement('div');
+      row.className = 'data-row';
+      row.innerHTML = `
+        <div class="color-swatch" style="background:${cal.color||'#3b82f6'}" title="Kleur">
+          <input type="color" value="${cal.color||'#3b82f6'}" data-idx="${i}">
+        </div>
+        <div class="cal-fields">
+          <input class="field-name" type="text" value="${escHtml(cal.name||'')}" data-idx="${i}" placeholder="Naam agenda" />
+          <input class="field-url" type="url" value="${escHtml(cal.url||'')}" data-idx="${i}" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        </div>
+        <button class="btn-remove" data-idx="${i}" title="Verwijderen">×</button>
+      `;
+
+      row.querySelector('input[type=color]').addEventListener('input', e => {
+        calendars[+e.target.dataset.idx].color = e.target.value;
+        e.target.parentElement.style.background = e.target.value;
+      });
+      row.querySelector('.field-name').addEventListener('input', e => {
+        calendars[+e.target.dataset.idx].name = e.target.value;
+      });
+      row.querySelector('.field-url').addEventListener('input', e => {
+        calendars[+e.target.dataset.idx].url = e.target.value.trim();
+      });
+      row.querySelector('.btn-remove').addEventListener('click', e => {
+        calendars.splice(+e.target.dataset.idx, 1);
+        renderCalendars();
+      });
+
+      list.appendChild(row);
+    });
+  }
+
+  document.getElementById('btn-add-calendar').addEventListener('click', () => {
+    calendars.push({id:'cal_'+Date.now(), name:'', url:'', color:'#3b82f6'});
+    renderCalendars();
+    const rows = document.querySelectorAll('#calendar-list .field-url');
+    rows[rows.length-1]?.focus();
   });
 
-  // Copy button
-  document.querySelector('.btn-copy').addEventListener('click', function () {
-    const url = document.querySelector('.share-url-box').value;
-    navigator.clipboard?.writeText(url);
-    this.textContent = 'Copied!';
-    setTimeout(() => this.textContent = 'Copy', 1800);
+  /* ═══════════════════
+     CUSTOM ICONS
+  ═══════════════════ */
+  function renderIcons() {
+    const grid = document.getElementById('icons-grid');
+    grid.innerHTML = '';
+
+    customIcons.forEach((ci, i) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'icon-thumb';
+      thumb.innerHTML = `
+        <img src="${ci.dataUrl}" alt="${escHtml(ci.label||'')}">
+        <button class="icon-thumb-del" data-idx="${i}" title="Verwijderen">×</button>
+      `;
+      thumb.querySelector('.icon-thumb-del').addEventListener('click', e => {
+        customIcons.splice(+e.target.dataset.idx, 1);
+        localStorage.setItem(KEY_ICONS, JSON.stringify(customIcons));
+        renderIcons();
+      });
+      grid.appendChild(thumb);
+    });
+
+    // Upload button
+    const label = document.createElement('label');
+    label.className = 'icon-upload-label';
+    label.title = 'Foto uploaden';
+    label.innerHTML = `📷<input type="file" accept="image/*" multiple>`;
+    label.querySelector('input').addEventListener('change', e => {
+      const files = Array.from(e.target.files);
+      let loaded = 0;
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          customIcons.push({id:'icon_'+Date.now()+'_'+loaded, dataUrl: ev.target.result, label: file.name});
+          loaded++;
+          if (loaded === files.length) {
+            localStorage.setItem(KEY_ICONS, JSON.stringify(customIcons));
+            renderIcons();
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+    grid.appendChild(label);
+  }
+
+  /* ═══════════════════
+     SAVE
+  ═══════════════════ */
+  document.getElementById('btn-save').addEventListener('click', () => {
+    localStorage.setItem(KEY_CUSTOMERS, JSON.stringify(customers));
+    localStorage.setItem(KEY_CALS,      JSON.stringify(calendars));
+    // Icons are saved immediately on upload/delete
+    const btn = document.getElementById('btn-save');
+    btn.textContent = '✓ Opgeslagen';
+    btn.classList.add('saved');
+    setTimeout(() => { btn.textContent = 'Opslaan'; btn.classList.remove('saved'); }, 1800);
   });
+
+  /* ═══════════════════
+     HELPERS
+  ═══════════════════ */
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  /* ═══════════════════
+     INIT
+  ═══════════════════ */
+  renderCustomers();
+  renderCalendars();
+  renderIcons();
+
+})();
 </script>
 </body>
 </html>
