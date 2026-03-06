@@ -17,10 +17,10 @@
     .week-nav { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center; min-width: 0; }
     .week-nav button { background: rgba(255,255,255,.12); border: none; color: #fff; width: 34px; height: 34px; border-radius: 10px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .week-nav button:hover { background: rgba(255,255,255,.22); }
-    .week-label { font-size: 12px; font-weight: 600; text-align: center; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 0; }
-    .wl-week { font-size: 17px; font-weight: 900; line-height: 1.2; color: #fff; }
-    .wl-range { font-size: 12px; color: rgba(255,255,255,.72); white-space: nowrap; line-height: 1.2; max-width: 170px; overflow: hidden; text-overflow: ellipsis; }
-    @media (max-width: 480px) { .wl-week { font-size: 15px; } .wl-range { font-size: 10px; max-width: 110px; } }
+    .week-label { min-width: 0; display: flex; flex-direction: row; align-items: baseline; gap: 7px; }
+    .wl-week  { font-size: 20px; font-weight: 900; color: #fff; white-space: nowrap; line-height: 1.1; }
+    .wl-range { font-size: 14px; font-weight: 600; color: rgba(255,255,255,.75); white-space: nowrap; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+    @media (max-width: 480px) { .wl-week { font-size: 16px; } .wl-range { font-size: 11px; max-width: 110px; } }
     .btn-settings { background: rgba(255,255,255,.12); border: none; color: #fff; width: 38px; height: 38px; border-radius: 10px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .btn-settings:hover { background: rgba(255,255,255,.22); }
     #loading-dot { width: 6px; height: 6px; border-radius: 50%; background: #facc15; animation: ldot 1s infinite; display: none; flex-shrink: 0; }
@@ -77,7 +77,8 @@
     .item-icon img { width: 15px; height: 15px; border-radius: 3px; object-fit: cover; }
     .item-text { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; max-width: 0; opacity: 0; transition: max-width .25s ease, opacity .2s ease; }
     .item:hover .item-text, .item.active .item-text { max-width: 180px; opacity: 1; }
-    .item-hidden { display: none; }
+    .item-no-icon .item-text { max-width: 160px; opacity: 1; }
+    .item-toppin-anchor { display: none; }
     .upcoming { animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,.25)} 50%{box-shadow:0 0 0 5px rgba(0,0,0,0)} }
     .day-divider { grid-column: 1/-1; height: 1px; background: rgba(0,0,0,.06); margin: 2px 0; }
@@ -374,12 +375,13 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v0.8.2';
+  const APP_VERSION   = 'v0.8.3';
   const APP_BUILD     = '6 mrt 2026';
 
   const KEY_CALS      = 'gcal_calendars';   // [{id,name,url,color}]
   const KEY_CUSTOMERS = 'app_customers';    // [{id,name,bg,text}]
   const KEY_ICONS     = 'custom_icons';     // [{id,dataUrl,label}]
+  const KEY_EMOJIS    = 'custom_emojis';    // ['☕','🎯',…]
   const KEY_OVERRIDES = 'event_overrides';  // {uid:{customerId,icon,private,topPin,size}}
 
   const DEFAULT_CUSTOMERS = [
@@ -403,10 +405,11 @@
     }
   })();
 
-  let calendars  = loadJson(KEY_CALS,      []);
-  let customers  = loadJson(KEY_CUSTOMERS, null) || DEFAULT_CUSTOMERS;
-  let customIcons= loadJson(KEY_ICONS,     []);
-  let overrides  = loadJson(KEY_OVERRIDES, {});
+  let calendars   = loadJson(KEY_CALS,      []);
+  let customers   = loadJson(KEY_CUSTOMERS, null) || DEFAULT_CUSTOMERS;
+  let customIcons = loadJson(KEY_ICONS,     []);
+  let customEmojis= loadJson(KEY_EMOJIS,   []);
+  let overrides   = loadJson(KEY_OVERRIDES, {});
 
   let calEvents   = [];
   let isConnected = false;
@@ -536,50 +539,79 @@
   }
 
   function getRecurringInstance(start, rrule, exdates, wStart, wEnd) {
-    const freq  = (rrule.match(/FREQ=(\w+)/)||[])[1];
+    const freq     = (rrule.match(/FREQ=(\w+)/)||[])[1];
     if (!freq) return null;
-    const until = rrule.match(/UNTIL=([^;]+)/);
-    const count = parseInt((rrule.match(/COUNT=(\d+)/)||[])[1]||'0');
-    const interval = parseInt((rrule.match(/INTERVAL=(\d+)/)||[])[1]||'1');
+    const until    = rrule.match(/UNTIL=([^;]+)/);
+    const count    = parseInt((rrule.match(/COUNT=(\d+)/)||[])[1] || '0');
+    const interval = parseInt((rrule.match(/INTERVAL=(\d+)/)||[])[1] || '1');
+
+    // Midnight-normalised start for day-level comparisons
+    const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+
+    function checkBounds(c, occurrenceIndex) {
+      if (c < startDay) return false;
+      if (until) { const {date:u} = parseIcsDate(until[1],''); if (c > u) return false; }
+      if (count > 0 && occurrenceIndex >= count) return false;
+      return true;
+    }
 
     if (freq === 'WEEKLY') {
-      // Support BYDAY for specific weekdays (e.g. MO,WE,FR)
-      const bydayMatch = rrule.match(/BYDAY=([^;]+)/);
       const DAYMAP = {SU:0,MO:1,TU:2,WE:3,TH:4,FR:5,SA:6};
+      const bydayMatch = rrule.match(/BYDAY=([^;]+)/);
       const targetDays = bydayMatch
-        ? bydayMatch[1].split(',').map(d => DAYMAP[d.trim().slice(-2).toUpperCase()]).filter(d => d!==undefined)
+        ? bydayMatch[1].split(',').map(d => DAYMAP[d.trim().slice(-2).toUpperCase()]).filter(d => d !== undefined)
         : [start.getDay()];
 
-      for (let i=0;i<7;i++) {
-        const c = new Date(wStart); c.setDate(wStart.getDate()+i);
+      // Monday of the start week (for interval calculation)
+      const startWkMon = new Date(startDay);
+      startWkMon.setDate(startDay.getDate() - ((startDay.getDay() + 6) % 7));
+
+      // Monday of the candidate week
+      const wMon = new Date(wStart);
+      const weeksDiff = Math.round((wMon - startWkMon) / (7 * 24 * 3600 * 1000));
+
+      // Wrong interval week — skip entirely
+      if (weeksDiff < 0 || weeksDiff % interval !== 0) return null;
+
+      for (let i = 0; i < 7; i++) {
+        const c = new Date(wStart); c.setDate(wStart.getDate() + i);
         if (!targetDays.includes(c.getDay())) continue;
-        if (c < start) continue;
-        if (until) { const {date:u}=parseIcsDate(until[1],''); if (c>u) return null; }
-        if (count > 0) {
-          // Count weekly occurrences from start to c (per weekday)
-          const msPerWeek = interval * 7 * 24 * 3600 * 1000;
-          const weeksBetween = Math.floor((c - start) / msPerWeek);
-          if (weeksBetween >= count) return null;
-        }
+        // occurrenceIndex: how many occurrences of this weekday have happened
+        const weeksSinceStartForDay = Math.round((c - startDay) / (7 * 24 * 3600 * 1000));
+        const occIdx = weeksSinceStartForDay / interval;
+        if (!checkBounds(c, occIdx)) continue;
         if (isExcludedDate(c, exdates)) continue;
         return c;
       }
+
     } else if (freq === 'DAILY') {
-      const c = new Date(wStart);
-      if (c < start) return null;
-      if (until) { const {date:u}=parseIcsDate(until[1],''); if (c>u) return null; }
-      if (count > 0) {
-        const daysBetween = Math.floor((c - start) / (24*3600*1000));
-        if (daysBetween >= count) return null;
+      // Return one instance per day of the week that qualifies
+      for (let i = 0; i < 7; i++) {
+        const c = new Date(wStart); c.setDate(wStart.getDate() + i);
+        const daysSinceStart = Math.round((c - startDay) / (24 * 3600 * 1000));
+        if (daysSinceStart < 0 || daysSinceStart % interval !== 0) continue;
+        if (!checkBounds(c, daysSinceStart / interval)) continue;
+        if (!isExcludedDate(c, exdates)) return c; // return first valid day
       }
-      if (!isExcludedDate(c, exdates)) return c;
+
     } else if (freq === 'MONTHLY') {
-      // Check if the start day-of-month occurs in this week
-      const targetDate = start.getDate();
-      for (let i=0;i<7;i++) {
-        const c = new Date(wStart); c.setDate(wStart.getDate()+i);
-        if (c.getDate()!==targetDate || c<start) continue;
-        if (until) { const {date:u}=parseIcsDate(until[1],''); if (c>u) return null; }
+      const targetDOM = start.getDate();
+      for (let i = 0; i < 7; i++) {
+        const c = new Date(wStart); c.setDate(wStart.getDate() + i);
+        if (c.getDate() !== targetDOM) continue;
+        const monthsSinceStart = (c.getFullYear() - start.getFullYear()) * 12 + (c.getMonth() - start.getMonth());
+        if (monthsSinceStart < 0 || monthsSinceStart % interval !== 0) continue;
+        if (!checkBounds(c, monthsSinceStart / interval)) continue;
+        if (!isExcludedDate(c, exdates)) return c;
+      }
+
+    } else if (freq === 'YEARLY') {
+      for (let i = 0; i < 7; i++) {
+        const c = new Date(wStart); c.setDate(wStart.getDate() + i);
+        if (c.getMonth() !== start.getMonth() || c.getDate() !== start.getDate()) continue;
+        const yearsSinceStart = c.getFullYear() - start.getFullYear();
+        if (yearsSinceStart < 0 || yearsSinceStart % interval !== 0) continue;
+        if (!checkBounds(c, yearsSinceStart / interval)) continue;
         if (!isExcludedDate(c, exdates)) return c;
       }
     }
@@ -644,7 +676,7 @@
 
     const wl = document.querySelector('.week-label');
     wl.querySelector('.wl-week').textContent  = `Week ${getWeekNumber(dates[0])}`;
-    wl.querySelector('.wl-range').textContent = formatShortRange(dates[0], dates[6]);
+    wl.querySelector('.wl-range').textContent = `· ${formatShortRange(dates[0], dates[6])}`;
 
     // Only show demo data when NO calendars configured at all
     const hasCals = calendars.length > 0;
@@ -697,8 +729,9 @@
       return col;
     }
 
-    const meetings = events.filter(e => e.type === 'meeting' && !(overrides[e.uid]||{}).topPin);
-    const tasks    = events.filter(e => e.type === 'task'    && !(overrides[e.uid]||{}).topPin);
+    const pinned   = events.filter(e =>  (overrides[e.uid]||{}).topPin);
+    const meetings = events.filter(e => !(overrides[e.uid]||{}).topPin && e.type === 'meeting');
+    const tasks    = events.filter(e => !(overrides[e.uid]||{}).topPin && e.type === 'task');
 
     meetings.forEach(e => body.appendChild(buildItem(e)));
     if (meetings.length && tasks.length) {
@@ -706,8 +739,15 @@
     }
     tasks.forEach(e => body.appendChild(buildItem(e)));
 
+    // Hidden anchors for topPin events so the edit sheet can find them by uid
+    pinned.forEach(e => {
+      const anchor = buildItem(e);
+      anchor.classList.add('item-toppin-anchor');
+      body.appendChild(anchor);
+    });
+
     const bodyEvents = meetings.length + tasks.length;
-    if (isConnected && !bodyEvents && !isWeekend) {
+    if (isConnected && !bodyEvents && !pinned.length && !isWeekend) {
       const em = document.createElement('div'); em.className='day-empty'; em.textContent='Vrij'; body.appendChild(em);
     }
     return col;
@@ -720,9 +760,11 @@
     const bg   = cust ? cust.bg   : (ev.calColor ? hexToLight(ev.calColor) : '#f1f5f9');
     const text = cust ? cust.text : (ev.calColor ? hexToDark(ev.calColor)  : '#1e293b');
 
-    const size = (overrides[ev.uid]||{}).size || 'normal';
+    const ov = overrides[ev.uid] || {};
+    const size = ov.size || 'normal';
+    const hasCustomIcon = !!ov.icon;
     const el = document.createElement('div');
-    el.className = `item ${ev.type==='meeting'?'item-meeting':'item-task'}${size!=='normal'?' item-'+size:''}`;
+    el.className = `item ${ev.type==='meeting'?'item-meeting':'item-task'}${size!=='normal'?' item-'+size:''}${!hasCustomIcon?' item-no-icon':''}`;
     el.style.background = bg;
     el.style.color      = text;
     if (ev._private) el.classList.add('item-hidden');
@@ -891,7 +933,8 @@
       return el;
     }
 
-    EMOJI_ICONS.forEach(icon => grid.appendChild(makeIconEl(icon, false, null)));
+    // Default emoji icons + saved custom emojis from Instellingen
+    [...EMOJI_ICONS, ...customEmojis].forEach(icon => grid.appendChild(makeIconEl(icon, false, null)));
     customIcons.forEach(ci => grid.appendChild(makeIconEl(ci.dataUrl, true, ci.dataUrl)));
 
     // Upload button
@@ -905,8 +948,7 @@
       const reader = new FileReader();
       reader.onload = ev => {
         const dataUrl = ev.target.result;
-        const id = 'icon_' + Date.now();
-        customIcons.push({id, dataUrl, label: file.name});
+        customIcons.push({id: 'icon_' + Date.now(), dataUrl, label: file.name});
         localStorage.setItem(KEY_ICONS, JSON.stringify(customIcons));
         buildIconGrid(dataUrl);
         document.getElementById('sheet-icon-display').innerHTML = `<img src="${escHtml(dataUrl)}" alt="">`;
@@ -914,29 +956,6 @@
       reader.readAsDataURL(file);
     });
     grid.appendChild(uploadLabel);
-
-    // Custom emoji input row — prepend above all icons
-    const emojiRow = document.createElement('div');
-    emojiRow.className = 'sh-emoji-row';
-    emojiRow.innerHTML = `<input class="sh-emoji-input" type="text" placeholder="Typ emoji  🐕" maxlength="8"><button class="sh-emoji-add">＋ Voeg toe</button>`;
-    const emojiInput = emojiRow.querySelector('.sh-emoji-input');
-    const applyEmoji = () => {
-      const val = emojiInput.value.trim();
-      if (!val) return;
-      const existing = [...grid.querySelectorAll('.sh-icon:not(.sh-icon-upload)')].find(el => !el.dataset.dataUrl && el.textContent.trim() === val);
-      let target = existing;
-      if (!target) {
-        target = makeIconEl(val, false, null);
-        grid.insertBefore(target, uploadLabel);
-      }
-      grid.querySelectorAll('.sh-icon').forEach(c => c.classList.remove('selected'));
-      target.classList.add('selected');
-      document.getElementById('sheet-icon-display').innerHTML = val;
-      emojiInput.value = '';
-    };
-    emojiRow.querySelector('.sh-emoji-add').addEventListener('click', applyEmoji);
-    emojiInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); applyEmoji(); } });
-    grid.prepend(emojiRow);
 
   }
 
