@@ -6,6 +6,11 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Mijn Week" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <title>Mijn Week</title>
   <script>
     // Registreer Service Worker zo vroeg mogelijk
@@ -52,11 +57,10 @@
     .day-col.today { border-color: #4f8ef7; }
     .day-col.weekend { opacity: .7; }
     .day-col.weekend .day-body { grid-template-columns: 1fr; }
-    .day-col.weekend .item-wide,
-    .day-col.weekend .item-large { grid-column: auto; flex-direction: row; justify-content: flex-start; min-height: auto; padding: 6px 4px; }
-    .day-col.weekend .item-large .item-icon { font-size: 15px; }
-    .day-col.weekend .item-large .item-icon img { width: 15px; height: 15px; }
-    .day-col.weekend .item-large .item-text { width: auto; text-align: left; font-size: 11px; }
+    .day-col.weekend .item-large { flex-direction: row; justify-content: flex-start; min-height: auto; padding: 6px 8px; }
+    .day-col.weekend .item-large .item-icon { font-size: 22px; }
+    .day-col.weekend .item-large .item-icon img { width: 22px; height: 22px; }
+    .day-col.weekend .item-large .item-text { width: auto; text-align: left; font-size: 11px; flex: 1; }
     .day-header { padding: 9px 10px 7px; background: #fafafa; border-bottom: 1px solid #f0f0f5; flex-shrink: 0; }
     .day-name-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; }
     .day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #888; }
@@ -72,28 +76,27 @@
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
     /* ── Item tile ── */
-    .item { display: flex; align-items: center; justify-content: center; gap: 5px; border-radius: 9px; padding: 6px 4px; cursor: pointer; overflow: hidden; transition: filter .15s, box-shadow .15s, transform .1s; user-select: none; min-width: 0; position: relative; }
+    .item { display: flex; align-items: center; justify-content: flex-start; gap: 6px; border-radius: 9px; padding: 6px 8px; cursor: pointer; overflow: hidden; transition: filter .15s, box-shadow .15s, transform .1s; user-select: none; min-width: 0; position: relative; grid-column: 1/-1; }
     .item:hover, .item.active { filter: brightness(.92); box-shadow: 0 2px 10px rgba(0,0,0,.14); transform: translateY(-1px); }
     .item:active { transform: scale(.97); }
     .item-meeting { border-left: 3px solid rgba(0,0,0,.18); }
-    .item-icon { font-size: 15px; flex-shrink: 0; line-height: 1; display: flex; align-items: center; justify-content: center; }
-    .item-icon img { width: 15px; height: 15px; border-radius: 3px; object-fit: cover; }
-    /* Text: verborgen op normaal formaat, zichtbaar bij hover of speciale klassen */
-    .item-text { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 0; opacity: 0; transition: max-width .25s ease, opacity .2s ease; flex: 0 1 auto; }
-    .item:hover .item-text, .item.active .item-text { max-width: 180px; opacity: 1; }
-    /* Geen icon → tekst altijd zichtbaar, vult beschikbare ruimte */
-    .item-no-icon { justify-content: flex-start; padding: 6px 7px; }
-    .item-no-icon .item-text { max-width: none; opacity: 1; flex: 1; min-width: 0; }
-    /* Breed: icon links, tekst vult rest af */
-    .item-wide { justify-content: flex-start; padding: 6px 8px; }
-    .item-wide .item-icon { font-size: 16px; }
-    .item-wide .item-text { max-width: none; opacity: 1; flex: 1; min-width: 0; }
+    .item-icon { font-size: 22px; flex-shrink: 0; line-height: 1; display: flex; align-items: center; justify-content: center; }
+    .item-icon img { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
+    /* Tekst: altijd zichtbaar, vult ruimte na icoon */
+    .item-text { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
+    /* item-no-icon: backwards compat (visueel gelijk aan normaal) */
+    .item-no-icon .item-icon { display: none; }
+    /* Breed: zelfde als normaal, backwards compat */
+    .item-wide .item-icon { font-size: 22px; }
     /* Groot: icon groter, tekst eronder altijd zichtbaar */
     .item-large { flex-direction: column; justify-content: center; gap: 3px; padding: 8px 6px; min-height: 60px; }
-    .item-large .item-icon { font-size: 22px; }
-    .item-large .item-icon img { width: 22px; height: 22px; }
-    .item-large .item-text { max-width: 100%; width: 100%; opacity: 1; text-align: center; font-size: 10px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-large .item-icon { font-size: 28px; }
+    .item-large .item-icon img { width: 28px; height: 28px; }
+    .item-large .item-text { flex: none; width: 100%; text-align: center; font-size: 10px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* Alleen tekst: verberg icoon */
+    .item-text-only .item-icon { display: none; }
     .item-toppin-anchor { display: none; }
+    .item-hidden { display: none; }
     .upcoming { animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,.25)} 50%{box-shadow:0 0 0 5px rgba(0,0,0,0)} }
     .day-divider { grid-column: 1/-1; height: 1px; background: rgba(0,0,0,.06); margin: 2px 0; }
@@ -104,16 +107,16 @@
     .day-pin img { width: 17px; height: 17px; border-radius: 3px; object-fit: cover; }
 
     /* ── Item sizes (grid placement) ── */
-    .item-wide  { grid-column: 1 / -1; }
     .item-large { grid-column: 1 / -1; }
 
     /* ── Size selector ── */
-    .size-seg { display: flex; gap: 6px; }
+    .size-seg { display: flex; gap: 6px; flex-wrap: wrap; }
     .size-seg input { display: none; }
     .size-opt { display: flex; align-items: center; justify-content: center; gap: 3px; padding: 8px 10px; border: 2px solid #e8e8f0; border-radius: 9px; cursor: pointer; transition: border-color .15s, background .15s; min-width: 44px; }
     .size-seg input:checked + .size-opt { border-color: #4f8ef7; background: #eff6ff; }
     .size-demo { width: 14px; height: 14px; background: #cbd5e1; border-radius: 3px; display: block; flex-shrink: 0; }
     .size-opt-large .size-demo { width: 28px; height: 28px; }
+    .size-demo-text { width: 28px; height: 8px; background: #cbd5e1; border-radius: 3px; display: block; }
 
     /* ── Custom emoji input ── */
     .sh-emoji-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; flex: 0 0 100%; width: 100%; }
@@ -265,16 +268,20 @@
         <div class="sheet-label">Formaat</div>
         <div class="size-seg">
           <input type="radio" name="sh-size" id="sh-size-normal" value="normal" checked />
-          <label for="sh-size-normal" class="size-opt" title="Normaal (1 kolom)">
-            <span class="size-demo"></span>
+          <label for="sh-size-normal" class="size-opt" title="Normaal (icoon + tekst)">
+            <span class="size-demo"></span><span class="size-demo-text"></span>
           </label>
           <input type="radio" name="sh-size" id="sh-size-wide" value="wide" />
-          <label for="sh-size-wide" class="size-opt" title="Breed (2 breed)">
-            <span class="size-demo"></span><span class="size-demo"></span>
+          <label for="sh-size-wide" class="size-opt" title="Breed (icoon + tekst)">
+            <span class="size-demo"></span><span class="size-demo-text"></span>
           </label>
           <input type="radio" name="sh-size" id="sh-size-large" value="large" />
-          <label for="sh-size-large" class="size-opt size-opt-large" title="Groot (2×2)">
+          <label for="sh-size-large" class="size-opt size-opt-large" title="Groot (verticaal)">
             <span class="size-demo"></span>
+          </label>
+          <input type="radio" name="sh-size" id="sh-size-textonly" value="text-only" />
+          <label for="sh-size-textonly" class="size-opt" title="Alleen tekst (geen icoon)">
+            <span class="size-demo-text"></span>
           </label>
         </div>
       </div>
@@ -361,7 +368,7 @@
       <span style="font-size:20px">📋</span>
       <div style="flex:1;min-width:0;">
         <div style="font-size:15px;font-weight:800;color:#1a1a2e;">Versiegeschiedenis</div>
-        <div style="font-size:10px;color:#aaa;margin-top:2px;" id="version-build-info">v0.7.0 · 5 mrt 2026</div>
+        <div style="font-size:10px;color:#aaa;margin-top:2px;" id="version-build-info">v0.9.0 · 6 mrt 2026</div>
       </div>
       <button class="sheet-close" id="version-panel-close">×</button>
     </div>
@@ -369,6 +376,7 @@
       <button id="btn-reload-app" style="flex:1;border:1.5px solid #dbeafe;background:#f8faff;color:#1e40af;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Ververs app</button>
     </div>
     <div id="version-list">
+      <div class="version-entry"><span class="version-tag">v0.9.0</span><span class="version-date">2026-03-06</span><span class="version-desc">Swipe links/rechts om van week te wisselen, verborgen items echt onzichtbaar, terugkerende meetings op meerdere dagen onafhankelijk instelbaar, standaard icoon groter (22px) met tekst zichtbaar, nieuwe 'alleen tekst' weergave.</span></div>
       <div class="version-entry"><span class="version-tag">v0.8.0</span><span class="version-date">2026-03-06</span><span class="version-desc">Topdag-toggle per meeting, 3 formaten (normaal/breed/groot), versie- &amp; agendabeheer naar Instellingen, topbar versimpeld.</span></div>
       <div class="version-entry"><span class="version-tag">v0.7.0</span><span class="version-date">2026-03-06</span><span class="version-desc">Dagiconen (pin emoji/foto bovenaan dag), eigen emoji invoer in icoonkiezer, week+datum tweeregelslabel, compactere koppelknop.</span></div>
       <div class="version-entry"><span class="version-tag">v0.6.0</span><span class="version-date">2026-03-05</span><span class="version-desc">Meerdere agenda's, klanten vanuit customize, foto's als icoon, uitsluitend agenda-data (geen demo-mix).</span></div>
@@ -386,7 +394,7 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v0.8.6';
+  const APP_VERSION   = 'v0.9.0';
   const APP_BUILD     = '6 mrt 2026';
 
   const KEY_CALS      = 'gcal_calendars';   // [{id,name,url,color}]
@@ -512,12 +520,14 @@
     const rrule   = ev['RRULE']||'';
     const exdates = ev['EXDATE']||'';
 
-    const makeEvent = date => ({ uid, date, type: allDay ? 'task' : 'meeting',
+    const makeEvent = (date, uidStr) => ({ uid: uidStr || uid, date, type: allDay ? 'task' : 'meeting',
       icon: allDay ? '📋' : '🤝', title: summary,
       calColor: calColor||'#3b82f6', customerId: null });
 
     if (rrule) {
-      return getRecurringInstances(startDate, rrule, exdates, wStart, wEnd).map(makeEvent);
+      // Use date-specific uid so each day-occurrence is independently customisable
+      return getRecurringInstances(startDate, rrule, exdates, wStart, wEnd)
+        .map(d => makeEvent(d, uid + ':' + isoDate(d)));
     }
     if (startDate >= wStart && startDate <= wEnd && !isExcludedDate(startDate, exdates)) {
       return [makeEvent(startDate)];
@@ -753,9 +763,8 @@
 
     const ov = overrides[ev.uid] || {};
     const size = ov.size || 'normal';
-    const hasCustomIcon = !!ov.icon;
     const el = document.createElement('div');
-    el.className = `item ${ev.type==='meeting'?'item-meeting':'item-task'}${size!=='normal'?' item-'+size:''}${!hasCustomIcon?' item-no-icon':''}`;
+    el.className = `item ${ev.type==='meeting'?'item-meeting':'item-task'}${size!=='normal'?' item-'+size:''}`;
     el.style.background = bg;
     el.style.color      = text;
     if (ev._private) el.classList.add('item-hidden');
@@ -843,6 +852,11 @@
     if (calendars.length) loadAllCalendars();
     else renderWeek();
   }
+
+  /* ═══════════════════════════════════
+     SWIPE WEEK NAVIGATION
+  ═══════════════════════════════════ */
+  let swipeStartX = null, swipeStartY = null, didSwipe = false;
 
 
   /* ═══════════════════════════════════
@@ -1150,18 +1164,52 @@
   function closeSheet(el) { el.classList.remove('open'); }
 
   /* ═══════════════════════════════════
-     TAP / LONG-PRESS
+     TAP / LONG-PRESS + SWIPE
   ═══════════════════════════════════ */
   let lpTimer=null, didLongPress=false;
 
   document.addEventListener('touchstart', e => {
-    const item = e.target.closest('.item'); if (!item) return;
-    didLongPress = false;
-    lpTimer = setTimeout(() => { didLongPress=true; openEditSheet(item); }, 480);
+    const item = e.target.closest('.item');
+    const inSheet = e.target.closest('.bottom-sheet');
+    if (item) {
+      // Item touch: track long-press, no swipe
+      swipeStartX = null;
+      didLongPress = false;
+      lpTimer = setTimeout(() => { didLongPress=true; openEditSheet(item); }, 480);
+    } else if (!inSheet) {
+      // Background touch: track for swipe
+      swipeStartX = e.touches[0].clientX;
+      swipeStartY = e.touches[0].clientY;
+      didSwipe = false;
+    }
   }, {passive:true});
-  document.addEventListener('touchmove', () => clearTimeout(lpTimer), {passive:true});
+
+  document.addEventListener('touchmove', e => {
+    clearTimeout(lpTimer);
+    // Cancel swipe tracking if vertical scroll detected
+    if (swipeStartX !== null) {
+      const dy = Math.abs(e.touches[0].clientY - swipeStartY);
+      const dx = Math.abs(e.touches[0].clientX - swipeStartX);
+      if (dy > dx + 10) { swipeStartX = null; } // clearly scrolling vertically
+    }
+  }, {passive:true});
+
   document.addEventListener('touchend', e => {
     clearTimeout(lpTimer);
+
+    // Check for horizontal swipe
+    if (swipeStartX !== null) {
+      const dx = e.changedTouches[0].clientX - swipeStartX;
+      const dy = Math.abs(e.changedTouches[0].clientY - swipeStartY);
+      swipeStartX = null;
+      if (Math.abs(dx) >= 60 && dy <= 80) {
+        didSwipe = true;
+        if (dx < 0) { weekOffset++; onWeekChange(); }
+        else         { weekOffset--; onWeekChange(); }
+        return;
+      }
+    }
+
     if (didLongPress) { e.preventDefault(); return; }
     const item = e.target.closest('.item');
     if (item) { e.preventDefault(); showTooltip(item, e); }
