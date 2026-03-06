@@ -124,16 +124,25 @@
       </div>
     </div>
 
-    <!-- ── 3. Aangepaste iconen (foto's) ── -->
+    <!-- ── 3. Eigen iconen & emoji ── -->
     <div class="section">
       <div class="section-header">
         <span class="section-icon">🖼️</span>
         <div>
-          <div class="section-title">Eigen iconen</div>
-          <div class="section-desc">Upload foto's — gebruik ze als icoon bij events</div>
+          <div class="section-title">Eigen iconen &amp; emoji</div>
+          <div class="section-desc">Foto's en emoji — beschikbaar als icoon bij alle meetings</div>
         </div>
       </div>
       <div class="icons-grid" id="icons-grid"></div>
+      <div style="border-top:1px solid #f0f0f5;padding:12px 16px;">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:8px;">Emoji-iconen</div>
+        <div class="icons-grid" id="emoji-grid" style="padding:0;margin-bottom:10px;min-height:20px;"></div>
+        <div style="display:flex;gap:8px;">
+          <input id="emoji-input" type="text" placeholder="Typ emoji  ☕ 🐕 🌞" maxlength="8"
+            style="flex:1;border:1.5px solid #e0e0f0;border-radius:8px;padding:8px 10px;font-size:20px;outline:none;min-width:0;">
+          <button class="btn-add-row" id="btn-add-emoji" style="width:auto;padding:8px 14px;white-space:nowrap;">＋ Voeg toe</button>
+        </div>
+      </div>
     </div>
 
     <!-- ── 4. Agenda herlaad ── -->
@@ -175,6 +184,7 @@
   const KEY_CALS      = 'gcal_calendars';
   const KEY_CUSTOMERS = 'app_customers';
   const KEY_ICONS     = 'custom_icons';
+  const KEY_EMOJIS    = 'custom_emojis';
 
   function loadJson(key, fallback) {
     try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
@@ -190,7 +200,8 @@
 
   let customers   = loadJson(KEY_CUSTOMERS, null) || DEFAULT_CUSTOMERS;
   let calendars   = loadJson(KEY_CALS,      []);
-  let customIcons = loadJson(KEY_ICONS,     []);
+  let customIcons  = loadJson(KEY_ICONS,   []);
+  let customEmojis = loadJson(KEY_EMOJIS, []);
 
   /* ═══════════════════
      CUSTOMERS
@@ -341,7 +352,7 @@
   /* ═══════════════════
      RELOAD / VERSION
   ═══════════════════ */
-  const APP_VERSION = 'v0.8.2';
+  const APP_VERSION = 'v0.8.3';
   const APP_BUILD   = '6 mrt 2026';
   document.getElementById('cust-version-badge').textContent = APP_VERSION + ' · ' + APP_BUILD;
   if (!calendars.length) document.getElementById('cust-demo-hint').style.display = 'block';
@@ -373,11 +384,46 @@
   function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   /* ═══════════════════
+     EMOJI ICONS
+  ═══════════════════ */
+  function renderEmojis() {
+    const grid = document.getElementById('emoji-grid');
+    grid.innerHTML = '';
+    customEmojis.forEach((em, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'icon-thumb';
+      wrap.style.cssText = 'display:flex;align-items:center;justify-content:center;font-size:22px;background:#f6f6fb;';
+      wrap.innerHTML = escHtml(em) + `<button class="icon-thumb-del" data-idx="${i}" title="Verwijderen">×</button>`;
+      wrap.querySelector('.icon-thumb-del').addEventListener('click', e => {
+        customEmojis.splice(+e.target.dataset.idx, 1);
+        localStorage.setItem(KEY_EMOJIS, JSON.stringify(customEmojis));
+        renderEmojis();
+      });
+      grid.appendChild(wrap);
+    });
+  }
+
+  function addEmoji() {
+    const val = document.getElementById('emoji-input').value.trim();
+    if (!val || customEmojis.includes(val)) return;
+    customEmojis.push(val);
+    localStorage.setItem(KEY_EMOJIS, JSON.stringify(customEmojis));
+    document.getElementById('emoji-input').value = '';
+    renderEmojis();
+  }
+
+  document.getElementById('btn-add-emoji').addEventListener('click', addEmoji);
+  document.getElementById('emoji-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addEmoji(); }
+  });
+
+  /* ═══════════════════
      INIT
   ═══════════════════ */
   renderCustomers();
   renderCalendars();
   renderIcons();
+  renderEmojis();
 
 })();
 </script>
