@@ -61,7 +61,7 @@
     .day-col.weekend .item-large .item-icon { font-size: 15px; }
     .day-col.weekend .item-large .item-icon img { width: 15px; height: 15px; }
     .day-header { padding: 9px 10px 7px; background: #fafafa; border-bottom: 1px solid #f0f0f5; flex-shrink: 0; }
-    .day-name-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+    .day-name-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; }
     .day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #888; }
     .day-col.weekend .day-name { color: #ccc; }
     .day-date { font-size: 20px; font-weight: 800; color: #1a1a2e; line-height: 1.1; margin-top: 1px; }
@@ -89,10 +89,10 @@
     @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,.25)} 50%{box-shadow:0 0 0 5px rgba(0,0,0,0)} }
     .day-divider { grid-column: 1/-1; height: 1px; background: rgba(0,0,0,.06); margin: 2px 0; }
     /* ── Day pins (from topPin events) ── */
-    .day-pins { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
-    .day-pin { font-size: 13px; line-height: 1; padding: 1px 2px; border-radius: 4px; cursor: pointer; transition: background .12s; }
-    .day-pin:hover { background: rgba(0,0,0,.08); }
-    .day-pin img { width: 14px; height: 14px; border-radius: 3px; object-fit: cover; vertical-align: middle; }
+    .day-pins { display: flex; flex-wrap: wrap; gap: 3px; justify-content: flex-end; max-width: 58px; flex-shrink: 0; }
+    .day-pin { font-size: 20px; line-height: 1; width: 26px; height: 26px; border-radius: 7px; cursor: pointer; border: 3px solid rgba(0,0,0,.15); background: rgba(0,0,0,.03); display: flex; align-items: center; justify-content: center; box-sizing: border-box; transition: filter .12s; flex-shrink: 0; }
+    .day-pin:hover { filter: brightness(.88); }
+    .day-pin img { width: 17px; height: 17px; border-radius: 3px; object-fit: cover; }
 
     /* ── Item sizes ── */
     .item-wide { grid-column: 1 / -1; }
@@ -380,7 +380,7 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v0.8.4';
+  const APP_VERSION   = 'v0.8.5';
   const APP_BUILD     = '6 mrt 2026';
 
   const KEY_CALS      = 'gcal_calendars';   // [{id,name,url,color}]
@@ -809,7 +809,9 @@
     return pinEvts.map(e => {
       const icon = (overrides[e.uid]||{}).icon || e.icon || '🤝';
       const inner = icon.startsWith('data:') ? `<img src="${escHtml(icon)}">` : escHtml(icon);
-      return `<span class="day-pin" data-uid="${escHtml(e.uid)}" title="${escHtml(e.title)}">${inner}</span>`;
+      const cust = customers.find(c => c.id === e.customerId);
+      const borderColor = cust ? cust.text : (e.calColor || '#94a3b8');
+      return `<span class="day-pin" data-uid="${escHtml(e.uid)}" title="${escHtml(e.title)}" style="border-color:${escHtml(borderColor)}">${inner}</span>`;
     }).join('');
   }
 
