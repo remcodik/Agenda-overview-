@@ -7,6 +7,12 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>Mijn Week</title>
+  <script>
+    // Registreer Service Worker zo vroeg mogelijk
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(reg => reg.update());
+    }
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a2e; min-height: 100vh; }
@@ -15,13 +21,13 @@
     /* ── Topbar ── */
     .topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #1a1a2e; color: #fff; flex-shrink: 0; gap: 8px; }
     .week-nav { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center; min-width: 0; }
-    .week-nav button { background: rgba(255,255,255,.12); border: none; color: #fff; width: 34px; height: 34px; border-radius: 10px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .week-nav button { background: rgba(255,255,255,.12); border: none; color: #fff; width: 44px; height: 44px; border-radius: 12px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .week-nav button:hover { background: rgba(255,255,255,.22); }
-    .week-label { min-width: 0; display: flex; flex-direction: row; align-items: baseline; gap: 7px; }
-    .wl-week  { font-size: 20px; font-weight: 900; color: #fff; white-space: nowrap; line-height: 1.1; }
-    .wl-range { font-size: 14px; font-weight: 600; color: rgba(255,255,255,.75); white-space: nowrap; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-    @media (max-width: 480px) { .wl-week { font-size: 16px; } .wl-range { font-size: 11px; max-width: 110px; } }
-    .btn-settings { background: rgba(255,255,255,.12); border: none; color: #fff; width: 38px; height: 38px; border-radius: 10px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .week-label { min-width: 0; display: flex; flex-direction: row; align-items: baseline; gap: 8px; }
+    .wl-week  { font-size: 22px; font-weight: 900; color: #fff; white-space: nowrap; line-height: 1.1; }
+    .wl-range { font-size: 20px; font-weight: 700; color: rgba(255,255,255,.75); white-space: nowrap; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+    @media (max-width: 480px) { .wl-week { font-size: 17px; } .wl-range { font-size: 15px; max-width: 130px; } }
+    .btn-settings { background: rgba(255,255,255,.12); border: none; color: #fff; width: 44px; height: 44px; border-radius: 12px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .btn-settings:hover { background: rgba(255,255,255,.22); }
     #loading-dot { width: 6px; height: 6px; border-radius: 50%; background: #facc15; animation: ldot 1s infinite; display: none; flex-shrink: 0; }
     #loading-dot.show { display: block; }
@@ -215,7 +221,6 @@
   </header>
 
   <div class="legend">
-    <span class="legend-title">Kleur = klant</span>
     <div id="legend-customers"></div>
     <span id="hidden-badge">🔒 <span id="hidden-count">0</span> verborgen</span>
     <span class="legend-hint">Tik · houd ingedrukt om te bewerken</span>
@@ -375,7 +380,7 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v0.8.3';
+  const APP_VERSION   = 'v0.8.4';
   const APP_BUILD     = '6 mrt 2026';
 
   const KEY_CALS      = 'gcal_calendars';   // [{id,name,url,color}]
@@ -956,6 +961,34 @@
       reader.readAsDataURL(file);
     });
     grid.appendChild(uploadLabel);
+
+    // Emoji invoer — snel emoji toevoegen en direct selecteren
+    const emojiRow = document.createElement('div');
+    emojiRow.className = 'sh-emoji-row';
+    emojiRow.innerHTML = `<input class="sh-emoji-input" type="text" placeholder="Typ emoji  ☕ 🐕 🌞" maxlength="8"><button class="sh-emoji-add">＋ Gebruik</button>`;
+    const emojiInput = emojiRow.querySelector('.sh-emoji-input');
+    const applyEmoji = () => {
+      const val = emojiInput.value.trim();
+      if (!val) return;
+      // Voeg toe aan globale lijst als nog niet aanwezig
+      if (!customEmojis.includes(val)) {
+        customEmojis.push(val);
+        localStorage.setItem(KEY_EMOJIS, JSON.stringify(customEmojis));
+      }
+      // Zoek of maak icoon-element en selecteer het
+      let target = [...grid.querySelectorAll('.sh-icon:not(.sh-icon-upload)')].find(el => !el.dataset.dataUrl && el.textContent.trim() === val);
+      if (!target) {
+        target = makeIconEl(val, false, null);
+        grid.insertBefore(target, uploadLabel);
+      }
+      grid.querySelectorAll('.sh-icon').forEach(c => c.classList.remove('selected'));
+      target.classList.add('selected');
+      document.getElementById('sheet-icon-display').innerHTML = val;
+      emojiInput.value = '';
+    };
+    emojiRow.querySelector('.sh-emoji-add').addEventListener('click', applyEmoji);
+    emojiInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); applyEmoji(); } });
+    grid.prepend(emojiRow);
 
   }
 
