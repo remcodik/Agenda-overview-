@@ -53,13 +53,10 @@
     .day-col.weekend { opacity: .7; }
     .day-col.weekend .day-body { grid-template-columns: 1fr; }
     .day-col.weekend .item-wide,
-    .day-col.weekend .item-large { grid-column: auto; min-height: auto; }
-    .day-col.weekend .item-wide .item-text,
-    .day-col.weekend .item-large .item-text { max-width: 0; opacity: 0; }
-    .day-col.weekend .item-wide:hover .item-text,
-    .day-col.weekend .item-large:hover .item-text { max-width: 180px; opacity: 1; }
+    .day-col.weekend .item-large { grid-column: auto; flex-direction: row; justify-content: flex-start; min-height: auto; padding: 6px 4px; }
     .day-col.weekend .item-large .item-icon { font-size: 15px; }
     .day-col.weekend .item-large .item-icon img { width: 15px; height: 15px; }
+    .day-col.weekend .item-large .item-text { width: auto; text-align: left; font-size: 11px; }
     .day-header { padding: 9px 10px 7px; background: #fafafa; border-bottom: 1px solid #f0f0f5; flex-shrink: 0; }
     .day-name-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; }
     .day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #888; }
@@ -75,15 +72,27 @@
     @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
     /* ── Item tile ── */
-    .item { display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 9px; padding: 6px 4px; cursor: pointer; overflow: hidden; transition: filter .15s, box-shadow .15s, transform .1s; user-select: none; min-width: 0; position: relative; }
+    .item { display: flex; align-items: center; justify-content: center; gap: 5px; border-radius: 9px; padding: 6px 4px; cursor: pointer; overflow: hidden; transition: filter .15s, box-shadow .15s, transform .1s; user-select: none; min-width: 0; position: relative; }
     .item:hover, .item.active { filter: brightness(.92); box-shadow: 0 2px 10px rgba(0,0,0,.14); transform: translateY(-1px); }
     .item:active { transform: scale(.97); }
     .item-meeting { border-left: 3px solid rgba(0,0,0,.18); }
     .item-icon { font-size: 15px; flex-shrink: 0; line-height: 1; display: flex; align-items: center; justify-content: center; }
     .item-icon img { width: 15px; height: 15px; border-radius: 3px; object-fit: cover; }
-    .item-text { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; max-width: 0; opacity: 0; transition: max-width .25s ease, opacity .2s ease; }
+    /* Text: verborgen op normaal formaat, zichtbaar bij hover of speciale klassen */
+    .item-text { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 0; opacity: 0; transition: max-width .25s ease, opacity .2s ease; flex: 0 1 auto; }
     .item:hover .item-text, .item.active .item-text { max-width: 180px; opacity: 1; }
-    .item-no-icon .item-text { max-width: 160px; opacity: 1; }
+    /* Geen icon → tekst altijd zichtbaar, vult beschikbare ruimte */
+    .item-no-icon { justify-content: flex-start; padding: 6px 7px; }
+    .item-no-icon .item-text { max-width: none; opacity: 1; flex: 1; min-width: 0; }
+    /* Breed: icon links, tekst vult rest af */
+    .item-wide { justify-content: flex-start; padding: 6px 8px; }
+    .item-wide .item-icon { font-size: 16px; }
+    .item-wide .item-text { max-width: none; opacity: 1; flex: 1; min-width: 0; }
+    /* Groot: icon groter, tekst eronder altijd zichtbaar */
+    .item-large { flex-direction: column; justify-content: center; gap: 3px; padding: 8px 6px; min-height: 60px; }
+    .item-large .item-icon { font-size: 22px; }
+    .item-large .item-icon img { width: 22px; height: 22px; }
+    .item-large .item-text { max-width: 100%; width: 100%; opacity: 1; text-align: center; font-size: 10px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .item-toppin-anchor { display: none; }
     .upcoming { animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,.25)} 50%{box-shadow:0 0 0 5px rgba(0,0,0,0)} }
@@ -94,12 +103,9 @@
     .day-pin:hover { filter: brightness(.88); }
     .day-pin img { width: 17px; height: 17px; border-radius: 3px; object-fit: cover; }
 
-    /* ── Item sizes ── */
-    .item-wide { grid-column: 1 / -1; }
-    .item-large { grid-column: 1 / -1; min-height: 58px; }
-    .item-large .item-icon { font-size: 20px; }
-    .item-large .item-icon img { width: 20px; height: 20px; }
-    .item-wide .item-text, .item-large .item-text { max-width: 200px; opacity: 1; }
+    /* ── Item sizes (grid placement) ── */
+    .item-wide  { grid-column: 1 / -1; }
+    .item-large { grid-column: 1 / -1; }
 
     /* ── Size selector ── */
     .size-seg { display: flex; gap: 6px; }
@@ -380,7 +386,7 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v0.8.5';
+  const APP_VERSION   = 'v0.8.6';
   const APP_BUILD     = '6 mrt 2026';
 
   const KEY_CALS      = 'gcal_calendars';   // [{id,name,url,color}]
@@ -475,8 +481,7 @@
     for (const raw of lines) {
       if (raw === 'BEGIN:VEVENT') { ev = {}; continue; }
       if (raw === 'END:VEVENT' && ev) {
-        const parsed = interpretEvent(ev, wStart, wEnd, calColor);
-        if (parsed) events.push(parsed);
+        interpretEvent(ev, wStart, wEnd, calColor).forEach(e => events.push(e));
         ev = null; continue;
       }
       if (!ev) continue;
@@ -497,29 +502,27 @@
   }
 
   function interpretEvent(ev, wStart, wEnd, calColor) {
-    if (!ev['DTSTART']) return null;
-    // Skip cancelled events
-    if ((ev['STATUS']||'').toUpperCase() === 'CANCELLED') return null;
+    if (!ev['DTSTART']) return [];
+    if ((ev['STATUS']||'').toUpperCase() === 'CANCELLED') return [];
     const {date: startDate, allDay} = parseIcsDate(ev['DTSTART'], ev['DTSTART_PARAMS']||'');
-    if (!startDate || isNaN(startDate)) return null;
+    if (!startDate || isNaN(startDate)) return [];
 
     const uid     = ev['UID'] || (isoDate(startDate)+'_'+(ev['SUMMARY']||''));
     const summary = unescIcs(ev['SUMMARY']||'(geen titel)');
     const rrule   = ev['RRULE']||'';
     const exdates = ev['EXDATE']||'';
-    let eventDate = null;
 
-    if (startDate >= wStart && startDate <= wEnd) {
-      // Check if this specific date is excluded
-      if (!isExcludedDate(startDate, exdates)) eventDate = startDate;
-    } else if (rrule) {
-      eventDate = getRecurringInstance(startDate, rrule, exdates, wStart, wEnd);
-    }
-    if (!eventDate) return null;
-
-    return { uid, date: eventDate, type: allDay ? 'task' : 'meeting',
+    const makeEvent = date => ({ uid, date, type: allDay ? 'task' : 'meeting',
       icon: allDay ? '📋' : '🤝', title: summary,
-      calColor: calColor||'#3b82f6', customerId: null };
+      calColor: calColor||'#3b82f6', customerId: null });
+
+    if (rrule) {
+      return getRecurringInstances(startDate, rrule, exdates, wStart, wEnd).map(makeEvent);
+    }
+    if (startDate >= wStart && startDate <= wEnd && !isExcludedDate(startDate, exdates)) {
+      return [makeEvent(startDate)];
+    }
+    return [];
   }
 
   function isExcludedDate(date, exdateStr) {
@@ -543,21 +546,21 @@
     return { date: utc ? new Date(Date.UTC(y,mo,d,h,mi,se)) : new Date(y,mo,d,h,mi,se), allDay:false };
   }
 
-  function getRecurringInstance(start, rrule, exdates, wStart, wEnd) {
+  // Returns ALL dates within wStart..wEnd where this recurring event occurs
+  function getRecurringInstances(start, rrule, exdates, wStart, wEnd) {
     const freq     = (rrule.match(/FREQ=(\w+)/)||[])[1];
-    if (!freq) return null;
+    if (!freq) return [];
     const until    = rrule.match(/UNTIL=([^;]+)/);
     const count    = parseInt((rrule.match(/COUNT=(\d+)/)||[])[1] || '0');
     const interval = parseInt((rrule.match(/INTERVAL=(\d+)/)||[])[1] || '1');
-
-    // Midnight-normalised start for day-level comparisons
     const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const results  = [];
 
-    function checkBounds(c, occurrenceIndex) {
+    function ok(c, occIdx) {
       if (c < startDay) return false;
       if (until) { const {date:u} = parseIcsDate(until[1],''); if (c > u) return false; }
-      if (count > 0 && occurrenceIndex >= count) return false;
-      return true;
+      if (count > 0 && occIdx >= count) return false;
+      return !isExcludedDate(c, exdates);
     }
 
     if (freq === 'WEEKLY') {
@@ -566,61 +569,44 @@
       const targetDays = bydayMatch
         ? bydayMatch[1].split(',').map(d => DAYMAP[d.trim().slice(-2).toUpperCase()]).filter(d => d !== undefined)
         : [start.getDay()];
-
-      // Monday of the start week (for interval calculation)
       const startWkMon = new Date(startDay);
       startWkMon.setDate(startDay.getDate() - ((startDay.getDay() + 6) % 7));
-
-      // Monday of the candidate week
-      const wMon = new Date(wStart);
-      const weeksDiff = Math.round((wMon - startWkMon) / (7 * 24 * 3600 * 1000));
-
-      // Wrong interval week — skip entirely
-      if (weeksDiff < 0 || weeksDiff % interval !== 0) return null;
-
+      const weeksDiff = Math.round((new Date(wStart) - startWkMon) / (7 * 24 * 3600 * 1000));
+      if (weeksDiff < 0 || weeksDiff % interval !== 0) return [];
       for (let i = 0; i < 7; i++) {
         const c = new Date(wStart); c.setDate(wStart.getDate() + i);
         if (!targetDays.includes(c.getDay())) continue;
-        // occurrenceIndex: how many occurrences of this weekday have happened
-        const weeksSinceStartForDay = Math.round((c - startDay) / (7 * 24 * 3600 * 1000));
-        const occIdx = weeksSinceStartForDay / interval;
-        if (!checkBounds(c, occIdx)) continue;
-        if (isExcludedDate(c, exdates)) continue;
-        return c;
+        const occIdx = Math.round((c - startDay) / (interval * 7 * 24 * 3600 * 1000));
+        if (ok(c, occIdx)) results.push(c);
       }
 
     } else if (freq === 'DAILY') {
-      // Return one instance per day of the week that qualifies
       for (let i = 0; i < 7; i++) {
         const c = new Date(wStart); c.setDate(wStart.getDate() + i);
-        const daysSinceStart = Math.round((c - startDay) / (24 * 3600 * 1000));
-        if (daysSinceStart < 0 || daysSinceStart % interval !== 0) continue;
-        if (!checkBounds(c, daysSinceStart / interval)) continue;
-        if (!isExcludedDate(c, exdates)) return c; // return first valid day
+        const days = Math.round((c - startDay) / (24 * 3600 * 1000));
+        if (days < 0 || days % interval !== 0) continue;
+        if (ok(c, days / interval)) results.push(c);
       }
 
     } else if (freq === 'MONTHLY') {
-      const targetDOM = start.getDate();
       for (let i = 0; i < 7; i++) {
         const c = new Date(wStart); c.setDate(wStart.getDate() + i);
-        if (c.getDate() !== targetDOM) continue;
-        const monthsSinceStart = (c.getFullYear() - start.getFullYear()) * 12 + (c.getMonth() - start.getMonth());
-        if (monthsSinceStart < 0 || monthsSinceStart % interval !== 0) continue;
-        if (!checkBounds(c, monthsSinceStart / interval)) continue;
-        if (!isExcludedDate(c, exdates)) return c;
+        if (c.getDate() !== start.getDate()) continue;
+        const months = (c.getFullYear() - start.getFullYear()) * 12 + (c.getMonth() - start.getMonth());
+        if (months < 0 || months % interval !== 0) continue;
+        if (ok(c, months / interval)) results.push(c);
       }
 
     } else if (freq === 'YEARLY') {
       for (let i = 0; i < 7; i++) {
         const c = new Date(wStart); c.setDate(wStart.getDate() + i);
         if (c.getMonth() !== start.getMonth() || c.getDate() !== start.getDate()) continue;
-        const yearsSinceStart = c.getFullYear() - start.getFullYear();
-        if (yearsSinceStart < 0 || yearsSinceStart % interval !== 0) continue;
-        if (!checkBounds(c, yearsSinceStart / interval)) continue;
-        if (!isExcludedDate(c, exdates)) return c;
+        const years = c.getFullYear() - start.getFullYear();
+        if (years < 0 || years % interval !== 0) continue;
+        if (ok(c, years / interval)) results.push(c);
       }
     }
-    return null;
+    return results;
   }
 
   function unescIcs(s) { return s.replace(/\\n/g,'\n').replace(/\\,/g,',').replace(/\\;/g,';').replace(/\\\\/g,'\\'); }
