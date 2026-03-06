@@ -11,22 +11,18 @@
 
     /* ── Topbar ── */
     .topbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #1a1a2e; color: #fff; flex-shrink: 0; gap: 8px; }
-    .topbar-title { font-size: 16px; font-weight: 700; white-space: nowrap; }
-    .week-nav { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; min-width: 0; }
-    .week-nav button { background: rgba(255,255,255,.12); border: none; color: #fff; width: 30px; height: 30px; border-radius: 8px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .week-nav { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center; min-width: 0; }
+    .week-nav button { background: rgba(255,255,255,.12); border: none; color: #fff; width: 34px; height: 34px; border-radius: 10px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .week-nav button:hover { background: rgba(255,255,255,.22); }
     .week-label { font-size: 12px; font-weight: 600; text-align: center; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 0; }
-    .wl-week { font-size: 11px; font-weight: 800; line-height: 1.3; color: #fff; }
-    .wl-range { font-size: 10px; color: rgba(255,255,255,.72); white-space: nowrap; line-height: 1.2; max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
-    .topbar-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    @media (max-width: 480px) { .topbar-title-text { display: none; } .wl-week { font-size: 10px; } .wl-range { font-size: 9px; max-width: 90px; } #version-badge { padding: 3px 6px; font-size: 9px; } }
-    #version-badge { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.6); padding: 4px 9px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; transition: background .15s, color .15s; }
-    #version-badge:hover { background: rgba(255,255,255,.2); color: #fff; }
-    .btn-settings { background: rgba(255,255,255,.12); border: none; color: #fff; width: 34px; height: 34px; border-radius: 8px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .btn-cal-connect { background: rgba(255,255,255,.12); border: none; color: #fff; padding: 4px 8px; border-radius: 7px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s; }
-    .btn-cal-connect:hover { background: rgba(255,255,255,.22); }
-    .btn-cal-connect.connected { background: #14532d; color: #86efac; }
-    .btn-cal-connect.loading { opacity: .6; cursor: default; }
+    .wl-week { font-size: 13px; font-weight: 800; line-height: 1.3; color: #fff; }
+    .wl-range { font-size: 11px; color: rgba(255,255,255,.72); white-space: nowrap; line-height: 1.2; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+    @media (max-width: 480px) { .wl-week { font-size: 12px; } .wl-range { font-size: 10px; max-width: 100px; } }
+    .btn-settings { background: rgba(255,255,255,.12); border: none; color: #fff; width: 38px; height: 38px; border-radius: 10px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .btn-settings:hover { background: rgba(255,255,255,.22); }
+    #loading-dot { width: 6px; height: 6px; border-radius: 50%; background: #facc15; animation: ldot 1s infinite; display: none; flex-shrink: 0; }
+    #loading-dot.show { display: block; }
+    @keyframes ldot { 0%,100%{opacity:1} 50%{opacity:.25} }
 
     /* ── Legend ── */
     .legend { display: flex; align-items: center; gap: 14px; padding: 7px 20px; background: #fff; border-bottom: 1px solid #f0f0f5; font-size: 11px; flex-shrink: 0; flex-wrap: wrap; }
@@ -73,16 +69,26 @@
     .upcoming { animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,.25)} 50%{box-shadow:0 0 0 5px rgba(0,0,0,0)} }
     .day-divider { grid-column: 1/-1; height: 1px; background: rgba(0,0,0,.06); margin: 2px 0; }
-    .btn-add { width: 100%; border: 1.5px dashed #d8d8e8; background: transparent; border-radius: 7px; padding: 5px; font-size: 13px; color: #c8c8d8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: border-color .15s, color .15s; }
-    .btn-add:hover { border-color: #4f8ef7; color: #4f8ef7; }
-
-    /* ── Day pins ── */
+    /* ── Day pins (from topPin events) ── */
     .day-pins { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
     .day-pin { font-size: 13px; line-height: 1; padding: 1px 2px; border-radius: 4px; cursor: pointer; transition: background .12s; }
     .day-pin:hover { background: rgba(0,0,0,.08); }
     .day-pin img { width: 14px; height: 14px; border-radius: 3px; object-fit: cover; vertical-align: middle; }
-    .btn-add-pin { background: none; border: 1px dashed #e0e0e8; color: #c8c8d8; border-radius: 4px; font-size: 9px; padding: 1px 3px; cursor: pointer; line-height: 1.4; flex-shrink: 0; }
-    .btn-add-pin:hover { border-color: #4f8ef7; color: #4f8ef7; }
+
+    /* ── Item sizes ── */
+    .item-wide { grid-column: 1 / -1; }
+    .item-large { grid-column: 1 / -1; min-height: 58px; }
+    .item-large .item-icon { font-size: 20px; }
+    .item-large .item-icon img { width: 20px; height: 20px; }
+    .item-wide .item-text, .item-large .item-text { max-width: 200px; opacity: 1; }
+
+    /* ── Size selector ── */
+    .size-seg { display: flex; gap: 6px; }
+    .size-seg input { display: none; }
+    .size-opt { display: flex; align-items: center; justify-content: center; gap: 3px; padding: 8px 10px; border: 2px solid #e8e8f0; border-radius: 9px; cursor: pointer; transition: border-color .15s, background .15s; min-width: 44px; }
+    .size-seg input:checked + .size-opt { border-color: #4f8ef7; background: #eff6ff; }
+    .size-demo { width: 14px; height: 14px; background: #cbd5e1; border-radius: 3px; display: block; flex-shrink: 0; }
+    .size-opt-large .size-demo { width: 28px; height: 28px; }
 
     /* ── Custom emoji input ── */
     .sh-emoji-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; flex: 0 0 100%; width: 100%; }
@@ -186,17 +192,13 @@
 <div class="app">
 
   <header class="topbar">
-    <span class="topbar-title">📅 <span class="topbar-title-text">Mijn Week</span></span>
+    <span id="loading-dot"></span>
     <div class="week-nav">
       <button id="btn-prev-week">&#8249;</button>
       <span class="week-label"><span class="wl-week">Week —</span><span class="wl-range">laden…</span></span>
       <button id="btn-next-week">&#8250;</button>
     </div>
-    <div class="topbar-actions">
-      <button id="btn-cal-connect" class="btn-cal-connect">Koppel</button>
-      <button id="version-badge" title="Versiegeschiedenis">v0.7</button>
-      <button class="btn-settings" onclick="location.href='customize.html'">⚙️</button>
-    </div>
+    <button class="btn-settings" onclick="location.href='customize.html'" title="Instellingen">⚙️</button>
   </header>
 
   <div class="legend">
@@ -232,15 +234,32 @@
         <div class="cust-chips" id="edit-cust-chips"></div>
       </div>
       <div>
-        <div class="sheet-label">Type</div>
-        <div class="type-seg">
-          <input type="radio" name="sh-type" id="sh-meeting" value="meeting" checked /><label for="sh-meeting">🤝 Meeting</label>
-          <input type="radio" name="sh-type" id="sh-task" value="task" /><label for="sh-task">✅ Taak</label>
-        </div>
-      </div>
-      <div>
         <div class="sheet-label">Icoon &nbsp;<span style="font-size:10px;color:#bbb;font-weight:400">— kies of upload foto</span></div>
         <div class="sh-icon-grid" id="edit-icon-grid"></div>
+      </div>
+      <div>
+        <div class="sheet-label">Formaat</div>
+        <div class="size-seg">
+          <input type="radio" name="sh-size" id="sh-size-normal" value="normal" checked />
+          <label for="sh-size-normal" class="size-opt" title="Normaal (1 kolom)">
+            <span class="size-demo"></span>
+          </label>
+          <input type="radio" name="sh-size" id="sh-size-wide" value="wide" />
+          <label for="sh-size-wide" class="size-opt" title="Breed (2 breed)">
+            <span class="size-demo"></span><span class="size-demo"></span>
+          </label>
+          <input type="radio" name="sh-size" id="sh-size-large" value="large" />
+          <label for="sh-size-large" class="size-opt size-opt-large" title="Groot (2×2)">
+            <span class="size-demo"></span>
+          </label>
+        </div>
+      </div>
+      <div class="sh-toggle-row">
+        <div class="sh-toggle-info">
+          <div class="sh-toggle-label">📌 Topdag</div>
+          <div class="sh-toggle-sub">Toon icoon bovenaan de dag</div>
+        </div>
+        <label class="sh-switch"><input type="checkbox" id="sh-toppin" /><span class="sh-slider"></span></label>
       </div>
       <div class="sh-toggle-row">
         <div class="sh-toggle-info">
@@ -309,23 +328,6 @@
   </div>
 </div>
 
-<!-- ── Pin picker (dagicoon) ── -->
-<div id="pin-picker-sheet" class="bottom-sheet">
-  <div class="bs-backdrop" id="pin-picker-backdrop"></div>
-  <div class="bs-panel">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title-row">
-      <span style="font-size:20px">📌</span>
-      <span id="pin-picker-title" style="flex:1;font-size:15px;font-weight:800;color:#1a1a2e">Dagicoon toevoegen</span>
-      <button class="sheet-close" id="pin-picker-close">×</button>
-    </div>
-    <div class="sheet-body">
-      <div class="sheet-label">Kies emoji of icoon &nbsp;<span style="font-size:10px;color:#bbb;font-weight:400">— tik om toe te voegen · tik pin om te verwijderen</span></div>
-      <div class="sh-icon-grid" id="pin-icon-grid"></div>
-    </div>
-  </div>
-</div>
-
 <!-- ── Version history ── -->
 <div id="version-panel" class="bottom-sheet">
   <div class="bs-backdrop" id="version-panel-backdrop"></div>
@@ -339,7 +341,11 @@
       </div>
       <button class="sheet-close" id="version-panel-close">×</button>
     </div>
+    <div style="padding:12px 18px 0;display:flex;gap:8px;">
+      <button id="btn-reload-app" style="flex:1;border:1.5px solid #dbeafe;background:#f8faff;color:#1e40af;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Ververs app</button>
+    </div>
     <div id="version-list">
+      <div class="version-entry"><span class="version-tag">v0.8.0</span><span class="version-date">2026-03-06</span><span class="version-desc">Topdag-toggle per meeting, 3 formaten (normaal/breed/groot), versie- &amp; agendabeheer naar Instellingen, topbar versimpeld.</span></div>
       <div class="version-entry"><span class="version-tag">v0.7.0</span><span class="version-date">2026-03-06</span><span class="version-desc">Dagiconen (pin emoji/foto bovenaan dag), eigen emoji invoer in icoonkiezer, week+datum tweeregelslabel, compactere koppelknop.</span></div>
       <div class="version-entry"><span class="version-tag">v0.6.0</span><span class="version-date">2026-03-05</span><span class="version-desc">Meerdere agenda's, klanten vanuit customize, foto's als icoon, uitsluitend agenda-data (geen demo-mix).</span></div>
       <div class="version-entry"><span class="version-tag">v0.5.0</span><span class="version-date">2026-03-04</span><span class="version-desc">Google Agenda koppeling via ICS-link.</span></div>
@@ -356,14 +362,13 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v0.7.0';
+  const APP_VERSION   = 'v0.8.0';
   const APP_BUILD     = '6 mrt 2026';
 
   const KEY_CALS      = 'gcal_calendars';   // [{id,name,url,color}]
   const KEY_CUSTOMERS = 'app_customers';    // [{id,name,bg,text}]
   const KEY_ICONS     = 'custom_icons';     // [{id,dataUrl,label}]
-  const KEY_OVERRIDES = 'event_overrides';  // {uid:{customerId,icon,private}}
-  const KEY_DAY_PINS  = 'day_pins';         // {dateStr:[icon,...]}
+  const KEY_OVERRIDES = 'event_overrides';  // {uid:{customerId,icon,private,topPin,size}}
 
   const DEFAULT_CUSTOMERS = [
     {id:'c1', name:'Acme Corp',   bg:'#ede0ff', text:'#4c1d95'},
@@ -390,7 +395,6 @@
   let customers  = loadJson(KEY_CUSTOMERS, null) || DEFAULT_CUSTOMERS;
   let customIcons= loadJson(KEY_ICONS,     []);
   let overrides  = loadJson(KEY_OVERRIDES, {});
-  let dayPins    = loadJson(KEY_DAY_PINS,  {});
 
   let calEvents   = [];
   let isConnected = false;
@@ -528,7 +532,8 @@
   async function loadAllCalendars() {
     if (!calendars.length) return;
     isLoading = true;
-    renderWeek(); // show skeleton, no demo data
+    document.getElementById('loading-dot').classList.add('show');
+    renderWeek();
 
     const dates = getWeekDates(weekOffset);
     try {
@@ -538,15 +543,15 @@
       calEvents   = results.flat();
       isConnected = true;
       isLoading   = false;
+      document.getElementById('loading-dot').classList.remove('show');
       renderWeek();
-      updateConnectBtn(true);
     } catch(err) {
       console.error(err);
       isLoading = false;
       isConnected = false;
+      document.getElementById('loading-dot').classList.remove('show');
       renderWeek();
-      updateConnectBtn(false);
-      alert('Kon agenda niet laden:\n' + err.message + '\n\nControleer de ICS-link in ⚙️ Customize.');
+      alert('Kon agenda niet laden:\n' + err.message + '\n\nControleer de ICS-link in ⚙️ Instellingen.');
     }
   }
 
@@ -597,6 +602,9 @@
 
     buildLegend();
     updateHiddenBadge();
+    // Show hint when running on demo data
+    const hint = document.querySelector('.legend-hint');
+    if (hint) hint.textContent = hasCals ? 'Tik · houd ingedrukt om te bewerken' : 'Demo-data · tik ⚙️ om agenda te koppelen';
   }
 
   function buildDayCol(date, events, isToday, isWeekend, gridCol, gridRow) {
@@ -610,12 +618,11 @@
       <div class="day-header">
         <div class="day-name-row">
           <span class="day-name">${DAY_NAMES[date.getDay()]}${isToday?' · Vandaag':''}</span>
-          <div class="day-pins" id="pins-${isoDate(date)}">${renderPinsHtml(isoDate(date))}</div>
+          <div class="day-pins" id="pins-${isoDate(date)}">${renderPinsHtml(events)}</div>
         </div>
         <div class="day-date">${date.getDate()}</div>
       </div>
       <div class="day-body"></div>
-      <div class="day-footer"><button class="btn-add">＋</button></div>
     `;
 
     const body = col.querySelector('.day-body');
@@ -648,8 +655,9 @@
     const bg   = cust ? cust.bg   : (ev.calColor ? hexToLight(ev.calColor) : '#f1f5f9');
     const text = cust ? cust.text : '#1e293b';
 
+    const size = (overrides[ev.uid]||{}).size || 'normal';
     const el = document.createElement('div');
-    el.className = `item ${ev.type==='meeting'?'item-meeting':'item-task'}`;
+    el.className = `item ${ev.type==='meeting'?'item-meeting':'item-task'}${size!=='normal'?' item-'+size:''}`;
     el.style.background = bg;
     el.style.color      = text;
     if (ev._private) el.classList.add('item-hidden');
@@ -677,93 +685,14 @@
   /* ═══════════════════════════════════
      DAY PINS (dagiconen)
   ═══════════════════════════════════ */
-  function renderPinsHtml(dateStr) {
-    const pins = dayPins[dateStr] || [];
-    let html = '';
-    pins.forEach((pin, i) => {
-      const inner = pin.startsWith('data:')
-        ? `<img src="${escHtml(pin)}">`
-        : escHtml(pin);
-      html += `<span class="day-pin" data-date="${dateStr}" data-idx="${i}" title="Tik om te verwijderen">${inner}</span>`;
-    });
-    if (pins.length < 4) {
-      html += `<button class="btn-add-pin" data-date="${dateStr}" title="Dagicoon toevoegen">＋</button>`;
-    }
-    return html;
+  function renderPinsHtml(dayEvents) {
+    const pinEvts = (dayEvents||[]).filter(e => (overrides[e.uid]||{}).topPin);
+    return pinEvts.map(e => {
+      const icon = (overrides[e.uid]||{}).icon || e.icon || '🤝';
+      const inner = icon.startsWith('data:') ? `<img src="${escHtml(icon)}">` : escHtml(icon);
+      return `<span class="day-pin" data-uid="${escHtml(e.uid)}" title="${escHtml(e.title)}">${inner}</span>`;
+    }).join('');
   }
-
-  function addDayPin(dateStr, icon) {
-    if (!dateStr) return;
-    if (!dayPins[dateStr]) dayPins[dateStr] = [];
-    if (dayPins[dateStr].length >= 4) return;
-    dayPins[dateStr].push(icon);
-    localStorage.setItem(KEY_DAY_PINS, JSON.stringify(dayPins));
-    const pinsEl = document.getElementById('pins-' + dateStr);
-    if (pinsEl) pinsEl.innerHTML = renderPinsHtml(dateStr);
-    closeSheet(document.getElementById('pin-picker-sheet'));
-  }
-
-  function removeDayPin(dateStr, idx) {
-    if (!dayPins[dateStr]) return;
-    dayPins[dateStr].splice(idx, 1);
-    if (!dayPins[dateStr].length) delete dayPins[dateStr];
-    localStorage.setItem(KEY_DAY_PINS, JSON.stringify(dayPins));
-    const pinsEl = document.getElementById('pins-' + dateStr);
-    if (pinsEl) pinsEl.innerHTML = renderPinsHtml(dateStr);
-  }
-
-  let activePinDate = null;
-
-  function buildPinIconGrid() {
-    const grid = document.getElementById('pin-icon-grid');
-    grid.innerHTML = '';
-
-    // Custom emoji input row
-    const emojiRow = document.createElement('div');
-    emojiRow.className = 'sh-emoji-row';
-    emojiRow.innerHTML = `<input class="sh-emoji-input" type="text" placeholder="Typ emoji  🐕 ☕ 🌞" maxlength="8"><button class="sh-emoji-add">＋ Voeg toe</button>`;
-    const emojiInput = emojiRow.querySelector('.sh-emoji-input');
-    const addEmojiPin = () => {
-      const val = emojiInput.value.trim();
-      if (val) { addDayPin(activePinDate, val); emojiInput.value = ''; }
-    };
-    emojiRow.querySelector('.sh-emoji-add').addEventListener('click', addEmojiPin);
-    emojiInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addEmojiPin(); } });
-    grid.appendChild(emojiRow);
-
-    function makePinIcon(icon, dataUrl) {
-      const el = document.createElement('div');
-      el.className = 'sh-icon';
-      if (dataUrl) { el.dataset.dataUrl = dataUrl; el.innerHTML = `<img src="${escHtml(dataUrl)}" alt="">`; }
-      else el.textContent = icon;
-      el.addEventListener('click', () => addDayPin(activePinDate, dataUrl || icon));
-      return el;
-    }
-
-    EMOJI_ICONS.forEach(icon => grid.appendChild(makePinIcon(icon)));
-    customIcons.forEach(ci => grid.appendChild(makePinIcon(ci.dataUrl, ci.dataUrl)));
-
-    const uploadLabel = document.createElement('label');
-    uploadLabel.className = 'sh-icon sh-icon-upload';
-    uploadLabel.title = 'Foto uploaden';
-    uploadLabel.innerHTML = `📷<input type="file" accept="image/*">`;
-    uploadLabel.querySelector('input').addEventListener('change', e => {
-      const file = e.target.files[0]; if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        const dataUrl = ev.target.result;
-        customIcons.push({id:'icon_'+Date.now(), dataUrl, label: file.name});
-        localStorage.setItem(KEY_ICONS, JSON.stringify(customIcons));
-        addDayPin(activePinDate, dataUrl);
-      };
-      reader.readAsDataURL(file);
-    });
-    grid.appendChild(uploadLabel);
-  }
-
-  const pinPickerSheet = document.getElementById('pin-picker-sheet');
-  document.getElementById('pin-picker-close').addEventListener('click',    () => closeSheet(pinPickerSheet));
-  document.getElementById('pin-picker-backdrop').addEventListener('click', () => closeSheet(pinPickerSheet));
 
   /* ═══════════════════════════════════
      LEGEND
@@ -808,33 +737,6 @@
     else renderWeek();
   }
 
-  /* ═══════════════════════════════════
-     CONNECT BUTTON
-  ═══════════════════════════════════ */
-  function updateConnectBtn(connected) {
-    const btn = document.getElementById('btn-cal-connect');
-    if (connected) {
-      btn.textContent = `✓ ${calendars.length} agenda${calendars.length!==1?'\'s':''}`;
-      btn.className   = 'btn-cal-connect connected';
-    } else if (isLoading) {
-      btn.textContent = '⟳ Laden…';
-      btn.className   = 'btn-cal-connect loading';
-    } else {
-      btn.textContent = 'Koppel';
-      btn.className   = 'btn-cal-connect';
-    }
-  }
-
-  document.getElementById('btn-cal-connect').addEventListener('click', () => {
-    if (isConnected) {
-      loadAllCalendars(); // reload
-    } else {
-      clearSetupError();
-      document.getElementById('setup-ics-input').value = '';
-      document.getElementById('setup-name-input').value = '';
-      openSheet(document.getElementById('setup-sheet'));
-    }
-  });
 
   /* ═══════════════════════════════════
      SETUP SHEET
@@ -843,6 +745,11 @@
   document.getElementById('setup-close').addEventListener('click',   () => closeSheet(setupSheet));
   document.getElementById('setup-backdrop').addEventListener('click', () => closeSheet(setupSheet));
   document.getElementById('btn-setup-manage').addEventListener('click', () => { closeSheet(setupSheet); location.href='customize.html'; });
+
+  // Auto-open setup if no calendars yet (first run)
+  if (!calendars.length) {
+    setTimeout(() => openSheet(document.getElementById('setup-sheet')), 400);
+  }
 
   document.getElementById('btn-setup-save').addEventListener('click', async () => {
     const url  = document.getElementById('setup-ics-input').value.trim();
@@ -986,8 +893,11 @@
       ? `<img src="${escHtml(imgEl.src)}" alt="">`
       : (iconEl?.textContent?.trim() || '📋');
 
-    document.getElementById(item.classList.contains('item-meeting') ? 'sh-meeting' : 'sh-task').checked = true;
     document.getElementById('sh-private').checked = item.classList.contains('item-hidden');
+    document.getElementById('sh-toppin').checked  = !!(ov.topPin);
+    const size = ov.size || 'normal';
+    const sizeRadio = document.querySelector(`input[name="sh-size"][value="${size}"]`);
+    if (sizeRadio) sizeRadio.checked = true;
 
     buildCustomerChips(custId !== null ? custId : item.dataset.custId || '');
     buildIconGrid(currentIcon);
@@ -1001,48 +911,29 @@
   document.getElementById('sheet-save').addEventListener('click', () => {
     if (!activeItem) { closeSheet(editSheet); return; }
 
-    // Title
-    const textEl = activeItem.querySelector('.item-text');
-    if (textEl) textEl.textContent = titleInput.value;
+    const uid = activeItem.dataset.uid;
 
     // Icon
     const selIconEl = document.querySelector('#edit-icon-grid .sh-icon.selected');
-    let iconVal = '';
-    if (selIconEl) {
-      iconVal = selIconEl.dataset.dataUrl || selIconEl.textContent.trim();
-    }
-    const iconElInItem = activeItem.querySelector('.item-icon');
-    if (iconElInItem && iconVal) iconElInItem.innerHTML = buildIconHtml(iconVal);
+    const iconVal = selIconEl ? (selIconEl.dataset.dataUrl || selIconEl.textContent.trim()) : '';
 
     // Customer
-    const selChip   = document.querySelector('#edit-cust-chips .cust-chip.selected');
-    const custId    = selChip ? (selChip.dataset.custId || null) : null;
-    const cust      = customers.find(c => c.id === custId);
-    if (cust) {
-      activeItem.style.background = cust.bg;
-      activeItem.style.color      = cust.text;
-    } else {
-      activeItem.style.background = '#f1f5f9';
-      activeItem.style.color      = '#1e293b';
-    }
+    const selChip = document.querySelector('#edit-cust-chips .cust-chip.selected');
+    const custId  = selChip ? (selChip.dataset.custId || null) : null;
 
-    // Type
-    const type = document.querySelector('input[name="sh-type"]:checked').value;
-    activeItem.classList.toggle('item-meeting', type==='meeting');
-    activeItem.classList.toggle('item-task',    type==='task');
-
-    // Private
+    // Toggles
     const isPrivate = document.getElementById('sh-private').checked;
-    activeItem.classList.toggle('item-hidden', isPrivate);
+    const topPin    = document.getElementById('sh-toppin').checked;
+    const size      = document.querySelector('input[name="sh-size"]:checked')?.value || 'normal';
 
-    // Persist override
-    const uid = activeItem.dataset.uid;
+    // Persist
     if (uid) {
-      overrides[uid] = { customerId: custId, icon: iconVal, private: isPrivate };
+      overrides[uid] = { customerId: custId, icon: iconVal || undefined, private: isPrivate, topPin, size };
       localStorage.setItem(KEY_OVERRIDES, JSON.stringify(overrides));
     }
 
     closeSheet(editSheet);
+    renderWeek();
     updateHiddenBadge();
   });
 
@@ -1129,10 +1020,16 @@
   ═══════════════════════════════════ */
   const versionPanel = document.getElementById('version-panel');
   document.getElementById('version-build-info').textContent = APP_VERSION + ' · ' + APP_BUILD;
-  document.getElementById('version-badge').textContent = APP_VERSION.replace('.0','').replace('.0','');
-  document.getElementById('version-badge').addEventListener('click',         () => openSheet(versionPanel));
-  document.getElementById('version-panel-close').addEventListener('click',   () => closeSheet(versionPanel));
-  document.getElementById('version-panel-backdrop').addEventListener('click',() => closeSheet(versionPanel));
+  document.getElementById('version-panel-close').addEventListener('click',   () => { closeSheet(versionPanel); history.replaceState(null,'','app.html'); });
+  document.getElementById('version-panel-backdrop').addEventListener('click',() => { closeSheet(versionPanel); history.replaceState(null,'','app.html'); });
+
+  document.getElementById('btn-reload-app').addEventListener('click', async () => {
+    try { await fetch(location.href, {cache:'reload'}); } catch(e) {}
+    location.reload();
+  });
+
+  // Open version panel if navigated here via #version hash
+  if (location.hash === '#version') openSheet(versionPanel);
 
   /* ═══════════════════════════════════
      SHEET HELPERS
@@ -1158,26 +1055,15 @@
     if (item) { e.preventDefault(); showTooltip(item, e); }
   }, {passive:false});
   document.addEventListener('click', e => {
-    // Day pin: add button
-    const addPinBtn = e.target.closest('.btn-add-pin');
-    if (addPinBtn) {
-      e.stopPropagation();
-      activePinDate = addPinBtn.dataset.date;
-      const DAY_NL = ['zo','ma','di','wo','do','vr','za'];
-      if (activePinDate) {
-        const d = new Date(activePinDate + 'T00:00:00');
-        document.getElementById('pin-picker-title').textContent =
-          `Dagicoon · ${DAY_NL[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
-      }
-      buildPinIconGrid();
-      openSheet(pinPickerSheet);
-      return;
-    }
-    // Day pin: remove on tap
+    // Tap a top-day pin → open edit sheet for that event
     const dayPin = e.target.closest('.day-pin');
     if (dayPin && !e.target.closest('.bottom-sheet')) {
       e.stopPropagation();
-      removeDayPin(dayPin.dataset.date, parseInt(dayPin.dataset.idx));
+      const uid = dayPin.dataset.uid;
+      if (uid) {
+        const item = document.querySelector(`.item[data-uid="${CSS.escape(uid)}"]`);
+        if (item) openEditSheet(item);
+      }
       return;
     }
     if (e.target.closest('.bottom-sheet') || e.target.closest('#item-tooltip')) return;
