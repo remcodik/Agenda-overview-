@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Customize – My Week</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -338,7 +341,7 @@
   /* ═══════════════════
      RELOAD / VERSION
   ═══════════════════ */
-  const APP_VERSION = 'v0.8.1';
+  const APP_VERSION = 'v0.8.2';
   const APP_BUILD   = '6 mrt 2026';
   document.getElementById('cust-version-badge').textContent = APP_VERSION + ' · ' + APP_BUILD;
   if (!calendars.length) document.getElementById('cust-demo-hint').style.display = 'block';

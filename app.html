@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Mijn Week</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -371,7 +374,7 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v0.8.1';
+  const APP_VERSION   = 'v0.8.2';
   const APP_BUILD     = '6 mrt 2026';
 
   const KEY_CALS      = 'gcal_calendars';   // [{id,name,url,color}]
@@ -1144,6 +1147,9 @@
   /* ═══════════════════════════════════
      INIT
   ═══════════════════════════════════ */
+  // Strip ?v= cache-bust param from URL (keep it clean in address bar)
+  if (location.search) history.replaceState(null, '', location.pathname + (location.hash || ''));
+
   renderWeek();
   if (calendars.length) loadAllCalendars();
 
