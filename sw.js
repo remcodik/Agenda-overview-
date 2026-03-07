@@ -1,8 +1,8 @@
-// Mijn Week – Service Worker v0.8.6
+// Mijn Week – Service Worker v0.9.2
 // Strategie: altijd netwerk (network-only), nooit browser-cache.
-// Update dit bestand bij elke release → browser detecteert de wijziging
-// en laadt direct de nieuwe versie van de app.
-const SW_VERSION = 'v0.8.6';
+// Verander SW_VERSION bij elke release → browser detecteert de wijziging
+// → installeert direct → app herlaadt automatisch met nieuwe versie.
+const SW_VERSION = 'v0.9.2';
 
 self.addEventListener('install', () => {
   self.skipWaiting(); // activeer direct, wacht niet op oud tabblad
@@ -16,15 +16,24 @@ self.addEventListener('activate', e => {
   );
 });
 
+// Reageer op postMessage vanuit de pagina (extra skip-waiting trigger)
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
 self.addEventListener('fetch', e => {
-  // Alleen HTML-pagina's van dezelfde origin: altijd vers van server halen
-  if (e.request.mode === 'navigate') {
+  // Alle HTML-navigaties en de app-bestanden: altijd vers van server halen
+  if (e.request.mode === 'navigate' ||
+      e.request.url.match(/\.(html|js|css)(\?.*)?$/)) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' }).catch(() =>
-        new Response('<h2>Geen verbinding</h2><p>Controleer je internet en probeer opnieuw.</p>',
-          { headers: { 'Content-Type': 'text/html' } })
+        e.request.mode === 'navigate'
+          ? new Response('<h2>Geen verbinding</h2><p>Controleer je internet en probeer opnieuw.</p>',
+              { headers: { 'Content-Type': 'text/html' } })
+          : fetch(e.request)
       )
     );
+    return;
   }
   // Overige requests (ICS-fetches e.d.) normaal laten gaan
 });
