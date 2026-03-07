@@ -141,12 +141,13 @@
     .bottom-sheet.open { pointer-events: all; }
     .bs-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background .25s; }
     .bottom-sheet.open .bs-backdrop { background: rgba(0,0,0,.38); }
-    .bs-panel { position: relative; width: 100%; max-width: 480px; margin: 0 auto; background: #fff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 32px rgba(0,0,0,.2); transform: translateY(100%); transition: transform .28s cubic-bezier(.32,1,.56,1); overflow: hidden; }
+    .bs-panel { position: relative; width: 100%; max-width: 480px; margin: 0 auto; background: #fff; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 32px rgba(0,0,0,.2); transform: translateY(100%); transition: transform .28s cubic-bezier(.32,1,.56,1); overflow: hidden; display: flex; flex-direction: column; max-height: 92vh; }
     .bottom-sheet.open .bs-panel { transform: translateY(0); }
     .sheet-handle { width: 36px; height: 4px; background: #ddd; border-radius: 2px; margin: 10px auto 0; }
     .sheet-title-row { display: flex; align-items: center; gap: 10px; padding: 14px 18px 12px; border-bottom: 1px solid #f0f0f5; }
     .sheet-close { width: 28px; height: 28px; border: none; background: #f0f0f5; border-radius: 50%; font-size: 18px; cursor: pointer; color: #888; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .sheet-body { padding: 14px 18px 20px; display: flex; flex-direction: column; gap: 14px; max-height: 70vh; overflow-y: auto; }
+    .sheet-body { padding: 14px 18px 8px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; flex: 1; min-height: 0; }
+    .sheet-footer { padding: 10px 18px 20px; border-top: 1px solid #f0f0f5; background: #fff; flex-shrink: 0; }
     .sheet-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: #aaa; margin-bottom: 6px; }
 
     /* Edit sheet */
@@ -213,7 +214,7 @@
 
     /* Version panel */
     #version-list { padding: 8px 18px 24px; display: flex; flex-direction: column; }
-    .version-entry { display: grid; grid-template-columns: 52px 92px 1fr; gap: 8px; padding: 11px 0; border-bottom: 1px solid #f0f0f5; align-items: start; }
+    .version-entry { display: grid; grid-template-columns: 52px 108px 1fr; gap: 8px; padding: 11px 0; border-bottom: 1px solid #f0f0f5; align-items: start; }
     .version-entry:last-child { border-bottom: none; }
     .version-tag { font-size: 12px; font-weight: 800; color: #4f8ef7; }
     .version-date { font-size: 11px; color: #aaa; padding-top: 1px; }
@@ -303,7 +304,9 @@
         </div>
         <label class="sh-switch"><input type="checkbox" id="sh-private" /><span class="sh-slider"></span></label>
       </div>
-      <button class="btn-sheet-save" id="sheet-save">Opslaan</button>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn-sheet-save" id="sheet-save" style="width:100%">Opslaan</button>
     </div>
   </div>
 </div>
@@ -372,7 +375,7 @@
       <span style="font-size:20px">📋</span>
       <div style="flex:1;min-width:0;">
         <div style="font-size:15px;font-weight:800;color:#1a1a2e;">Versiegeschiedenis</div>
-        <div style="font-size:10px;color:#aaa;margin-top:2px;" id="version-build-info">v0.9.1 · 7 mrt 2026</div>
+        <div style="font-size:10px;color:#aaa;margin-top:2px;" id="version-build-info">v0.9.2 · 7 mrt 2026</div>
       </div>
       <button class="sheet-close" id="version-panel-close">×</button>
     </div>
@@ -380,14 +383,15 @@
       <button id="btn-reload-app" style="flex:1;border:1.5px solid #dbeafe;background:#f8faff;color:#1e40af;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Ververs app</button>
     </div>
     <div id="version-list">
-      <div class="version-entry"><span class="version-tag">v0.9.1</span><span class="version-date">2026-03-07</span><span class="version-desc">Icoonvolgorde aanpasbaar via slepen (drag &amp; drop op desktop, touch-sleep op mobiel). Volgorde wordt automatisch opgeslagen.</span></div>
-      <div class="version-entry"><span class="version-tag">v0.9.0</span><span class="version-date">2026-03-06</span><span class="version-desc">Swipe links/rechts om van week te wisselen, verborgen items echt onzichtbaar, terugkerende meetings op meerdere dagen onafhankelijk instelbaar, standaard icoon groter (22px) met tekst zichtbaar, nieuwe 'alleen tekst' weergave.</span></div>
-      <div class="version-entry"><span class="version-tag">v0.8.0</span><span class="version-date">2026-03-06</span><span class="version-desc">Topdag-toggle per meeting, 3 formaten (normaal/breed/groot), versie- &amp; agendabeheer naar Instellingen, topbar versimpeld.</span></div>
-      <div class="version-entry"><span class="version-tag">v0.7.0</span><span class="version-date">2026-03-06</span><span class="version-desc">Dagiconen (pin emoji/foto bovenaan dag), eigen emoji invoer in icoonkiezer, week+datum tweeregelslabel, compactere koppelknop.</span></div>
-      <div class="version-entry"><span class="version-tag">v0.6.0</span><span class="version-date">2026-03-05</span><span class="version-desc">Meerdere agenda's, klanten vanuit customize, foto's als icoon, uitsluitend agenda-data (geen demo-mix).</span></div>
-      <div class="version-entry"><span class="version-tag">v0.5.0</span><span class="version-date">2026-03-04</span><span class="version-desc">Google Agenda koppeling via ICS-link.</span></div>
-      <div class="version-entry"><span class="version-tag">v0.4.0</span><span class="version-date">2026-03-03</span><span class="version-desc">Dynamische weeknavigatie.</span></div>
-      <div class="version-entry"><span class="version-tag">v0.1.0</span><span class="version-date">2026-02-25</span><span class="version-desc">Eerste weekoverzicht.</span></div>
+      <div class="version-entry"><span class="version-tag">v0.9.2</span><span class="version-date">7 mrt · 10:45</span><span class="version-desc">Instellingen blijven behouden bij week wisselen, opslaan-knop altijd zichtbaar (buiten scrollgebied), tijdstip bij versiegeschiedenis.</span></div>
+      <div class="version-entry"><span class="version-tag">v0.9.1</span><span class="version-date">7 mrt · 09:30</span><span class="version-desc">Icoonvolgorde aanpasbaar via slepen (drag &amp; drop op desktop, touch-sleep op mobiel). Volgorde wordt automatisch opgeslagen.</span></div>
+      <div class="version-entry"><span class="version-tag">v0.9.0</span><span class="version-date">6 mrt · 22:00</span><span class="version-desc">Swipe links/rechts om van week te wisselen, verborgen items echt onzichtbaar, terugkerende meetings op meerdere dagen onafhankelijk instelbaar, standaard icoon groter (22px) met tekst zichtbaar, nieuwe 'alleen tekst' weergave.</span></div>
+      <div class="version-entry"><span class="version-tag">v0.8.0</span><span class="version-date">6 mrt · 18:30</span><span class="version-desc">Topdag-toggle per meeting, 3 formaten (normaal/breed/groot), versie- &amp; agendabeheer naar Instellingen, topbar versimpeld.</span></div>
+      <div class="version-entry"><span class="version-tag">v0.7.0</span><span class="version-date">6 mrt · 14:00</span><span class="version-desc">Dagiconen (pin emoji/foto bovenaan dag), eigen emoji invoer in icoonkiezer, week+datum tweeregelslabel, compactere koppelknop.</span></div>
+      <div class="version-entry"><span class="version-tag">v0.6.0</span><span class="version-date">5 mrt · 19:00</span><span class="version-desc">Meerdere agenda's, klanten vanuit customize, foto's als icoon, uitsluitend agenda-data (geen demo-mix).</span></div>
+      <div class="version-entry"><span class="version-tag">v0.5.0</span><span class="version-date">4 mrt · 16:00</span><span class="version-desc">Google Agenda koppeling via ICS-link.</span></div>
+      <div class="version-entry"><span class="version-tag">v0.4.0</span><span class="version-date">3 mrt · 15:00</span><span class="version-desc">Dynamische weeknavigatie.</span></div>
+      <div class="version-entry"><span class="version-tag">v0.1.0</span><span class="version-date">25 feb · 11:00</span><span class="version-desc">Eerste weekoverzicht.</span></div>
     </div>
   </div>
 </div>
@@ -399,7 +403,7 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v0.9.1';
+  const APP_VERSION   = 'v0.9.2';
   const APP_BUILD     = '7 mrt 2026';
 
   const KEY_CALS      = 'gcal_calendars';   // [{id,name,url,color}]
@@ -660,8 +664,15 @@
   /* ═══════════════════════════════════
      APPLY OVERRIDES
   ═══════════════════════════════════ */
+  // For recurring events the uid is 'base_uid:YYYY-MM-DD'.
+  // Customisations are saved under the base uid so they apply to ALL weeks.
+  function baseUid(uid) {
+    return /:\d{4}-\d{2}-\d{2}$/.test(uid) ? uid.replace(/:\d{4}-\d{2}-\d{2}$/, '') : uid;
+  }
+
   function applyOverride(ev) {
-    const ov = overrides[ev.uid];
+    // First look for an exact-uid override, then fall back to base uid
+    const ov = overrides[ev.uid] || overrides[baseUid(ev.uid)];
     if (!ov) return ev;
     return Object.assign({}, ev, {
       customerId: ov.customerId !== undefined ? ov.customerId : ev.customerId,
@@ -1182,9 +1193,10 @@
     const topPin    = document.getElementById('sh-toppin').checked;
     const size      = document.querySelector('input[name="sh-size"]:checked')?.value || 'normal';
 
-    // Persist
-    if (uid) {
-      overrides[uid] = { customerId: custId, icon: iconVal || undefined, private: isPrivate, topPin, size };
+    // Persist — recurring events save under base uid so all weeks inherit the setting
+    const saveUid = uid ? baseUid(uid) : null;
+    if (saveUid) {
+      overrides[saveUid] = { customerId: custId, icon: iconVal || undefined, private: isPrivate, topPin, size };
       localStorage.setItem(KEY_OVERRIDES, JSON.stringify(overrides));
     }
 
