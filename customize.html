@@ -415,7 +415,7 @@
   /* ═══════════════════
      RELOAD / VERSION
   ═══════════════════ */
-  const APP_VERSION = 'v0.9.2';
+  const APP_VERSION = 'v0.9.4';
   const APP_BUILD   = '7 mrt 2026';
   document.getElementById('cust-version-badge').textContent = APP_VERSION + ' · ' + APP_BUILD;
   if (!calendars.length) document.getElementById('cust-demo-hint').style.display = 'block';
@@ -487,6 +487,9 @@
   renderCalendars();
   renderIcons();
   renderEmojis();
+
+  // iOS Safari bfcache: reload when page is restored from memory so localStorage is always fresh
+  window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
 
 })();
 </script>
