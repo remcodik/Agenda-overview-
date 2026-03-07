@@ -426,6 +426,18 @@
   const APP_VERSION   = 'v0.9.2';
   const APP_BUILD     = '7 mrt 2026';
 
+  /* ── Auto-update: haal versie op van server, laad opnieuw als nieuwer ──
+     Bypast alle iOS WKWebView / service-worker cacheproblemen.
+     version.json is een tiny bestand dat altijd vers van de server komt. */
+  (async function autoUpdate() {
+    if (new URLSearchParams(location.search).get('_v') === APP_VERSION) return;
+    try {
+      const {v} = await (await fetch('version.json?_=' + Date.now(), {cache:'no-store'})).json();
+      if (v && v !== APP_VERSION)
+        window.location.replace(location.pathname + '?_v=' + encodeURIComponent(v));
+    } catch (_) {}
+  })();
+
   const KEY_CALS      = 'gcal_calendars';   // [{id,name,url,color}]
   const KEY_CUSTOMERS = 'app_customers';    // [{id,name,bg,text}]
   const KEY_ICONS     = 'custom_icons';     // [{id,dataUrl,label}]
