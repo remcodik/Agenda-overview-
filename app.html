@@ -166,6 +166,10 @@
     .sh-icon img { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
     .sh-icon.selected { border-color: #4f8ef7; background: #eff6ff; }
     .sh-icon:hover { background: #eff6ff; }
+    .sh-icon[draggable=true] { cursor: grab; touch-action: none; }
+    .sh-icon[draggable=true]:active { cursor: grabbing; }
+    .sh-icon.dragging { opacity: 0.25; transform: scale(.95); }
+    .sh-icon.drag-over { border-color: #4f8ef7 !important; background: #eff6ff !important; transform: scale(1.08); }
     .sh-icon-upload { position: relative; overflow: hidden; }
     .sh-icon-upload input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
     .btn-sheet-save { width: 100%; background: #1a1a2e; color: #fff; border: none; border-radius: 10px; padding: 13px; font-size: 14px; font-weight: 800; cursor: pointer; }
@@ -368,7 +372,7 @@
       <span style="font-size:20px">📋</span>
       <div style="flex:1;min-width:0;">
         <div style="font-size:15px;font-weight:800;color:#1a1a2e;">Versiegeschiedenis</div>
-        <div style="font-size:10px;color:#aaa;margin-top:2px;" id="version-build-info">v0.9.0 · 6 mrt 2026</div>
+        <div style="font-size:10px;color:#aaa;margin-top:2px;" id="version-build-info">v0.9.1 · 7 mrt 2026</div>
       </div>
       <button class="sheet-close" id="version-panel-close">×</button>
     </div>
@@ -376,6 +380,7 @@
       <button id="btn-reload-app" style="flex:1;border:1.5px solid #dbeafe;background:#f8faff;color:#1e40af;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Ververs app</button>
     </div>
     <div id="version-list">
+      <div class="version-entry"><span class="version-tag">v0.9.1</span><span class="version-date">2026-03-07</span><span class="version-desc">Icoonvolgorde aanpasbaar via slepen (drag &amp; drop op desktop, touch-sleep op mobiel). Volgorde wordt automatisch opgeslagen.</span></div>
       <div class="version-entry"><span class="version-tag">v0.9.0</span><span class="version-date">2026-03-06</span><span class="version-desc">Swipe links/rechts om van week te wisselen, verborgen items echt onzichtbaar, terugkerende meetings op meerdere dagen onafhankelijk instelbaar, standaard icoon groter (22px) met tekst zichtbaar, nieuwe 'alleen tekst' weergave.</span></div>
       <div class="version-entry"><span class="version-tag">v0.8.0</span><span class="version-date">2026-03-06</span><span class="version-desc">Topdag-toggle per meeting, 3 formaten (normaal/breed/groot), versie- &amp; agendabeheer naar Instellingen, topbar versimpeld.</span></div>
       <div class="version-entry"><span class="version-tag">v0.7.0</span><span class="version-date">2026-03-06</span><span class="version-desc">Dagiconen (pin emoji/foto bovenaan dag), eigen emoji invoer in icoonkiezer, week+datum tweeregelslabel, compactere koppelknop.</span></div>
@@ -394,14 +399,15 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v0.9.0';
-  const APP_BUILD     = '6 mrt 2026';
+  const APP_VERSION   = 'v0.9.1';
+  const APP_BUILD     = '7 mrt 2026';
 
   const KEY_CALS      = 'gcal_calendars';   // [{id,name,url,color}]
   const KEY_CUSTOMERS = 'app_customers';    // [{id,name,bg,text}]
   const KEY_ICONS     = 'custom_icons';     // [{id,dataUrl,label}]
   const KEY_EMOJIS    = 'custom_emojis';    // ['☕','🎯',…]
-  const KEY_OVERRIDES = 'event_overrides';  // {uid:{customerId,icon,private,topPin,size}}
+  const KEY_OVERRIDES   = 'event_overrides';  // {uid:{customerId,icon,private,topPin,size}}
+  const KEY_ICON_ORDER  = 'icon_order';       // [emoji|'photo:id', ...]
 
   const DEFAULT_CUSTOMERS = [
     {id:'c1', name:'Acme Corp',   bg:'#ede0ff', text:'#4c1d95'},
@@ -426,9 +432,10 @@
 
   let calendars   = loadJson(KEY_CALS,      []);
   let customers   = loadJson(KEY_CUSTOMERS, null) || DEFAULT_CUSTOMERS;
-  let customIcons = loadJson(KEY_ICONS,     []);
-  let customEmojis= loadJson(KEY_EMOJIS,   []);
-  let overrides   = loadJson(KEY_OVERRIDES, {});
+  let customIcons = loadJson(KEY_ICONS,      []);
+  let customEmojis= loadJson(KEY_EMOJIS,    []);
+  let overrides   = loadJson(KEY_OVERRIDES,  {});
+  let iconOrder   = loadJson(KEY_ICON_ORDER, null);
 
   let calEvents   = [];
   let isConnected = false;
@@ -922,29 +929,68 @@
   ═══════════════════════════════════ */
   const EMOJI_ICONS = ['🤝','🏢','🖥️','💬','📞','🎤','✉️','📋','💻','📝','✅','📦','🎯','🗂️','🗺️','🔒'];
 
+  /* Icon order helpers
+     Each slot is either an emoji string ('🤝') or a photo reference ('photo:icon_123') */
+  function defaultIconOrder() {
+    return [
+      ...EMOJI_ICONS,
+      ...customEmojis,
+      ...customIcons.map(ci => 'photo:' + ci.id),
+    ];
+  }
+  function resolvedIconOrder() {
+    const base = iconOrder || defaultIconOrder();
+    // Append anything not yet in the saved order (newly added icons)
+    const extras = [
+      ...customEmojis.filter(e => !base.includes(e)),
+      ...customIcons.filter(ci => !base.includes('photo:' + ci.id)).map(ci => 'photo:' + ci.id),
+    ];
+    return [...base, ...extras];
+  }
+  function persistIconOrder(grid) {
+    const slots = [...grid.querySelectorAll('.sh-icon:not(.sh-icon-upload)')];
+    iconOrder = slots.map(el => el.dataset.photoId ? 'photo:' + el.dataset.photoId : el.dataset.emoji || '');
+    localStorage.setItem(KEY_ICON_ORDER, JSON.stringify(iconOrder));
+  }
+
   function buildIconGrid(currentIcon) {
     const grid = document.getElementById('edit-icon-grid');
     grid.innerHTML = '';
 
-    function makeIconEl(icon, isImg, dataUrl) {
+    function makeIconEl(emoji, dataUrl, photoId) {
       const el = document.createElement('div');
-      el.className = 'sh-icon' + (icon === currentIcon ? ' selected' : '');
-      if (dataUrl) { el.dataset.dataUrl = dataUrl; el.innerHTML = `<img src="${escHtml(dataUrl)}" alt="">`; }
-      else el.textContent = icon;
+      const isCurrent = dataUrl ? dataUrl === currentIcon : emoji === currentIcon;
+      el.className = 'sh-icon' + (isCurrent ? ' selected' : '');
+      el.setAttribute('draggable', 'true');
+      if (dataUrl) {
+        el.dataset.dataUrl = dataUrl;
+        el.dataset.photoId = photoId || '';
+        el.innerHTML = `<img src="${escHtml(dataUrl)}" alt="">`;
+      } else {
+        el.dataset.emoji = emoji;
+        el.textContent = emoji;
+      }
       el.addEventListener('click', () => {
         grid.querySelectorAll('.sh-icon').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
         const display = document.getElementById('sheet-icon-display');
-        display.innerHTML = dataUrl ? `<img src="${escHtml(dataUrl)}" alt="">` : icon;
+        display.innerHTML = dataUrl ? `<img src="${escHtml(dataUrl)}" alt="">` : emoji;
       });
       return el;
     }
 
-    // Default emoji icons + saved custom emojis from Instellingen
-    [...EMOJI_ICONS, ...customEmojis].forEach(icon => grid.appendChild(makeIconEl(icon, false, null)));
-    customIcons.forEach(ci => grid.appendChild(makeIconEl(ci.dataUrl, true, ci.dataUrl)));
+    // Build grid in saved/default order
+    resolvedIconOrder().forEach(slot => {
+      if (slot.startsWith('photo:')) {
+        const id = slot.slice(6);
+        const ci = customIcons.find(c => c.id === id);
+        if (ci) grid.appendChild(makeIconEl(null, ci.dataUrl, ci.id));
+      } else if (slot) {
+        grid.appendChild(makeIconEl(slot, null, null));
+      }
+    });
 
-    // Upload button
+    // Upload button (not draggable, always last)
     const uploadLabel = document.createElement('label');
     uploadLabel.className = 'sh-icon sh-icon-upload';
     uploadLabel.title = 'Foto uploaden';
@@ -955,8 +1001,12 @@
       const reader = new FileReader();
       reader.onload = ev => {
         const dataUrl = ev.target.result;
-        customIcons.push({id: 'icon_' + Date.now(), dataUrl, label: file.name});
+        const newIcon = {id: 'icon_' + Date.now(), dataUrl, label: file.name};
+        customIcons.push(newIcon);
         localStorage.setItem(KEY_ICONS, JSON.stringify(customIcons));
+        // Add to front of order
+        iconOrder = ['photo:' + newIcon.id, ...(iconOrder || defaultIconOrder())];
+        localStorage.setItem(KEY_ICON_ORDER, JSON.stringify(iconOrder));
         buildIconGrid(dataUrl);
         document.getElementById('sheet-icon-display').innerHTML = `<img src="${escHtml(dataUrl)}" alt="">`;
       };
@@ -972,19 +1022,17 @@
     const applyEmoji = () => {
       const val = emojiInput.value.trim();
       if (!val) return;
-      // Voeg toe aan globale lijst als nog niet aanwezig
       if (!customEmojis.includes(val)) {
         customEmojis.push(val);
         localStorage.setItem(KEY_EMOJIS, JSON.stringify(customEmojis));
       }
-      // Zoek of maak icoon-element en selecteer het
-      let target = [...grid.querySelectorAll('.sh-icon:not(.sh-icon-upload)')].find(el => !el.dataset.dataUrl && el.textContent.trim() === val);
-      if (!target) {
-        target = makeIconEl(val, false, null);
-        grid.insertBefore(target, uploadLabel);
+      // Add to front of order
+      const base = iconOrder || defaultIconOrder();
+      if (!base.includes(val)) {
+        iconOrder = [val, ...base];
+        localStorage.setItem(KEY_ICON_ORDER, JSON.stringify(iconOrder));
       }
-      grid.querySelectorAll('.sh-icon').forEach(c => c.classList.remove('selected'));
-      target.classList.add('selected');
+      buildIconGrid(val);
       document.getElementById('sheet-icon-display').innerHTML = val;
       emojiInput.value = '';
     };
@@ -992,6 +1040,88 @@
     emojiInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); applyEmoji(); } });
     grid.prepend(emojiRow);
 
+    // ── Drag-and-drop reordering ──
+    setupIconDrag(grid, uploadLabel);
+  }
+
+  function setupIconDrag(grid, uploadBtn) {
+    let dragSrc = null;
+
+    // Desktop: HTML5 drag
+    grid.addEventListener('dragstart', e => {
+      const el = e.target.closest('.sh-icon[draggable]');
+      if (!el) return;
+      dragSrc = el;
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => el.classList.add('dragging'), 0);
+    });
+    grid.addEventListener('dragend', e => {
+      const el = e.target.closest('.sh-icon[draggable]');
+      if (el) el.classList.remove('dragging');
+      grid.querySelectorAll('.sh-icon').forEach(i => i.classList.remove('drag-over'));
+      if (dragSrc) { persistIconOrder(grid); dragSrc = null; }
+    });
+    grid.addEventListener('dragover', e => {
+      e.preventDefault();
+      const target = e.target.closest('.sh-icon[draggable]');
+      if (target && target !== dragSrc) {
+        grid.querySelectorAll('.sh-icon').forEach(i => i.classList.remove('drag-over'));
+        target.classList.add('drag-over');
+      }
+    });
+    grid.addEventListener('drop', e => {
+      e.preventDefault();
+      const target = e.target.closest('.sh-icon[draggable]');
+      if (!target || !dragSrc || target === dragSrc) return;
+      const all = [...grid.querySelectorAll('.sh-icon[draggable]')];
+      if (all.indexOf(dragSrc) < all.indexOf(target)) target.after(dragSrc);
+      else target.before(dragSrc);
+    });
+
+    // Mobile: touch drag
+    let touchEl = null, clone = null, lastX, lastY;
+
+    grid.addEventListener('touchstart', e => {
+      const el = e.target.closest('.sh-icon[draggable]');
+      if (!el) return;
+      touchEl = el;
+      lastX = e.touches[0].clientX;
+      lastY = e.touches[0].clientY;
+    }, {passive: true});
+
+    grid.addEventListener('touchmove', e => {
+      if (!touchEl) return;
+      const x = e.touches[0].clientX, y = e.touches[0].clientY;
+      if (!clone && Math.hypot(x - lastX, y - lastY) < 8) return;
+      e.preventDefault();
+      if (!clone) {
+        const r = touchEl.getBoundingClientRect();
+        clone = touchEl.cloneNode(true);
+        clone.style.cssText = `position:fixed;width:${r.width}px;height:${r.height}px;z-index:99999;pointer-events:none;opacity:.85;border-radius:9px;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:none;`;
+        document.body.appendChild(clone);
+        touchEl.classList.add('dragging');
+      }
+      clone.style.left = (x - parseInt(clone.style.width)/2) + 'px';
+      clone.style.top  = (y - parseInt(clone.style.height)/2) + 'px';
+      // Find element beneath
+      clone.style.display = 'none';
+      const beneath = document.elementFromPoint(x, y);
+      clone.style.display = '';
+      const dropEl = beneath?.closest('.sh-icon[draggable]');
+      if (dropEl && dropEl !== touchEl) {
+        const all = [...grid.querySelectorAll('.sh-icon[draggable]')];
+        if (all.indexOf(touchEl) < all.indexOf(dropEl)) dropEl.after(touchEl);
+        else dropEl.before(touchEl);
+      }
+    }, {passive: false});
+
+    grid.addEventListener('touchend', () => {
+      if (!touchEl) return;
+      touchEl.classList.remove('dragging');
+      clone?.remove(); clone = null;
+      persistIconOrder(grid);
+      touchEl = null;
+    }, {passive: true});
   }
 
   /* ═══════════════════════════════════
