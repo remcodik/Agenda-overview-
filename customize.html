@@ -159,7 +159,25 @@
       </div>
     </div>
 
-    <!-- ── 5. Versie ── -->
+    <!-- ── 5. Backup & herstel ── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">💾</span>
+        <div>
+          <div class="section-title">Backup &amp; herstel</div>
+          <div class="section-desc">Exporteer al je instellingen als bestand, of zet ze terug</div>
+        </div>
+      </div>
+      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
+        <button class="btn-add-row" id="btn-export">💾 Exporteer alle instellingen</button>
+        <label class="btn-add-row" style="cursor:pointer;text-align:center;">
+          📂 Importeer instellingen
+          <input type="file" id="btn-import" accept=".json" style="display:none;">
+        </label>
+      </div>
+    </div>
+
+    <!-- ── 6. Versie ── -->
     <div class="section">
       <div class="section-header">
         <span class="section-icon">📋</span>
@@ -348,6 +366,51 @@
     });
     grid.appendChild(label);
   }
+
+  /* ═══════════════════
+     BACKUP / HERSTEL
+  ═══════════════════ */
+  const BACKUP_KEYS = [
+    'gcal_calendars', 'app_customers', 'custom_icons',
+    'custom_emojis', 'event_overrides', 'icon_order'
+  ];
+
+  document.getElementById('btn-export').addEventListener('click', () => {
+    const data = { _version: 'v0.9.2', _exported: new Date().toISOString() };
+    BACKUP_KEYS.forEach(k => {
+      const v = localStorage.getItem(k);
+      if (v) data[k] = JSON.parse(v);
+    });
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'mijn-week-backup-' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  document.getElementById('btn-import').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try {
+        const data = JSON.parse(evt.target.result);
+        let count = 0;
+        BACKUP_KEYS.forEach(k => {
+          if (data[k] !== undefined) {
+            localStorage.setItem(k, JSON.stringify(data[k]));
+            count++;
+          }
+        });
+        alert('✅ ' + count + ' instellingen teruggezet. App wordt herladen.');
+        location.href = 'app.html';
+      } catch {
+        alert('❌ Ongeldig bestand. Gebruik een eerder geëxporteerd backup-bestand.');
+      }
+    };
+    reader.readAsText(file);
+  });
 
   /* ═══════════════════
      RELOAD / VERSION
