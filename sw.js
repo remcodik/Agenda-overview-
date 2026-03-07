@@ -22,9 +22,9 @@ self.addEventListener('message', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Alle HTML-navigaties en de app-bestanden: altijd vers van server halen
+  // HTML-navigaties, app-bestanden én version.json: altijd vers van server halen
   if (e.request.mode === 'navigate' ||
-      e.request.url.match(/\.(html|js|css)(\?.*)?$/)) {
+      e.request.url.match(/\.(html|js|css|json)(\?.*)?$/)) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' }).catch(() =>
         e.request.mode === 'navigate'
