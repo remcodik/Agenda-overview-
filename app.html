@@ -54,6 +54,9 @@
     @media (max-width: 480px) { .wl-week { font-size: 17px; } .wl-range { font-size: 15px; max-width: 130px; } }
     .btn-settings { background: rgba(255,255,255,.12); border: none; color: #fff; width: 44px; height: 44px; border-radius: 12px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .btn-settings:hover { background: rgba(255,255,255,.22); }
+    .btn-view-toggle { background: rgba(255,255,255,.12); border: none; color: rgba(255,255,255,.8); height: 44px; padding: 0 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; flex-shrink: 0; letter-spacing: .3px; }
+    .btn-view-toggle:hover { background: rgba(255,255,255,.22); }
+    .btn-view-toggle.active { background: rgba(255,255,255,.28); color: #fff; }
     #loading-dot { width: 6px; height: 6px; border-radius: 50%; background: #facc15; animation: ldot 1s infinite; display: none; flex-shrink: 0; }
     #loading-dot.show { display: block; }
     @keyframes ldot { 0%,100%{opacity:1} 50%{opacity:.25} }
@@ -73,7 +76,7 @@
     .week-grid { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: 1fr 1fr; gap: 8px; padding: 12px 16px 16px; flex: 1; overflow: hidden; min-height: 0; }
 
     /* ── Day column ── */
-    .day-col { background: #fff; border-radius: 14px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.07); border: 2px solid transparent; min-width: 0; }
+    .day-col { background: #fff; border-radius: 14px; display: flex; flex-direction: column; overflow: visible; box-shadow: 0 1px 4px rgba(0,0,0,.07); border: 2px solid transparent; min-width: 0; }
     .day-col.today { border-color: #4f8ef7; }
     .day-col.weekend { opacity: .7; }
     .day-col.weekend .day-body { grid-template-columns: 1fr; }
@@ -88,7 +91,9 @@
     .day-date { font-size: 20px; font-weight: 800; color: #1a1a2e; line-height: 1.1; margin-top: 1px; }
     .day-col.today .day-date { color: #4f8ef7; }
     .day-col.weekend .day-date { color: #ccc; }
-    .day-body { flex: 1; padding: 8px 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; align-content: start; overflow-y: auto; min-height: 0; }
+    .day-col.weekend .day-name-row { flex-direction: column; align-items: flex-start; gap: 1px; }
+    .day-col.weekend .day-pins { max-width: none; justify-content: flex-start; }
+    .day-body { flex: 1; padding: 8px 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; align-content: start; overflow-y: auto; overflow-x: hidden; min-height: 0; }
     .day-footer { padding: 5px 6px 7px; flex-shrink: 0; }
     .day-empty { grid-column: 1/-1; padding: 10px 4px; font-size: 10px; color: #d8d8e8; text-align: center; font-weight: 600; }
     .day-loading { grid-column: 1/-1; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
@@ -115,16 +120,23 @@
     .item-large .item-text { flex: none; width: 100%; text-align: center; font-size: 10px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     /* Alleen tekst: verberg icoon */
     .item-text-only .item-icon { display: none; }
+    /* Klein: halve breedte (2 per rij) */
+    .item.item-small { grid-column: auto; padding: 5px 5px; gap: 4px; }
+    .item-small .item-icon { font-size: 16px; }
+    .item-small .item-icon img { width: 16px; height: 16px; }
+    .item-small .item-text { font-size: 10px; }
     .item-toppin-anchor { display: none; }
     .item-hidden { display: none; }
     .upcoming { animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,.25)} 50%{box-shadow:0 0 0 5px rgba(0,0,0,0)} }
     .day-divider { grid-column: 1/-1; height: 1px; background: rgba(0,0,0,.06); margin: 2px 0; }
     /* ── Day pins (from topPin events) ── */
-    .day-pins { display: flex; flex-wrap: wrap; gap: 3px; justify-content: flex-end; max-width: 58px; flex-shrink: 0; }
-    .day-pin { font-size: 20px; line-height: 1; width: 26px; height: 26px; border-radius: 7px; cursor: pointer; border: 3px solid rgba(0,0,0,.15); background: rgba(0,0,0,.03); display: flex; align-items: center; justify-content: center; box-sizing: border-box; transition: filter .12s; flex-shrink: 0; }
+    .day-pins { display: flex; flex-wrap: wrap; gap: 3px; justify-content: flex-end; max-width: 72px; flex-shrink: 0; }
+    .day-pin { font-size: 22px; line-height: 1; width: 32px; height: 32px; border-radius: 9px; cursor: pointer; border: 3px solid rgba(0,0,0,.15); background: rgba(0,0,0,.03); display: flex; align-items: center; justify-content: center; box-sizing: border-box; transition: filter .12s; flex-shrink: 0; }
     .day-pin:hover { filter: brightness(.88); }
-    .day-pin img { width: 17px; height: 17px; border-radius: 3px; object-fit: cover; }
+    .day-pin img { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; }
+    .day-pin-large { width: 44px; height: 44px; border-radius: 12px; font-size: 28px; }
+    .day-pin-large img { width: 28px; height: 28px; border-radius: 7px; }
 
     /* ── Item sizes (grid placement) ── */
     .item-large { grid-column: 1 / -1; }
@@ -137,6 +149,7 @@
     .size-demo { width: 14px; height: 14px; background: #cbd5e1; border-radius: 3px; display: block; flex-shrink: 0; }
     .size-opt-large .size-demo { width: 28px; height: 28px; }
     .size-demo-text { width: 28px; height: 8px; background: #cbd5e1; border-radius: 3px; display: block; }
+    .size-demo-small { width: 9px; height: 9px; background: #cbd5e1; border-radius: 2px; display: block; flex-shrink: 0; }
 
     /* ── Custom emoji input ── */
     .sh-emoji-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; flex: 0 0 100%; width: 100%; }
@@ -150,10 +163,13 @@
     ::-webkit-scrollbar-thumb { background: #d0d0e0; border-radius: 2px; }
 
     /* ── Tooltip ── */
-    #item-tooltip { position: fixed; background: rgba(20,20,20,.9); color: #fff; font-size: 12px; font-weight: 700; padding: 5px 10px 5px 11px; border-radius: 8px; white-space: nowrap; z-index: 9999; box-shadow: 0 4px 16px rgba(0,0,0,.28); opacity: 0; display: flex; align-items: center; gap: 8px; transition: opacity .15s ease, transform .15s ease; transform: translateY(4px); }
+    #item-tooltip { position: fixed; background: rgba(20,20,20,.9); color: #fff; font-size: 12px; font-weight: 700; padding: 5px 10px 5px 11px; border-radius: 8px; z-index: 9999; box-shadow: 0 4px 16px rgba(0,0,0,.28); opacity: 0; display: flex; align-items: center; gap: 8px; transition: opacity .15s ease, transform .15s ease; transform: translateY(4px); max-width: calc(100vw - 32px); }
     #item-tooltip.visible { opacity: 1; transform: translateY(0); }
-    #tooltip-label { pointer-events: none; }
-    #tooltip-edit { pointer-events: all; background: rgba(255,255,255,.15); border: none; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; cursor: pointer; white-space: nowrap; }
+    #tooltip-label-wrap { overflow: hidden; flex: 1; min-width: 0; }
+    #tooltip-label { display: block; white-space: nowrap; pointer-events: none; }
+    #tooltip-label.scrolling { animation: label-scroll 4s ease-in-out 0.4s infinite; }
+    @keyframes label-scroll { 0%,25%{transform:translateX(0)} 75%,100%{transform:translateX(var(--lsp,0px))} }
+    #tooltip-edit { pointer-events: all; background: rgba(255,255,255,.15); border: none; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
     #tooltip-edit:hover { background: rgba(255,255,255,.28); }
 
     /* ── Bottom sheet ── */
@@ -259,6 +275,7 @@
       <span class="week-label"><span class="wl-week">Week —</span><span class="wl-range">laden…</span></span>
       <button id="btn-next-week">&#8250;</button>
     </div>
+    <button id="btn-view-toggle" class="btn-view-toggle" title="Werkdagen / volledige week">5d</button>
     <button class="btn-settings" onclick="location.href='customize.html'" title="Instellingen">⚙️</button>
   </header>
 
@@ -274,7 +291,7 @@
 
 <!-- Tooltip -->
 <div id="item-tooltip">
-  <span id="tooltip-label"></span>
+  <span id="tooltip-label-wrap"><span id="tooltip-label"></span></span>
   <button id="tooltip-edit">✏️ Bewerk</button>
 </div>
 
@@ -306,13 +323,17 @@
       <div>
         <div class="sheet-label">Formaat</div>
         <div class="size-seg">
+          <input type="radio" name="sh-size" id="sh-size-small" value="small" />
+          <label for="sh-size-small" class="size-opt" title="Klein (2 per rij)">
+            <span class="size-demo-small"></span><span class="size-demo-small"></span>
+          </label>
           <input type="radio" name="sh-size" id="sh-size-normal" value="normal" checked />
           <label for="sh-size-normal" class="size-opt" title="Normaal (icoon + tekst)">
             <span class="size-demo"></span><span class="size-demo-text"></span>
           </label>
           <input type="radio" name="sh-size" id="sh-size-wide" value="wide" />
-          <label for="sh-size-wide" class="size-opt" title="Breed (icoon + tekst)">
-            <span class="size-demo"></span><span class="size-demo-text"></span>
+          <label for="sh-size-wide" class="size-opt" title="Breed (volle breedte)">
+            <span class="size-demo" style="width:28px"></span>
           </label>
           <input type="radio" name="sh-size" id="sh-size-large" value="large" />
           <label for="sh-size-large" class="size-opt size-opt-large" title="Groot (verticaal)">
@@ -497,6 +518,9 @@
   let weekOffset  = 0;
   let combiMode   = false;
   let combiSlots  = [null, null]; // each: {emoji, dataUrl} | null
+
+  const KEY_VIEW_MODE = 'view_mode';
+  let viewMode = localStorage.getItem(KEY_VIEW_MODE) || 'week'; // 'week' | 'workdays'
 
   /* ═══════════════════════════════════
      WEEK HELPERS
@@ -738,7 +762,8 @@
   /* ═══════════════════════════════════
      RENDER WEEK
   ═══════════════════════════════════ */
-  const LAYOUT   = [[0,'1/3',1],[1,'3/5',1],[2,'5/7',1],[3,'1/3',2],[4,'3/5',2],[5,'5/6',2],[6,'6/7',2]];
+  const LAYOUT_WEEK     = [[0,'1/3',1],[1,'3/5',1],[2,'5/7',1],[3,'1/3',2],[4,'3/5',2],[5,'5/6',2],[6,'6/7',2]];
+  const LAYOUT_WORKDAYS = [[0,'1/3',1],[1,'3/5',1],[2,'5/7',1],[3,'1/4',2],[4,'4/7',2]]; // Thu+Fri elk 50%
   const DAY_NAMES= ['Zo','Ma','Di','Wo','Do','Vr','Za'];
 
   function renderWeek() {
@@ -759,7 +784,8 @@
     const grid = document.querySelector('.week-grid');
     grid.innerHTML = '';
 
-    LAYOUT.forEach(([di, col, row]) => {
+    const layout = viewMode === 'workdays' ? LAYOUT_WORKDAYS : LAYOUT_WEEK;
+    layout.forEach(([di, col, row]) => {
       const date      = dates[di];
       const isToday   = sameDay(date, today);
       const isWeekend = di >= 5;
@@ -876,7 +902,8 @@
       const inner = icon.startsWith('data:') ? `<img src="${escHtml(icon)}">` : escHtml(icon);
       const cust = customers.find(c => c.id === e.customerId);
       const borderColor = cust ? cust.text : (e.calColor || '#94a3b8');
-      return `<span class="day-pin" data-uid="${escHtml(e.uid)}" title="${escHtml(e.title)}" style="border-color:${escHtml(borderColor)}">${inner}</span>`;
+      const isLarge = (overrides[baseUid(e.uid)]?.size || e.size || 'normal') === 'large';
+      return `<span class="day-pin${isLarge ? ' day-pin-large' : ''}" data-uid="${escHtml(e.uid)}" title="${escHtml(e.title)}" style="border-color:${escHtml(borderColor)}">${inner}</span>`;
     }).join('');
   }
 
@@ -1358,13 +1385,28 @@
     iconDisplay.innerHTML = `<img src="${escHtml(dataUrl)}" alt="">`;
   });
 
+  /* ── View mode toggle (werkdagen / volledige week) ── */
+  const btnViewToggle = document.getElementById('btn-view-toggle');
+  function updateViewToggleBtn() {
+    btnViewToggle.textContent = viewMode === 'workdays' ? '7d' : '5d';
+    btnViewToggle.title = viewMode === 'workdays' ? 'Volledige week' : 'Alleen werkdagen';
+    btnViewToggle.classList.toggle('active', viewMode === 'workdays');
+  }
+  updateViewToggleBtn();
+  btnViewToggle.addEventListener('click', () => {
+    viewMode = viewMode === 'workdays' ? 'week' : 'workdays';
+    localStorage.setItem(KEY_VIEW_MODE, viewMode);
+    updateViewToggleBtn();
+    renderWeek();
+  });
+
   /* ═══════════════════════════════════
      TOOLTIP
   ═══════════════════════════════════ */
   const tooltip  = document.getElementById('item-tooltip');
   const tipLabel = document.getElementById('tooltip-label');
   const tipEdit  = document.getElementById('tooltip-edit');
-  let hideTimer = null, activeItem = null;
+  let activeItem = null;
 
   function positionTooltip() {
     if (!activeItem) return;
@@ -1382,12 +1424,24 @@
   function showTooltip(item, e) {
     const label = item.querySelector('.item-text')?.textContent?.trim()||'';
     if (!label) return;
-    activeItem = item; tipLabel.textContent = label;
+    activeItem = item;
+    tipLabel.textContent = label;
+    tipLabel.classList.remove('scrolling');
+    tipLabel.style.removeProperty('--lsp');
     tooltip.classList.remove('visible');
     positionTooltip();
-    requestAnimationFrame(() => tooltip.classList.add('visible'));
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(hideTooltip, 2600);
+    requestAnimationFrame(() => {
+      tooltip.classList.add('visible');
+      // Start marquee als tekst te lang is
+      requestAnimationFrame(() => {
+        const wrap = tipLabel.parentElement;
+        const overflow = tipLabel.scrollWidth - wrap.clientWidth;
+        if (overflow > 4) {
+          tipLabel.style.setProperty('--lsp', (-overflow) + 'px');
+          tipLabel.classList.add('scrolling');
+        }
+      });
+    });
     e?.stopPropagation();
   }
   function hideTooltip() { tooltip.classList.remove('visible'); }
