@@ -395,7 +395,7 @@
       <span style="font-size:20px">📋</span>
       <div style="flex:1;min-width:0;">
         <div style="font-size:15px;font-weight:800;color:#1a1a2e;">Versiegeschiedenis</div>
-        <div style="font-size:10px;color:#aaa;margin-top:2px;" id="version-build-info">v0.9.4 · 7 mrt 2026</div>
+        <div style="font-size:10px;color:#aaa;margin-top:2px;" id="version-build-info">v0.9.5 · 8 mrt 2026</div>
       </div>
       <button class="sheet-close" id="version-panel-close">×</button>
     </div>
@@ -403,7 +403,8 @@
       <button id="btn-reload-app" style="flex:1;border:1.5px solid #dbeafe;background:#f8faff;color:#1e40af;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Ververs app</button>
     </div>
     <div id="version-list">
-      <div class="version-entry"><span class="version-tag">v0.9.4</span><span class="version-date">7 mrt · 16:30</span><span class="version-desc">Bugfix: topdag-pin werkt nu correct ook bij terugkerende meetings · bugfix: 2e agenda verdwijnt niet meer na terugnavigeren (iOS bfcache).</span></div>
+      <div class="version-entry"><span class="version-tag">v0.9.5</span><span class="version-date">8 mrt · 09:00</span><span class="version-desc">Hotfix: app start weer normaal op (reload-loop op iOS beginscherm opgelost). Topdag-pin fix blijft behouden.</span></div>
+      <div class="version-entry"><span class="version-tag">v0.9.4</span><span class="version-date">7 mrt · 16:30</span><span class="version-desc">Bugfix: topdag-pin werkt nu correct ook bij terugkerende meetings.</span></div>
       <div class="version-entry"><span class="version-tag">v0.9.3</span><span class="version-date">7 mrt · 14:00</span><span class="version-desc">Backup &amp; herstel: exporteer/importeer alle instellingen als JSON-bestand.</span></div>
       <div class="version-entry"><span class="version-tag">v0.9.2</span><span class="version-date">7 mrt · 10:45</span><span class="version-desc">Instellingen blijven behouden bij week wisselen, opslaan-knop altijd zichtbaar (buiten scrollgebied), tijdstip bij versiegeschiedenis.</span></div>
       <div class="version-entry"><span class="version-tag">v0.9.1</span><span class="version-date">7 mrt · 09:30</span><span class="version-desc">Icoonvolgorde aanpasbaar via slepen (drag &amp; drop op desktop, touch-sleep op mobiel). Volgorde wordt automatisch opgeslagen.</span></div>
@@ -1413,9 +1414,6 @@
   ═══════════════════════════════════ */
   // Strip ?v= cache-bust param from URL (keep it clean in address bar)
   if (location.search) history.replaceState(null, '', location.pathname + (location.hash || ''));
-
-  // iOS Safari bfcache: reload when page is restored from memory so localStorage is always fresh
-  window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
 
   renderWeek();
   if (calendars.length) loadAllCalendars();

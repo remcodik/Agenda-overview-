@@ -404,7 +404,7 @@
           }
         });
         alert('✅ ' + count + ' instellingen teruggezet. App wordt herladen.');
-        location.href = 'app.html';
+        location.href = 'app.html?' + Date.now();
       } catch {
         alert('❌ Ongeldig bestand. Gebruik een eerder geëxporteerd backup-bestand.');
       }
@@ -415,17 +415,17 @@
   /* ═══════════════════
      RELOAD / VERSION
   ═══════════════════ */
-  const APP_VERSION = 'v0.9.4';
+  const APP_VERSION = 'v0.9.5';
   const APP_BUILD   = '7 mrt 2026';
   document.getElementById('cust-version-badge').textContent = APP_VERSION + ' · ' + APP_BUILD;
   if (!calendars.length) document.getElementById('cust-demo-hint').style.display = 'block';
 
   document.getElementById('btn-reload-cals').addEventListener('click', () => {
-    location.href = 'app.html';
+    location.href = 'app.html?' + Date.now();
   });
   document.getElementById('btn-hard-reload').addEventListener('click', async () => {
     try { await fetch('app.html', {cache:'reload'}); } catch(e) {}
-    location.href = 'app.html';
+    location.href = 'app.html?' + Date.now();
   });
 
   /* ═══════════════════
@@ -487,9 +487,6 @@
   renderCalendars();
   renderIcons();
   renderEmojis();
-
-  // iOS Safari bfcache: reload when page is restored from memory so localStorage is always fresh
-  window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
 
 })();
 </script>
