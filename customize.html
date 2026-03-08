@@ -70,6 +70,16 @@
     .ics-help a { color: #3b82f6; }
     .ics-code { display: inline-block; background: #eff6ff; padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: 10px; }
 
+    /* ── Logo zoeken ── */
+    .logo-suggestion { display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .1s;border-bottom:1px solid #f6f6fb; }
+    .logo-suggestion:last-child { border-bottom:none; }
+    .logo-suggestion:hover, .logo-suggestion:active { background:#eff6ff; }
+    .logo-suggestion img { width:36px;height:36px;border-radius:7px;object-fit:contain;border:1.5px solid #e8e8f0;background:#fff;flex-shrink:0; }
+    .logo-suggestion-name { font-size:13px;font-weight:700;color:#1a1a2e; }
+    .logo-suggestion-domain { font-size:11px;color:#999; }
+    #logo-suggestions { display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1.5px solid #dbeafe;border-radius:10px;overflow:hidden;z-index:20;box-shadow:0 6px 20px rgba(0,0,0,.12); }
+    .logo-loading { padding:12px 14px;font-size:12px;color:#aaa;text-align:center; }
+
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: #d0d0e0; border-radius: 2px; }
@@ -134,6 +144,15 @@
         </div>
       </div>
       <div class="icons-grid" id="icons-grid"></div>
+      <div style="border-top:1px solid #f0f0f5;padding:12px 16px;">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:8px;">Zoek bedrijfslogo</div>
+        <div style="position:relative;">
+          <input id="logo-search" type="search" placeholder="🔍  Typ bedrijfsnaam… bijv. Apple, Bol.com" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+            style="width:100%;border:1.5px solid #e8e8f0;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;font-family:inherit;transition:border-color .15s;-webkit-appearance:none;">
+          <div id="logo-suggestions"></div>
+        </div>
+        <div id="logo-status" style="font-size:11px;color:#aaa;margin-top:6px;min-height:16px;"></div>
+      </div>
       <div style="border-top:1px solid #f0f0f5;padding:12px 16px;">
         <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:8px;">Emoji-iconen</div>
         <div class="icons-grid" id="emoji-grid" style="padding:0;margin-bottom:10px;min-height:20px;"></div>
@@ -415,7 +434,7 @@
   /* ═══════════════════
      RELOAD / VERSION
   ═══════════════════ */
-  const APP_VERSION = 'v0.9.5';
+  const APP_VERSION = 'v0.9.6';
   const APP_BUILD   = '7 mrt 2026';
   document.getElementById('cust-version-badge').textContent = APP_VERSION + ' · ' + APP_BUILD;
   if (!calendars.length) document.getElementById('cust-demo-hint').style.display = 'block';
@@ -478,6 +497,91 @@
   document.getElementById('btn-add-emoji').addEventListener('click', addEmoji);
   document.getElementById('emoji-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); addEmoji(); }
+  });
+
+  /* ═══════════════════
+     LOGO ZOEKEN
+  ═══════════════════ */
+  const logoSearchEl  = document.getElementById('logo-search');
+  const logoSuggestEl = document.getElementById('logo-suggestions');
+  const logoStatusEl  = document.getElementById('logo-status');
+  let logoTimer = null;
+
+  logoSearchEl.addEventListener('focus', () => {
+    logoSearchEl.style.borderColor = '#4f8ef7';
+  });
+  logoSearchEl.addEventListener('blur', () => {
+    logoSearchEl.style.borderColor = '#e8e8f0';
+  });
+
+  logoSearchEl.addEventListener('input', () => {
+    clearTimeout(logoTimer);
+    const q = logoSearchEl.value.trim();
+    if (q.length < 2) { logoSuggestEl.style.display = 'none'; logoStatusEl.textContent = ''; return; }
+    logoStatusEl.textContent = 'Zoeken…';
+    logoTimer = setTimeout(() => fetchLogoSuggestions(q), 400);
+  });
+
+  async function fetchLogoSuggestions(q) {
+    try {
+      const res = await fetch('https://autocomplete.clearbit.com/v1/companies/suggest?query=' + encodeURIComponent(q));
+      if (!res.ok) throw new Error('no results');
+      const items = await res.json();
+      logoStatusEl.textContent = '';
+      if (!items.length) {
+        logoSuggestEl.style.display = 'none';
+        logoStatusEl.textContent = 'Geen bedrijven gevonden.';
+        return;
+      }
+      logoSuggestEl.innerHTML = items.slice(0, 6).map(c => `
+        <div class="logo-suggestion" data-logo="${escHtml(c.logo)}" data-name="${escHtml(c.name)}">
+          <img src="${escHtml(c.logo)}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'">
+          <div>
+            <div class="logo-suggestion-name">${escHtml(c.name)}</div>
+            <div class="logo-suggestion-domain">${escHtml(c.domain)}</div>
+          </div>
+        </div>
+      `).join('');
+      logoSuggestEl.style.display = 'block';
+      logoSuggestEl.querySelectorAll('.logo-suggestion').forEach(el => {
+        el.addEventListener('mousedown', ev => { ev.preventDefault(); addLogoAsIcon(el.dataset.logo, el.dataset.name); });
+        el.addEventListener('touchend',  ev => { ev.preventDefault(); addLogoAsIcon(el.dataset.logo, el.dataset.name); });
+      });
+    } catch {
+      logoStatusEl.textContent = 'Zoeken mislukt, probeer opnieuw.';
+      logoSuggestEl.style.display = 'none';
+    }
+  }
+
+  async function addLogoAsIcon(logoUrl, name) {
+    logoSearchEl.value = '';
+    logoSuggestEl.style.display = 'none';
+    logoStatusEl.textContent = 'Logo laden…';
+    try {
+      const proxy = 'https://corsproxy.io/?' + encodeURIComponent(logoUrl);
+      const blob  = await (await fetch(proxy)).blob();
+      const reader = new FileReader();
+      reader.onload = evt => {
+        const id = 'logo_' + Date.now();
+        customIcons.push({id, dataUrl: evt.target.result, label: name});
+        if (!iconOrder) iconOrder = [];
+        iconOrder.push('photo:' + id);
+        localStorage.setItem(KEY_ICONS,      JSON.stringify(customIcons));
+        localStorage.setItem(KEY_ICON_ORDER,  JSON.stringify(iconOrder));
+        logoStatusEl.textContent = '✅ ' + name + ' toegevoegd als icoon!';
+        setTimeout(() => { logoStatusEl.textContent = ''; }, 2500);
+        renderIcons();
+      };
+      reader.readAsDataURL(blob);
+    } catch {
+      logoStatusEl.textContent = '❌ Logo kon niet worden geladen.';
+    }
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#logo-search') && !e.target.closest('#logo-suggestions')) {
+      logoSuggestEl.style.display = 'none';
+    }
   });
 
   /* ═══════════════════
