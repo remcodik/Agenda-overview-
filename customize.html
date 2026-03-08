@@ -558,24 +558,59 @@
     logoSuggestEl.style.display = 'none';
     logoStatusEl.textContent = 'Logo laden…';
     try {
-      const proxy = 'https://corsproxy.io/?' + encodeURIComponent(logoUrl);
-      const blob  = await (await fetch(proxy)).blob();
-      const reader = new FileReader();
-      reader.onload = evt => {
-        const id = 'logo_' + Date.now();
-        customIcons.push({id, dataUrl: evt.target.result, label: name});
-        if (!iconOrder) iconOrder = [];
-        iconOrder.push('photo:' + id);
-        localStorage.setItem(KEY_ICONS,      JSON.stringify(customIcons));
-        localStorage.setItem(KEY_ICON_ORDER,  JSON.stringify(iconOrder));
-        logoStatusEl.textContent = '✅ ' + name + ' toegevoegd als icoon!';
-        setTimeout(() => { logoStatusEl.textContent = ''; }, 2500);
-        renderIcons();
-      };
-      reader.readAsDataURL(blob);
+      const dataUrl = await loadImageAsDataUrl(logoUrl);
+      const id = 'logo_' + Date.now();
+      customIcons.push({id, dataUrl, label: name});
+      if (!iconOrder) iconOrder = [];
+      iconOrder.push('photo:' + id);
+      localStorage.setItem(KEY_ICONS,      JSON.stringify(customIcons));
+      localStorage.setItem(KEY_ICON_ORDER,  JSON.stringify(iconOrder));
+      logoStatusEl.textContent = '✅ ' + name + ' toegevoegd als icoon!';
+      setTimeout(() => { logoStatusEl.textContent = ''; }, 2500);
+      renderIcons();
     } catch {
       logoStatusEl.textContent = '❌ Logo kon niet worden geladen.';
     }
+  }
+
+  function loadImageAsDataUrl(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width  = img.naturalWidth  || 64;
+          canvas.height = img.naturalHeight || 64;
+          canvas.getContext('2d').drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        } catch {
+          // Canvas tainted door CORS – probeer proxies
+          fetchViaProxies(url).then(resolve).catch(reject);
+        }
+      };
+      img.onerror = () => fetchViaProxies(url).then(resolve).catch(reject);
+      img.src = url;
+    });
+  }
+
+  async function fetchViaProxies(url) {
+    const proxies = [
+      'https://corsproxy.io/?' + encodeURIComponent(url),
+      'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+    ];
+    for (const proxy of proxies) {
+      try {
+        const blob = await (await fetch(proxy, {cache: 'no-store'})).blob();
+        return await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = e => res(e.target.result);
+          r.onerror = rej;
+          r.readAsDataURL(blob);
+        });
+      } catch { /* volgende proberen */ }
+    }
+    throw new Error('Alle proxies mislukt');
   }
 
   document.addEventListener('click', e => {
