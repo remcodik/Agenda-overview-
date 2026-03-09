@@ -61,13 +61,14 @@
     #loading-dot.show { display: block; }
     @keyframes ldot { 0%,100%{opacity:1} 50%{opacity:.25} }
 
-    /* ── Legend (hidden – content moved into day headers) ── */
-    .legend { display: none; }
-    #legend-customers { display: none; }
-    /* Hidden badge in topbar */
-    #hidden-badge { display: none; align-items: center; gap: 4px; background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.25); border-radius: 10px; padding: 4px 10px; font-size: 11px; font-weight: 800; color: rgba(255,255,255,.9); cursor: pointer; user-select: none; height: 44px; flex-shrink: 0; }
+    /* ── Legend ── */
+    .legend { display: flex; align-items: center; gap: 14px; padding: 6px 16px; background: #fff; border-bottom: 1px solid #f0f0f5; font-size: 11px; flex-shrink: 0; flex-wrap: wrap; }
+    #legend-customers { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-weight: 600; color: #333; font-size: 11px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    #hidden-badge { display: none; align-items: center; gap: 4px; background: #f1f5f9; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 3px 9px; font-size: 10px; font-weight: 800; color: #64748b; cursor: pointer; user-select: none; flex-shrink: 0; }
     #hidden-badge.show { display: flex; }
-    #hidden-badge:hover { background: rgba(255,255,255,.25); }
+    #hidden-badge:hover { background: #e2e8f0; }
     /* Per-day customer color dots */
     .day-cust-dots { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 3px; }
     .day-cust-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -289,12 +290,12 @@
       <button id="btn-next-week">&#8250;</button>
     </div>
     <button id="btn-view-toggle" class="btn-view-toggle" title="Werkdagen / volledige week">5d</button>
-    <span id="hidden-badge" title="Verborgen items">🔒 <span id="hidden-count">0</span></span>
     <button class="btn-settings" onclick="location.href='customize.html'" title="Instellingen">⚙️</button>
   </header>
 
-  <div class="legend" style="display:none">
+  <div class="legend">
     <div id="legend-customers"></div>
+    <span id="hidden-badge">🔒 <span id="hidden-count">0</span> verborgen</span>
   </div>
 
   <main class="week-grid"></main>
