@@ -61,16 +61,18 @@
     #loading-dot.show { display: block; }
     @keyframes ldot { 0%,100%{opacity:1} 50%{opacity:.25} }
 
-    /* ── Legend ── */
-    .legend { display: flex; align-items: center; gap: 14px; padding: 7px 20px; background: #fff; border-bottom: 1px solid #f0f0f5; font-size: 11px; flex-shrink: 0; flex-wrap: wrap; }
-    .legend-title { font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .5px; font-size: 10px; }
-    #legend-customers { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .legend-item { display: flex; align-items: center; gap: 5px; font-weight: 600; color: #333; font-size: 11px; }
-    .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-    .legend-hint { margin-left: auto; color: #bbb; font-size: 10px; font-style: italic; }
-    #hidden-badge { display: none; align-items: center; gap: 4px; background: #f1f5f9; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 3px 9px; font-size: 10px; font-weight: 800; color: #64748b; cursor: pointer; user-select: none; }
+    /* ── Legend (hidden – content moved into day headers) ── */
+    .legend { display: none; }
+    #legend-customers { display: none; }
+    /* Hidden badge in topbar */
+    #hidden-badge { display: none; align-items: center; gap: 4px; background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.25); border-radius: 10px; padding: 4px 10px; font-size: 11px; font-weight: 800; color: rgba(255,255,255,.9); cursor: pointer; user-select: none; height: 44px; flex-shrink: 0; }
     #hidden-badge.show { display: flex; }
-    #hidden-badge:hover { background: #e2e8f0; }
+    #hidden-badge:hover { background: rgba(255,255,255,.25); }
+    /* Per-day customer color dots */
+    .day-cust-dots { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 3px; }
+    .day-cust-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    /* Per-day hidden indicator */
+    .day-hidden-dot { font-size: 9px; margin-top: 3px; color: #94a3b8; font-weight: 700; line-height: 1; }
 
     /* ── Week grid ── */
     .week-grid { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: 1fr 1fr; gap: 8px; padding: 12px 16px 16px; flex: 1; overflow: hidden; min-height: 0; }
@@ -81,18 +83,17 @@
     .day-col.weekend { opacity: .7; }
     .day-col.weekend .day-body { grid-template-columns: 1fr; }
     .day-col.weekend .item-large { flex-direction: row; justify-content: flex-start; min-height: auto; padding: 6px 8px; }
-    .day-col.weekend .item-large .item-icon { font-size: 22px; }
-    .day-col.weekend .item-large .item-icon img { width: 22px; height: 22px; }
+    .day-col.weekend .item-large .item-icon { font-size: 26px; }
+    .day-col.weekend .item-large .item-icon img { width: 26px; height: 26px; }
     .day-col.weekend .item-large .item-text { width: auto; text-align: left; font-size: 11px; flex: 1; }
-    .day-header { padding: 9px 10px 7px; background: #fafafa; border-bottom: 1px solid #f0f0f5; flex-shrink: 0; }
-    .day-name-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; }
+    .day-header { padding: 8px 8px 7px; background: #fafafa; border-bottom: 1px solid #f0f0f5; flex-shrink: 0; display: flex; align-items: flex-start; gap: 6px; min-height: 56px; }
+    .day-info { flex-shrink: 0; display: flex; flex-direction: column; gap: 1px; }
     .day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #888; }
     .day-col.weekend .day-name { color: #ccc; }
-    .day-date { font-size: 20px; font-weight: 800; color: #1a1a2e; line-height: 1.1; margin-top: 1px; }
+    .day-date { font-size: 22px; font-weight: 800; color: #1a1a2e; line-height: 1.1; }
     .day-col.today .day-date { color: #4f8ef7; }
     .day-col.weekend .day-date { color: #ccc; }
-    .day-col.weekend .day-name-row { flex-direction: column; align-items: flex-start; gap: 1px; }
-    .day-col.weekend .day-pins { max-width: none; justify-content: flex-start; }
+    .day-pins { flex: 1; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; align-content: flex-start; }
     .day-body { flex: 1; padding: 8px 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; align-content: start; overflow-y: auto; overflow-x: hidden; min-height: 0; }
     .day-footer { padding: 5px 6px 7px; flex-shrink: 0; }
     .day-empty { grid-column: 1/-1; padding: 10px 4px; font-size: 10px; color: #d8d8e8; text-align: center; font-weight: 600; }
@@ -105,20 +106,20 @@
     .item:hover, .item.active { filter: brightness(.92); box-shadow: 0 2px 10px rgba(0,0,0,.14); transform: translateY(-1px); }
     .item:active { transform: scale(.97); }
     .item-meeting { border-left: 3px solid rgba(0,0,0,.18); }
-    .item-icon { font-size: 22px; flex-shrink: 0; line-height: 1; display: flex; align-items: center; justify-content: center; }
-    .item-icon img { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
+    .item-icon { font-size: 26px; flex-shrink: 0; line-height: 1; display: flex; align-items: center; justify-content: center; }
+    .item-icon img { width: 26px; height: 26px; border-radius: 4px; object-fit: cover; }
     /* Tekst: altijd zichtbaar, vult ruimte na icoon */
     .item-text { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
     /* item-no-icon: backwards compat (visueel gelijk aan normaal) */
     .item-no-icon .item-icon { display: none; }
     /* Breed: volledige breedte, tekst wraps (geen afknippen) */
     .item-wide { align-items: flex-start; padding: 7px 8px; }
-    .item-wide .item-icon { font-size: 22px; margin-top: 1px; }
+    .item-wide .item-icon { font-size: 26px; margin-top: 1px; }
     .item-wide .item-text { white-space: normal; word-break: break-word; line-height: 1.35; text-overflow: clip; }
     /* Groot: icon groter, tekst eronder altijd zichtbaar */
     .item-large { flex-direction: column; justify-content: center; gap: 3px; padding: 8px 6px; min-height: 60px; }
-    .item-large .item-icon { font-size: 28px; }
-    .item-large .item-icon img { width: 28px; height: 28px; }
+    .item-large .item-icon { font-size: 36px; }
+    .item-large .item-icon img { width: 36px; height: 36px; }
     .item-large .item-text { flex: none; width: 100%; text-align: center; font-size: 10px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     /* Alleen tekst: verberg icoon */
     .item-text-only .item-icon { display: none; }
@@ -128,21 +129,27 @@
     .item-cont-arrow { font-size: 9px; margin-right: 2px; opacity: .7; }
     /* Klein: halve breedte (2 per rij) */
     .item.item-small { grid-column: auto; padding: 5px 5px; gap: 4px; }
-    .item-small .item-icon { font-size: 16px; }
-    .item-small .item-icon img { width: 16px; height: 16px; }
+    .item-small .item-icon { font-size: 20px; }
+    .item-small .item-icon img { width: 20px; height: 20px; }
     .item-small .item-text { font-size: 10px; }
     .item-toppin-anchor { display: none; }
     .item-hidden { display: none; }
+    /* Drag handle for reordering */
+    .item-drag-handle { flex-shrink: 0; font-size: 12px; color: rgba(0,0,0,.18); cursor: grab; padding: 2px 0 2px 5px; user-select: none; touch-action: none; line-height: 1; letter-spacing: -1px; }
+    .item-drag-handle:active { cursor: grabbing; }
+    .item-large .item-drag-handle { display: none; }
+    .item-small .item-drag-handle { display: none; }
+    .item.item-dragging { opacity: 0.3; pointer-events: none; }
+    .item-drag-placeholder { grid-column: 1/-1; background: rgba(79,142,247,.1); border: 2px dashed #4f8ef7; border-radius: 9px; min-height: 34px; }
     .upcoming { animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,.25)} 50%{box-shadow:0 0 0 5px rgba(0,0,0,0)} }
     .day-divider { grid-column: 1/-1; height: 1px; background: rgba(0,0,0,.06); margin: 2px 0; }
     /* ── Day pins (from topPin events) ── */
-    .day-pins { display: flex; flex-wrap: wrap; gap: 3px; justify-content: flex-end; max-width: 72px; flex-shrink: 0; }
-    .day-pin { font-size: 22px; line-height: 1; width: 32px; height: 32px; border-radius: 9px; cursor: pointer; border: 3px solid rgba(0,0,0,.15); background: rgba(0,0,0,.03); display: flex; align-items: center; justify-content: center; box-sizing: border-box; transition: filter .12s; flex-shrink: 0; }
+    .day-pin { font-size: 26px; line-height: 1; width: 38px; height: 38px; border-radius: 10px; cursor: pointer; border: 3px solid rgba(0,0,0,.15); background: rgba(0,0,0,.03); display: flex; align-items: center; justify-content: center; box-sizing: border-box; transition: filter .12s; flex-shrink: 0; }
     .day-pin:hover { filter: brightness(.88); }
-    .day-pin img { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; }
-    .day-pin-large { width: 44px; height: 44px; border-radius: 12px; font-size: 28px; }
-    .day-pin-large img { width: 28px; height: 28px; border-radius: 7px; }
+    .day-pin img { width: 26px; height: 26px; border-radius: 5px; object-fit: cover; }
+    .day-pin-large { width: 52px; height: 52px; border-radius: 14px; font-size: 34px; }
+    .day-pin-large img { width: 36px; height: 36px; border-radius: 9px; }
 
     /* ── Item sizes (grid placement) ── */
     .item-large { grid-column: 1 / -1; }
@@ -282,13 +289,12 @@
       <button id="btn-next-week">&#8250;</button>
     </div>
     <button id="btn-view-toggle" class="btn-view-toggle" title="Werkdagen / volledige week">5d</button>
+    <span id="hidden-badge" title="Verborgen items">🔒 <span id="hidden-count">0</span></span>
     <button class="btn-settings" onclick="location.href='customize.html'" title="Instellingen">⚙️</button>
   </header>
 
-  <div class="legend">
+  <div class="legend" style="display:none">
     <div id="legend-customers"></div>
-    <span id="hidden-badge">🔒 <span id="hidden-count">0</span> verborgen</span>
-    <span class="legend-hint">Tik · houd ingedrukt om te bewerken</span>
   </div>
 
   <main class="week-grid"></main>
@@ -489,6 +495,7 @@
   const KEY_EMOJIS    = 'custom_emojis';    // ['☕','🎯',…]
   const KEY_OVERRIDES   = 'event_overrides';  // {uid:{customerId,icon,private,topPin,size}}
   const KEY_ICON_ORDER  = 'icon_order';       // [emoji|'photo:id', ...]
+  const KEY_SORT_ORDER  = 'item_sort_order';  // {'YYYY-MM-DD': ['uid1','uid2',…]}
 
   const DEFAULT_CUSTOMERS = [
     {id:'c1', name:'Acme Corp',   bg:'#ede0ff', text:'#4c1d95'},
@@ -516,6 +523,7 @@
   let customIcons = loadJson(KEY_ICONS,      []);
   let customEmojis= loadJson(KEY_EMOJIS,    []);
   let overrides   = loadJson(KEY_OVERRIDES,  {});
+  let itemSortOrder = loadJson(KEY_SORT_ORDER, {});
   let iconOrder   = loadJson(KEY_ICON_ORDER, null);
 
   let calEvents   = [];
@@ -863,9 +871,7 @@
 
     buildLegend();
     updateHiddenBadge();
-    // Show hint when running on demo data
-    const hint = document.querySelector('.legend-hint');
-    if (hint) hint.textContent = hasCals ? 'Tik · houd ingedrukt om te bewerken' : 'Demo-data · tik ⚙️ om agenda te koppelen';
+    // (legend-hint removed — legend bar replaced by per-day indicators)
   }
 
   function buildDayCol(date, events, isToday, isWeekend, gridCol, gridRow) {
@@ -875,13 +881,27 @@
     col.style.gridRow    = gridRow;
     col.dataset.date     = isoDate(date);
 
+    // Per-day customer color dots
+    const dayCustColors = [...new Set(
+      events.filter(e => !e.topPin && e.customerId)
+            .map(e => customers.find(c => c.id === e.customerId))
+            .filter(Boolean)
+            .map(c => c.text)
+    )];
+    const custDotsHtml = dayCustColors.length
+      ? `<div class="day-cust-dots">${dayCustColors.map(col => `<span class="day-cust-dot" style="background:${escHtml(col)}"></span>`).join('')}</div>`
+      : '';
+    const hiddenCount = events.filter(e => !e.topPin && e._private).length;
+    const hiddenDotHtml = hiddenCount ? `<div class="day-hidden-dot" data-day-hidden="${escHtml(isoDate(date))}">🔒${hiddenCount}</div>` : `<div class="day-hidden-dot" data-day-hidden="${escHtml(isoDate(date))}" style="display:none"></div>`;
+
     col.innerHTML = `
       <div class="day-header">
-        <div class="day-name-row">
+        <div class="day-info">
           <span class="day-name">${DAY_NAMES[date.getDay()]}${isToday?' · Vandaag':''}</span>
-          <div class="day-pins" id="pins-${isoDate(date)}">${renderPinsHtml(events)}</div>
+          <div class="day-date">${date.getDate()}</div>
+          ${custDotsHtml}${hiddenDotHtml}
         </div>
-        <div class="day-date">${date.getDate()}</div>
+        <div class="day-pins" id="pins-${isoDate(date)}">${renderPinsHtml(events)}</div>
       </div>
       <div class="day-body"></div>
     `;
@@ -898,11 +918,25 @@
     const meetings = events.filter(e => !e.topPin && e.type === 'meeting');
     const tasks    = events.filter(e => !e.topPin && e.type === 'task');
 
-    meetings.forEach(e => body.appendChild(buildItem(e)));
-    if (meetings.length && tasks.length) {
-      const div = document.createElement('div'); div.className='day-divider'; body.appendChild(div);
+    // Apply saved sort order if present, otherwise meetings first then tasks
+    const dateKey = isoDate(date);
+    const savedOrder = itemSortOrder[dateKey];
+    let bodyEvts;
+    if (savedOrder && savedOrder.length) {
+      bodyEvts = [...meetings, ...tasks].sort((a, b) => {
+        const ai = savedOrder.indexOf(a.uid), bi = savedOrder.indexOf(b.uid);
+        if (ai === -1 && bi === -1) return 0;
+        if (ai === -1) return 1; if (bi === -1) return -1;
+        return ai - bi;
+      });
+      bodyEvts.forEach(e => body.appendChild(buildItem(e)));
+    } else {
+      meetings.forEach(e => body.appendChild(buildItem(e)));
+      if (meetings.length && tasks.length) {
+        const div = document.createElement('div'); div.className='day-divider'; body.appendChild(div);
+      }
+      tasks.forEach(e => body.appendChild(buildItem(e)));
     }
-    tasks.forEach(e => body.appendChild(buildItem(e)));
 
     // Hidden anchors for topPin events so the edit sheet can find them by uid
     pinned.forEach(e => {
@@ -910,6 +944,9 @@
       anchor.classList.add('item-toppin-anchor');
       body.appendChild(anchor);
     });
+
+    // Enable touch drag-to-sort
+    attachItemSort(body, dateKey);
 
     const bodyEvents = meetings.length + tasks.length;
     if (isConnected && !bodyEvents && !pinned.length && !isWeekend) {
@@ -940,8 +977,64 @@
     const titleHtml = isCont
       ? `<span class="item-cont-arrow">↩</span>${escHtml(ev.title)}`
       : escHtml(ev.title);
-    el.innerHTML = `<span class="item-icon">${iconHtml}</span><span class="item-text">${titleHtml}</span>`;
+    el.innerHTML = `<span class="item-icon">${iconHtml}</span><span class="item-text">${titleHtml}</span><span class="item-drag-handle">⠿⠿</span>`;
     return el;
+  }
+
+  /* ─── Touch drag-to-sort items within a day ─── */
+  function attachItemSort(body, dateKey) {
+    let dragEl = null, placeholder = null;
+
+    function getItems() {
+      return [...body.querySelectorAll('.item:not(.item-toppin-anchor):not(.item-dragging)')];
+    }
+    function saveDayOrder() {
+      const uids = [...body.querySelectorAll('.item:not(.item-toppin-anchor)')]
+        .map(el => el.dataset.uid).filter(Boolean);
+      itemSortOrder[dateKey] = uids;
+      localStorage.setItem(KEY_SORT_ORDER, JSON.stringify(itemSortOrder));
+    }
+    function insertPlaceholder(clientY) {
+      const items = getItems();
+      let insertBefore = null;
+      for (const it of items) {
+        const r = it.getBoundingClientRect();
+        if (clientY < r.top + r.height / 2) { insertBefore = it; break; }
+      }
+      if (insertBefore) body.insertBefore(placeholder, insertBefore);
+      else {
+        const anchor = body.querySelector('.item-toppin-anchor') || body.querySelector('.day-empty');
+        anchor ? body.insertBefore(placeholder, anchor) : body.appendChild(placeholder);
+      }
+    }
+
+    body.addEventListener('touchstart', e => {
+      if (!e.target.closest('.item-drag-handle')) return;
+      e.preventDefault(); e.stopPropagation();
+      dragEl = e.target.closest('.item');
+      if (!dragEl) return;
+      // Remove divider if present (free-sort mode)
+      body.querySelector('.day-divider')?.remove();
+      dragEl.classList.add('item-dragging');
+      placeholder = document.createElement('div');
+      placeholder.className = 'item-drag-placeholder';
+      placeholder.style.height = dragEl.offsetHeight + 'px';
+      dragEl.after(placeholder);
+    }, {passive: false});
+
+    body.addEventListener('touchmove', e => {
+      if (!dragEl) return;
+      e.preventDefault();
+      insertPlaceholder(e.touches[0].clientY);
+    }, {passive: false});
+
+    body.addEventListener('touchend', () => {
+      if (!dragEl) return;
+      dragEl.classList.remove('item-dragging');
+      placeholder.replaceWith(dragEl);
+      placeholder = null; dragEl = null;
+      saveDayOrder();
+    });
   }
 
   function buildIconHtml(icon) {
@@ -1393,6 +1486,8 @@
     buildIconGrid(currentIcon);
 
     openSheet(editSheet);
+    // Prevent title input from appearing auto-selected when sheet opens
+    setTimeout(() => titleInput.blur(), 50);
   }
 
   document.getElementById('sheet-close').addEventListener('click', () => closeSheet(editSheet));
@@ -1535,6 +1630,14 @@
     const count = document.querySelectorAll('.item.item-hidden').length;
     document.getElementById('hidden-count').textContent = count;
     document.getElementById('hidden-badge').classList.toggle('show', count > 0);
+    // Update per-day hidden indicators
+    document.querySelectorAll('[data-day-hidden]').forEach(dot => {
+      const dateStr = dot.dataset.dayHidden;
+      const col = document.querySelector(`.day-col[data-date="${dateStr}"]`);
+      const dayHidden = col ? col.querySelectorAll('.item.item-hidden').length : 0;
+      dot.textContent = dayHidden ? '🔒' + dayHidden : '';
+      dot.style.display = dayHidden ? '' : 'none';
+    });
   }
 
   document.getElementById('hidden-badge').addEventListener('click', openHiddenPanel);
@@ -1602,16 +1705,22 @@
     const inSheet = e.target.closest('.bottom-sheet');
     if (item) {
       // Item touch: track long-press, no swipe
+      // preventDefault suppresses browser native long-press (text selection, context menu)
+      e.preventDefault();
       swipeStartX = null;
       didLongPress = false;
-      lpTimer = setTimeout(() => { didLongPress=true; openEditSheet(item); }, 480);
+      lpTimer = setTimeout(() => {
+        didLongPress = true;
+        window.getSelection()?.removeAllRanges();
+        openEditSheet(item);
+      }, 480);
     } else if (!inSheet) {
       // Background touch: track for swipe
       swipeStartX = e.touches[0].clientX;
       swipeStartY = e.touches[0].clientY;
       didSwipe = false;
     }
-  }, {passive:true});
+  }, {passive:false});
 
   document.addEventListener('touchmove', e => {
     clearTimeout(lpTimer);
