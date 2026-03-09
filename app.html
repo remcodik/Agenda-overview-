@@ -1404,6 +1404,8 @@
     buildIconGrid(currentIcon);
 
     openSheet(editSheet);
+    // Prevent title input from appearing auto-selected when sheet opens
+    setTimeout(() => titleInput.blur(), 50);
   }
 
   document.getElementById('sheet-close').addEventListener('click', () => closeSheet(editSheet));
@@ -1621,16 +1623,22 @@
     const inSheet = e.target.closest('.bottom-sheet');
     if (item) {
       // Item touch: track long-press, no swipe
+      // preventDefault suppresses browser native long-press (text selection, context menu)
+      e.preventDefault();
       swipeStartX = null;
       didLongPress = false;
-      lpTimer = setTimeout(() => { didLongPress=true; openEditSheet(item); }, 480);
+      lpTimer = setTimeout(() => {
+        didLongPress = true;
+        window.getSelection()?.removeAllRanges();
+        openEditSheet(item);
+      }, 480);
     } else if (!inSheet) {
       // Background touch: track for swipe
       swipeStartX = e.touches[0].clientX;
       swipeStartY = e.touches[0].clientY;
       didSwipe = false;
     }
-  }, {passive:true});
+  }, {passive:false});
 
   document.addEventListener('touchmove', e => {
     clearTimeout(lpTimer);
