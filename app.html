@@ -1708,12 +1708,12 @@
   document.addEventListener('touchstart', e => {
     const item = e.target.closest('.item');
     const inSheet = e.target.closest('.bottom-sheet');
+    didLongPress = false; // always reset at start of new touch sequence
     if (item) {
       // Item touch: track long-press, no swipe
       // preventDefault suppresses browser native long-press (text selection, context menu)
       e.preventDefault();
       swipeStartX = null;
-      didLongPress = false;
       lpTimer = setTimeout(() => {
         didLongPress = true;
         window.getSelection()?.removeAllRanges();
