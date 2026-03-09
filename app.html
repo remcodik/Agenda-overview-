@@ -61,16 +61,18 @@
     #loading-dot.show { display: block; }
     @keyframes ldot { 0%,100%{opacity:1} 50%{opacity:.25} }
 
-    /* ── Legend ── */
-    .legend { display: flex; align-items: center; gap: 14px; padding: 7px 20px; background: #fff; border-bottom: 1px solid #f0f0f5; font-size: 11px; flex-shrink: 0; flex-wrap: wrap; }
-    .legend-title { font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .5px; font-size: 10px; }
-    #legend-customers { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .legend-item { display: flex; align-items: center; gap: 5px; font-weight: 600; color: #333; font-size: 11px; }
-    .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-    .legend-hint { margin-left: auto; color: #bbb; font-size: 10px; font-style: italic; }
-    #hidden-badge { display: none; align-items: center; gap: 4px; background: #f1f5f9; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 3px 9px; font-size: 10px; font-weight: 800; color: #64748b; cursor: pointer; user-select: none; }
+    /* ── Legend (hidden – content moved into day headers) ── */
+    .legend { display: none; }
+    #legend-customers { display: none; }
+    /* Hidden badge in topbar */
+    #hidden-badge { display: none; align-items: center; gap: 4px; background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.25); border-radius: 10px; padding: 4px 10px; font-size: 11px; font-weight: 800; color: rgba(255,255,255,.9); cursor: pointer; user-select: none; height: 44px; flex-shrink: 0; }
     #hidden-badge.show { display: flex; }
-    #hidden-badge:hover { background: #e2e8f0; }
+    #hidden-badge:hover { background: rgba(255,255,255,.25); }
+    /* Per-day customer color dots */
+    .day-cust-dots { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 3px; }
+    .day-cust-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    /* Per-day hidden indicator */
+    .day-hidden-dot { font-size: 9px; margin-top: 3px; color: #94a3b8; font-weight: 700; line-height: 1; }
 
     /* ── Week grid ── */
     .week-grid { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: 1fr 1fr; gap: 8px; padding: 12px 16px 16px; flex: 1; overflow: hidden; min-height: 0; }
@@ -280,13 +282,12 @@
       <button id="btn-next-week">&#8250;</button>
     </div>
     <button id="btn-view-toggle" class="btn-view-toggle" title="Werkdagen / volledige week">5d</button>
+    <span id="hidden-badge" title="Verborgen items">🔒 <span id="hidden-count">0</span></span>
     <button class="btn-settings" onclick="location.href='customize.html'" title="Instellingen">⚙️</button>
   </header>
 
-  <div class="legend">
+  <div class="legend" style="display:none">
     <div id="legend-customers"></div>
-    <span id="hidden-badge">🔒 <span id="hidden-count">0</span> verborgen</span>
-    <span class="legend-hint">Tik · houd ingedrukt om te bewerken</span>
   </div>
 
   <main class="week-grid"></main>
@@ -861,9 +862,7 @@
 
     buildLegend();
     updateHiddenBadge();
-    // Show hint when running on demo data
-    const hint = document.querySelector('.legend-hint');
-    if (hint) hint.textContent = hasCals ? 'Tik · houd ingedrukt om te bewerken' : 'Demo-data · tik ⚙️ om agenda te koppelen';
+    // (legend-hint removed — legend bar replaced by per-day indicators)
   }
 
   function buildDayCol(date, events, isToday, isWeekend, gridCol, gridRow) {
@@ -873,11 +872,25 @@
     col.style.gridRow    = gridRow;
     col.dataset.date     = isoDate(date);
 
+    // Per-day customer color dots
+    const dayCustColors = [...new Set(
+      events.filter(e => !e.topPin && e.customerId)
+            .map(e => customers.find(c => c.id === e.customerId))
+            .filter(Boolean)
+            .map(c => c.text)
+    )];
+    const custDotsHtml = dayCustColors.length
+      ? `<div class="day-cust-dots">${dayCustColors.map(col => `<span class="day-cust-dot" style="background:${escHtml(col)}"></span>`).join('')}</div>`
+      : '';
+    const hiddenCount = events.filter(e => !e.topPin && e._private).length;
+    const hiddenDotHtml = hiddenCount ? `<div class="day-hidden-dot" data-day-hidden="${escHtml(isoDate(date))}">🔒${hiddenCount}</div>` : `<div class="day-hidden-dot" data-day-hidden="${escHtml(isoDate(date))}" style="display:none"></div>`;
+
     col.innerHTML = `
       <div class="day-header">
         <div class="day-info">
           <span class="day-name">${DAY_NAMES[date.getDay()]}${isToday?' · Vandaag':''}</span>
           <div class="day-date">${date.getDate()}</div>
+          ${custDotsHtml}${hiddenDotHtml}
         </div>
         <div class="day-pins" id="pins-${isoDate(date)}">${renderPinsHtml(events)}</div>
       </div>
@@ -1533,6 +1546,14 @@
     const count = document.querySelectorAll('.item.item-hidden').length;
     document.getElementById('hidden-count').textContent = count;
     document.getElementById('hidden-badge').classList.toggle('show', count > 0);
+    // Update per-day hidden indicators
+    document.querySelectorAll('[data-day-hidden]').forEach(dot => {
+      const dateStr = dot.dataset.dayHidden;
+      const col = document.querySelector(`.day-col[data-date="${dateStr}"]`);
+      const dayHidden = col ? col.querySelectorAll('.item.item-hidden').length : 0;
+      dot.textContent = dayHidden ? '🔒' + dayHidden : '';
+      dot.style.display = dayHidden ? '' : 'none';
+    });
   }
 
   document.getElementById('hidden-badge').addEventListener('click', openHiddenPanel);
