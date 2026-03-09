@@ -107,15 +107,15 @@
     .item:hover, .item.active { filter: brightness(.92); box-shadow: 0 2px 10px rgba(0,0,0,.14); transform: translateY(-1px); }
     .item:active { transform: scale(.97); }
     .item-meeting { border-left: 3px solid rgba(0,0,0,.18); }
-    .item-icon { font-size: 26px; flex-shrink: 0; line-height: 1; display: flex; align-items: center; justify-content: center; }
-    .item-icon img { width: 26px; height: 26px; border-radius: 4px; object-fit: cover; }
+    .item-icon { font-size: 34px; flex-shrink: 0; line-height: 1; display: flex; align-items: center; justify-content: center; align-self: stretch; min-width: 38px; }
+    .item-icon img { width: 34px; height: 34px; border-radius: 4px; object-fit: cover; }
     /* Tekst: altijd zichtbaar, vult ruimte na icoon */
     .item-text { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
     /* item-no-icon: backwards compat (visueel gelijk aan normaal) */
     .item-no-icon .item-icon { display: none; }
     /* Breed: volledige breedte, tekst wraps (geen afknippen) */
     .item-wide { align-items: flex-start; padding: 7px 8px; }
-    .item-wide .item-icon { font-size: 26px; margin-top: 1px; }
+    .item-wide .item-icon { font-size: 34px; margin-top: 0; }
     .item-wide .item-text { white-space: normal; word-break: break-word; line-height: 1.35; text-overflow: clip; }
     /* Groot: icon groter, tekst eronder altijd zichtbaar */
     .item-large { flex-direction: column; justify-content: center; gap: 3px; padding: 8px 6px; min-height: 60px; }
