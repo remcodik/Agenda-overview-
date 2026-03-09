@@ -722,7 +722,7 @@
       const results = await Promise.all(
         calendars.map(cal => fetchAndParseIcs(cal.url, dates, cal.color||'#3b82f6'))
       );
-      calEvents   = results.flat();
+      calEvents   = deduplicateEvents(results.flat());
       isConnected = true;
       isLoading   = false;
       document.getElementById('loading-dot').classList.remove('show');
@@ -735,6 +735,22 @@
       renderWeek();
       alert('Kon agenda niet laden:\n' + err.message + '\n\nControleer de ICS-link in ⚙️ Instellingen.');
     }
+  }
+
+  /* ═══════════════════════════════════
+     DEDUPLICATIE (gedeelde agenda's)
+  ═══════════════════════════════════ */
+  // Als meerdere agenda's hetzelfde event bevatten (bijv. gedeelde Google
+  // Agenda), heeft elke instantie dezelfde ICS-UID. We bewaren alleen de
+  // eerste keer dat een uid voorkomt.  Bij herhalende events is de uid
+  // 'base:YYYY-MM-DD', dus elke dag-instantie telt apart.
+  function deduplicateEvents(events) {
+    const seen = new Set();
+    return events.filter(ev => {
+      if (seen.has(ev.uid)) return false;
+      seen.add(ev.uid);
+      return true;
+    });
   }
 
   /* ═══════════════════════════════════
