@@ -81,8 +81,8 @@
     .day-col.weekend { opacity: .7; }
     .day-col.weekend .day-body { grid-template-columns: 1fr; }
     .day-col.weekend .item-large { flex-direction: row; justify-content: flex-start; min-height: auto; padding: 6px 8px; }
-    .day-col.weekend .item-large .item-icon { font-size: 22px; }
-    .day-col.weekend .item-large .item-icon img { width: 22px; height: 22px; }
+    .day-col.weekend .item-large .item-icon { font-size: 26px; }
+    .day-col.weekend .item-large .item-icon img { width: 26px; height: 26px; }
     .day-col.weekend .item-large .item-text { width: auto; text-align: left; font-size: 11px; flex: 1; }
     .day-header { padding: 9px 10px 7px; background: #fafafa; border-bottom: 1px solid #f0f0f5; flex-shrink: 0; }
     .day-name-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; }
@@ -105,20 +105,20 @@
     .item:hover, .item.active { filter: brightness(.92); box-shadow: 0 2px 10px rgba(0,0,0,.14); transform: translateY(-1px); }
     .item:active { transform: scale(.97); }
     .item-meeting { border-left: 3px solid rgba(0,0,0,.18); }
-    .item-icon { font-size: 22px; flex-shrink: 0; line-height: 1; display: flex; align-items: center; justify-content: center; }
-    .item-icon img { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
+    .item-icon { font-size: 26px; flex-shrink: 0; line-height: 1; display: flex; align-items: center; justify-content: center; }
+    .item-icon img { width: 26px; height: 26px; border-radius: 4px; object-fit: cover; }
     /* Tekst: altijd zichtbaar, vult ruimte na icoon */
     .item-text { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
     /* item-no-icon: backwards compat (visueel gelijk aan normaal) */
     .item-no-icon .item-icon { display: none; }
     /* Breed: volledige breedte, tekst wraps (geen afknippen) */
     .item-wide { align-items: flex-start; padding: 7px 8px; }
-    .item-wide .item-icon { font-size: 22px; margin-top: 1px; }
+    .item-wide .item-icon { font-size: 26px; margin-top: 1px; }
     .item-wide .item-text { white-space: normal; word-break: break-word; line-height: 1.35; text-overflow: clip; }
     /* Groot: icon groter, tekst eronder altijd zichtbaar */
     .item-large { flex-direction: column; justify-content: center; gap: 3px; padding: 8px 6px; min-height: 60px; }
-    .item-large .item-icon { font-size: 28px; }
-    .item-large .item-icon img { width: 28px; height: 28px; }
+    .item-large .item-icon { font-size: 36px; }
+    .item-large .item-icon img { width: 36px; height: 36px; }
     .item-large .item-text { flex: none; width: 100%; text-align: center; font-size: 10px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     /* Alleen tekst: verberg icoon */
     .item-text-only .item-icon { display: none; }
@@ -128,8 +128,8 @@
     .item-cont-arrow { font-size: 9px; margin-right: 2px; opacity: .7; }
     /* Klein: halve breedte (2 per rij) */
     .item.item-small { grid-column: auto; padding: 5px 5px; gap: 4px; }
-    .item-small .item-icon { font-size: 16px; }
-    .item-small .item-icon img { width: 16px; height: 16px; }
+    .item-small .item-icon { font-size: 20px; }
+    .item-small .item-icon img { width: 20px; height: 20px; }
     .item-small .item-text { font-size: 10px; }
     .item-toppin-anchor { display: none; }
     .item-hidden { display: none; }
@@ -140,7 +140,7 @@
     .day-pins { display: flex; flex-wrap: wrap; gap: 3px; justify-content: flex-end; max-width: 72px; flex-shrink: 0; }
     .day-pin { font-size: 22px; line-height: 1; width: 32px; height: 32px; border-radius: 9px; cursor: pointer; border: 3px solid rgba(0,0,0,.15); background: rgba(0,0,0,.03); display: flex; align-items: center; justify-content: center; box-sizing: border-box; transition: filter .12s; flex-shrink: 0; }
     .day-pin:hover { filter: brightness(.88); }
-    .day-pin img { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; }
+    .day-pin img { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; }
     .day-pin-large { width: 44px; height: 44px; border-radius: 12px; font-size: 28px; }
     .day-pin-large img { width: 28px; height: 28px; border-radius: 7px; }
 
