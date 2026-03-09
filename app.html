@@ -95,7 +95,14 @@
     .day-col.today .day-date { color: #4f8ef7; }
     .day-col.weekend .day-date { color: #ccc; }
     .day-pins { flex: 1; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; align-content: flex-start; }
-    .day-body { flex: 1; padding: 8px 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; align-content: start; overflow-y: auto; overflow-x: hidden; min-height: 0; }
+    .day-body { flex: 1; padding: 8px 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; align-content: start; overflow: hidden; min-height: 0; }
+    /* Auto-compact: 2 kolommen met kleinere iconen als items niet passen */
+    .day-body.day-compact .item:not(.item-large):not(.item-wide) { grid-column: auto; padding: 3px 5px; gap: 3px; }
+    .day-body.day-compact .item:not(.item-large):not(.item-wide) .item-icon { font-size: 20px; min-width: 24px; }
+    .day-body.day-compact .item:not(.item-large):not(.item-wide) .item-icon img { width: 20px; height: 20px; }
+    .day-body.day-compact .item:not(.item-large):not(.item-wide) .item-text { font-size: 10px; }
+    .day-body.day-compact .item:not(.item-large):not(.item-wide) .item-drag-handle { display: none; }
+    .day-body.day-compact { gap: 3px; padding: 5px 4px; }
     .day-footer { padding: 5px 6px 7px; flex-shrink: 0; }
     .day-empty { grid-column: 1/-1; padding: 10px 4px; font-size: 10px; color: #d8d8e8; text-align: center; font-weight: 600; }
     .day-loading { grid-column: 1/-1; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
@@ -953,6 +960,13 @@
 
     // Enable touch drag-to-sort
     attachItemSort(body, dateKey);
+
+    // Auto-compact: switch to 2-column small icons if items overflow the day block
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (body.scrollHeight > body.clientHeight + 4) {
+        body.classList.add('day-compact');
+      }
+    }));
 
     const bodyEvents = meetings.length + tasks.length;
     if (isConnected && !bodyEvents && !pinned.length && !isWeekend) {
