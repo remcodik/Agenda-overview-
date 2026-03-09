@@ -134,6 +134,13 @@
     .item-small .item-text { font-size: 10px; }
     .item-toppin-anchor { display: none; }
     .item-hidden { display: none; }
+    /* Drag handle for reordering */
+    .item-drag-handle { flex-shrink: 0; font-size: 12px; color: rgba(0,0,0,.18); cursor: grab; padding: 2px 0 2px 5px; user-select: none; touch-action: none; line-height: 1; letter-spacing: -1px; }
+    .item-drag-handle:active { cursor: grabbing; }
+    .item-large .item-drag-handle { display: none; }
+    .item-small .item-drag-handle { display: none; }
+    .item.item-dragging { opacity: 0.3; pointer-events: none; }
+    .item-drag-placeholder { grid-column: 1/-1; background: rgba(79,142,247,.1); border: 2px dashed #4f8ef7; border-radius: 9px; min-height: 34px; }
     .upcoming { animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,.25)} 50%{box-shadow:0 0 0 5px rgba(0,0,0,0)} }
     .day-divider { grid-column: 1/-1; height: 1px; background: rgba(0,0,0,.06); margin: 2px 0; }
@@ -488,6 +495,7 @@
   const KEY_EMOJIS    = 'custom_emojis';    // ['☕','🎯',…]
   const KEY_OVERRIDES   = 'event_overrides';  // {uid:{customerId,icon,private,topPin,size}}
   const KEY_ICON_ORDER  = 'icon_order';       // [emoji|'photo:id', ...]
+  const KEY_SORT_ORDER  = 'item_sort_order';  // {'YYYY-MM-DD': ['uid1','uid2',…]}
 
   const DEFAULT_CUSTOMERS = [
     {id:'c1', name:'Acme Corp',   bg:'#ede0ff', text:'#4c1d95'},
@@ -515,6 +523,7 @@
   let customIcons = loadJson(KEY_ICONS,      []);
   let customEmojis= loadJson(KEY_EMOJIS,    []);
   let overrides   = loadJson(KEY_OVERRIDES,  {});
+  let itemSortOrder = loadJson(KEY_SORT_ORDER, {});
   let iconOrder   = loadJson(KEY_ICON_ORDER, null);
 
   let calEvents   = [];
@@ -909,11 +918,25 @@
     const meetings = events.filter(e => !e.topPin && e.type === 'meeting');
     const tasks    = events.filter(e => !e.topPin && e.type === 'task');
 
-    meetings.forEach(e => body.appendChild(buildItem(e)));
-    if (meetings.length && tasks.length) {
-      const div = document.createElement('div'); div.className='day-divider'; body.appendChild(div);
+    // Apply saved sort order if present, otherwise meetings first then tasks
+    const dateKey = isoDate(date);
+    const savedOrder = itemSortOrder[dateKey];
+    let bodyEvts;
+    if (savedOrder && savedOrder.length) {
+      bodyEvts = [...meetings, ...tasks].sort((a, b) => {
+        const ai = savedOrder.indexOf(a.uid), bi = savedOrder.indexOf(b.uid);
+        if (ai === -1 && bi === -1) return 0;
+        if (ai === -1) return 1; if (bi === -1) return -1;
+        return ai - bi;
+      });
+      bodyEvts.forEach(e => body.appendChild(buildItem(e)));
+    } else {
+      meetings.forEach(e => body.appendChild(buildItem(e)));
+      if (meetings.length && tasks.length) {
+        const div = document.createElement('div'); div.className='day-divider'; body.appendChild(div);
+      }
+      tasks.forEach(e => body.appendChild(buildItem(e)));
     }
-    tasks.forEach(e => body.appendChild(buildItem(e)));
 
     // Hidden anchors for topPin events so the edit sheet can find them by uid
     pinned.forEach(e => {
@@ -921,6 +944,9 @@
       anchor.classList.add('item-toppin-anchor');
       body.appendChild(anchor);
     });
+
+    // Enable touch drag-to-sort
+    attachItemSort(body, dateKey);
 
     const bodyEvents = meetings.length + tasks.length;
     if (isConnected && !bodyEvents && !pinned.length && !isWeekend) {
@@ -951,8 +977,64 @@
     const titleHtml = isCont
       ? `<span class="item-cont-arrow">↩</span>${escHtml(ev.title)}`
       : escHtml(ev.title);
-    el.innerHTML = `<span class="item-icon">${iconHtml}</span><span class="item-text">${titleHtml}</span>`;
+    el.innerHTML = `<span class="item-icon">${iconHtml}</span><span class="item-text">${titleHtml}</span><span class="item-drag-handle">⠿⠿</span>`;
     return el;
+  }
+
+  /* ─── Touch drag-to-sort items within a day ─── */
+  function attachItemSort(body, dateKey) {
+    let dragEl = null, placeholder = null;
+
+    function getItems() {
+      return [...body.querySelectorAll('.item:not(.item-toppin-anchor):not(.item-dragging)')];
+    }
+    function saveDayOrder() {
+      const uids = [...body.querySelectorAll('.item:not(.item-toppin-anchor)')]
+        .map(el => el.dataset.uid).filter(Boolean);
+      itemSortOrder[dateKey] = uids;
+      localStorage.setItem(KEY_SORT_ORDER, JSON.stringify(itemSortOrder));
+    }
+    function insertPlaceholder(clientY) {
+      const items = getItems();
+      let insertBefore = null;
+      for (const it of items) {
+        const r = it.getBoundingClientRect();
+        if (clientY < r.top + r.height / 2) { insertBefore = it; break; }
+      }
+      if (insertBefore) body.insertBefore(placeholder, insertBefore);
+      else {
+        const anchor = body.querySelector('.item-toppin-anchor') || body.querySelector('.day-empty');
+        anchor ? body.insertBefore(placeholder, anchor) : body.appendChild(placeholder);
+      }
+    }
+
+    body.addEventListener('touchstart', e => {
+      if (!e.target.closest('.item-drag-handle')) return;
+      e.preventDefault(); e.stopPropagation();
+      dragEl = e.target.closest('.item');
+      if (!dragEl) return;
+      // Remove divider if present (free-sort mode)
+      body.querySelector('.day-divider')?.remove();
+      dragEl.classList.add('item-dragging');
+      placeholder = document.createElement('div');
+      placeholder.className = 'item-drag-placeholder';
+      placeholder.style.height = dragEl.offsetHeight + 'px';
+      dragEl.after(placeholder);
+    }, {passive: false});
+
+    body.addEventListener('touchmove', e => {
+      if (!dragEl) return;
+      e.preventDefault();
+      insertPlaceholder(e.touches[0].clientY);
+    }, {passive: false});
+
+    body.addEventListener('touchend', () => {
+      if (!dragEl) return;
+      dragEl.classList.remove('item-dragging');
+      placeholder.replaceWith(dragEl);
+      placeholder = null; dragEl = null;
+      saveDayOrder();
+    });
   }
 
   function buildIconHtml(icon) {
