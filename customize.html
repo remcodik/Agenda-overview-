@@ -80,6 +80,18 @@
     #logo-suggestions { display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1.5px solid #dbeafe;border-radius:10px;overflow:hidden;z-index:20;box-shadow:0 6px 20px rgba(0,0,0,.12); }
     .logo-loading { padding:12px 14px;font-size:12px;color:#aaa;text-align:center; }
 
+    /* ── Backup section ── */
+    .backup-ios-tip { background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 11px 13px; font-size: 12px; color: #78350f; line-height: 1.6; margin: 0 16px 0; }
+    .backup-ios-tip strong { color: #92400e; }
+    .backup-ios-tip ol { padding-left: 18px; margin-top: 6px; }
+    .backup-ios-tip li { margin-bottom: 2px; }
+    .backup-btns { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 16px; }
+    .btn-backup-export { background: #1a1a2e; color: #fff; border: none; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-backup-export:hover { filter: brightness(1.2); }
+    .btn-backup-import { background: #f0f0f8; color: #1a1a2e; border: 1.5px solid #dde0f0; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-backup-import:hover { background: #e8e8f5; }
+    .backup-status { font-size: 12px; font-weight: 700; text-align: center; min-height: 18px; }
+
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: #d0d0e0; border-radius: 2px; }
@@ -184,15 +196,27 @@
         <span class="section-icon">💾</span>
         <div>
           <div class="section-title">Backup &amp; herstel</div>
-          <div class="section-desc">Exporteer al je instellingen als bestand, of zet ze terug</div>
+          <div class="section-desc">Agenda's, iconen, bewerkingen — alles in één bestand</div>
         </div>
       </div>
-      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
-        <button class="btn-add-row" id="btn-export">💾 Exporteer alle instellingen</button>
-        <label class="btn-add-row" style="cursor:pointer;text-align:center;">
-          📂 Importeer instellingen
+      <div class="backup-ios-tip" style="margin-top:14px;">
+        <strong>📱 Thuis-scherm app op iPhone/iPad?</strong><br>
+        iOS slaat de data van de browser en de thuis-scherm app <em>apart</em> op.
+        Doe dit eenmalig om alles over te zetten:
+        <ol>
+          <li>Open de app in <strong>Safari</strong> en stel alles in</li>
+          <li>Tik <strong>Backup downloaden</strong> hieronder — sla het bestand op</li>
+          <li>Open de app via het <strong>thuis-scherm icoon</strong></li>
+          <li>Ga naar ⚙️ Instellingen → tik <strong>Backup terugzetten</strong></li>
+        </ol>
+      </div>
+      <div class="backup-btns">
+        <button class="btn-backup-export" id="btn-export">⬇ Backup downloaden</button>
+        <label class="btn-backup-import">
+          ⬆ Backup terugzetten
           <input type="file" id="btn-import" accept=".json" style="display:none;">
         </label>
+        <div class="backup-status" id="backup-status"></div>
       </div>
     </div>
 
@@ -391,21 +415,29 @@
   ═══════════════════ */
   const BACKUP_KEYS = [
     'gcal_calendars', 'app_customers', 'custom_icons',
-    'custom_emojis', 'event_overrides', 'icon_order'
+    'custom_emojis', 'event_overrides', 'icon_order', 'view_mode'
   ];
 
+  const backupStatusEl = document.getElementById('backup-status');
+
   document.getElementById('btn-export').addEventListener('click', () => {
-    const data = { _version: 'v0.9.2', _exported: new Date().toISOString() };
+    const data = { _app: 'MijnWeek', _exported: new Date().toISOString() };
     BACKUP_KEYS.forEach(k => {
       const v = localStorage.getItem(k);
-      if (v) data[k] = JSON.parse(v);
+      if (v) { try { data[k] = JSON.parse(v); } catch { data[k] = v; } }
     });
     const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url  = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'mijn-week-backup-' + new Date().toISOString().slice(0,10) + '.json';
+    a.href = url;
+    a.download = 'mijnweek-backup-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(a.href);
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    backupStatusEl.style.color = '#16a34a';
+    backupStatusEl.textContent = '✅ Backup gedownload!';
+    setTimeout(() => { backupStatusEl.textContent = ''; }, 3000);
   });
 
   document.getElementById('btn-import').addEventListener('change', e => {
@@ -415,6 +447,9 @@
     reader.onload = evt => {
       try {
         const data = JSON.parse(evt.target.result);
+        if (!data._app && !data.gcal_calendars && !data.app_customers) {
+          throw new Error('Geen geldig MijnWeek backup-bestand');
+        }
         let count = 0;
         BACKUP_KEYS.forEach(k => {
           if (data[k] !== undefined) {
@@ -422,13 +457,16 @@
             count++;
           }
         });
-        alert('✅ ' + count + ' instellingen teruggezet. App wordt herladen.');
-        location.href = 'app.html?' + Date.now();
-      } catch {
-        alert('❌ Ongeldig bestand. Gebruik een eerder geëxporteerd backup-bestand.');
+        backupStatusEl.style.color = '#16a34a';
+        backupStatusEl.textContent = '✅ ' + count + ' items teruggezet — bezig met herladen…';
+        setTimeout(() => { location.href = 'app.html?' + Date.now(); }, 800);
+      } catch (err) {
+        backupStatusEl.style.color = '#dc2626';
+        backupStatusEl.textContent = '❌ ' + (err.message || 'Ongeldig bestand');
       }
     };
     reader.readAsText(file);
+    e.target.value = ''; // reset zodat hetzelfde bestand opnieuw gekozen kan worden
   });
 
   /* ═══════════════════
