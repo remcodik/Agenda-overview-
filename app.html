@@ -69,11 +69,6 @@
     #hidden-badge { display: none; align-items: center; gap: 4px; background: #f1f5f9; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 3px 9px; font-size: 10px; font-weight: 800; color: #64748b; cursor: pointer; user-select: none; flex-shrink: 0; }
     #hidden-badge.show { display: flex; }
     #hidden-badge:hover { background: #e2e8f0; }
-    /* Per-day customer color dots */
-    .day-cust-dots { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 3px; }
-    .day-cust-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    /* Per-day hidden indicator */
-    .day-hidden-dot { font-size: 9px; margin-top: 3px; color: #94a3b8; font-weight: 700; line-height: 1; }
 
     /* ── Week grid ── */
     .week-grid { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: 1fr 1fr; gap: 8px; padding: 12px 16px 16px; flex: 1; overflow: hidden; min-height: 0; }
@@ -131,6 +126,10 @@
     .item-large .item-text { flex: none; width: 100%; text-align: center; font-size: 10px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     /* Alleen tekst: verberg icoon */
     .item-text-only .item-icon { display: none; }
+    /* Alleen icoon: verberg tekst + sleep-handle */
+    .item-icon-only .item-text { display: none; }
+    .item-icon-only .item-drag-handle { display: none; }
+    .item-icon-only { justify-content: center; }
     /* Meerdaags event — vervolg-dagen */
     .item-multiday-cont { opacity: .82; border-left-style: dashed !important; }
     .item-multiday-cont .item-icon { opacity: .55; }
@@ -311,7 +310,10 @@
 
 <!-- Tooltip -->
 <div id="item-tooltip">
-  <span id="tooltip-label-wrap"><span id="tooltip-label"></span></span>
+  <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;overflow:hidden;">
+    <span id="tooltip-label-wrap"><span id="tooltip-label"></span></span>
+    <span id="tooltip-meta" style="font-size:10px;color:rgba(255,255,255,.6);white-space:nowrap;display:none;"></span>
+  </div>
   <button id="tooltip-edit">✏️ Bewerk</button>
 </div>
 
@@ -325,6 +327,7 @@
       <input id="sheet-title-input" type="text" />
       <button class="sheet-close" id="sheet-close">×</button>
     </div>
+    <div id="sh-event-meta" style="padding:4px 18px 0;font-size:11px;color:#888;display:none;"></div>
     <div class="sheet-body">
       <div>
         <div class="sheet-label">Klant</div>
@@ -364,6 +367,13 @@
             <span class="size-demo-text"></span>
           </label>
         </div>
+      </div>
+      <div class="sh-toggle-row">
+        <div class="sh-toggle-info">
+          <div class="sh-toggle-label">🖼️ Alleen icoon</div>
+          <div class="sh-toggle-sub">Verberg tekst — tik om details te zien</div>
+        </div>
+        <label class="sh-switch"><input type="checkbox" id="sh-icononly" /><span class="sh-slider"></span></label>
       </div>
       <div class="sh-toggle-row">
         <div class="sh-toggle-info">
@@ -458,6 +468,7 @@
       <button id="btn-reload-app" style="flex:1;border:1.5px solid #dbeafe;background:#f8faff;color:#1e40af;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Ververs app</button>
     </div>
     <div id="version-list">
+      <div class="version-entry"><span class="version-tag">v1.0.5</span><span class="version-date">10 mrt · 12:00</span><span class="version-desc">Dag-stippen verwijderd. Topdag-toggle fix. Meeting-titel bewerkbaar + opslaan. Datum/tijd zichtbaar in bewerk-sheet en tooltip. Icoon-alleen modus. Icoonpositie 5/7-daags wisselen gefixed.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.4</span><span class="version-date">9 mrt · 15:00</span><span class="version-desc">Sortering binnen dag: sleep items omhoog/omlaag via het ⠿⠿ handvat rechts op elk item. Volgorde wordt per dag opgeslagen.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.3</span><span class="version-date">9 mrt · 14:00</span><span class="version-desc">Vasthouden om te bewerken verbeterd: tekst-selectie onderdrukt, bewerk-scherm opent zonder auto-focus op invoerveld.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.2</span><span class="version-date">9 mrt · 13:00</span><span class="version-desc">Legendabalk verwijderd (meer ruimte voor dagblokken): klantdots en verborgen-indicator verplaatst naar daghoofdje. Verborgen-badge compact in topbar.</span></div>
@@ -487,8 +498,8 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v0.9.6';
-  const APP_BUILD     = '8 mrt 2026 · 11:00';
+  const APP_VERSION   = 'v1.0.5';
+  const APP_BUILD     = '10 mrt 2026 · 12:00';
 
   /* ── Auto-update: haal versie op van server, laad opnieuw als nieuwer ──
      Bypast alle iOS WKWebView / service-worker cacheproblemen.
@@ -646,11 +657,16 @@
       }
     }
 
+    const _sH = allDay ? null : startDate.getHours();
+    const _sM = allDay ? null : startDate.getMinutes();
+    const _eH = (!allDay && endDate) ? endDate.getHours()   : null;
+    const _eM = (!allDay && endDate) ? endDate.getMinutes() : null;
     const makeEvent = (date, uidStr, multiDay, isStart) => ({
       uid: uidStr || uid, date, type: allDay ? 'task' : 'meeting',
       icon: allDay ? '📋' : '🤝', title: summary,
       calColor: calColor||'#3b82f6', customerId: null,
       multiDay: !!multiDay, isStart: isStart !== false,
+      startHour: _sH, startMin: _sM, endHour: _eH, endMin: _eM,
     });
 
     if (rrule) {
@@ -835,6 +851,8 @@
       _private:   ov.private    !== undefined ? ov.private    : ev._private,
       topPin:     ov.topPin     !== undefined ? ov.topPin     : ev.topPin,
       size:       ov.size       !== undefined ? ov.size       : ev.size,
+      title:      ov.title      !== undefined ? ov.title      : ev.title,
+      hideText:   ov.hideText   !== undefined ? ov.hideText   : ev.hideText,
     });
   }
 
@@ -862,16 +880,17 @@
     else events = getDemoEvents(dates);
 
     const grid = document.querySelector('.week-grid');
-    grid.innerHTML = '';
 
-    // Grid afmetingen wisselen op basis van weergavemodus
+    // Stel grid-afmetingen in VOOR het vullen, zodat kolommen altijd kloppen
     if (viewMode === 'workdays') {
       grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
       grid.style.gridTemplateRows   = '1fr 1fr 1fr';
     } else {
-      grid.style.gridTemplateColumns = '';
-      grid.style.gridTemplateRows   = '';
+      grid.style.gridTemplateColumns = 'repeat(6, 1fr)';
+      grid.style.gridTemplateRows   = '1fr 1fr';
     }
+
+    grid.innerHTML = '';
 
     const layout = viewMode === 'workdays' ? LAYOUT_WORKDAYS : LAYOUT_WEEK;
     layout.forEach(([di, col, row]) => {
@@ -894,25 +913,11 @@
     col.style.gridRow    = gridRow;
     col.dataset.date     = isoDate(date);
 
-    // Per-day customer color dots
-    const dayCustColors = [...new Set(
-      events.filter(e => !e.topPin && e.customerId)
-            .map(e => customers.find(c => c.id === e.customerId))
-            .filter(Boolean)
-            .map(c => c.text)
-    )];
-    const custDotsHtml = dayCustColors.length
-      ? `<div class="day-cust-dots">${dayCustColors.map(col => `<span class="day-cust-dot" style="background:${escHtml(col)}"></span>`).join('')}</div>`
-      : '';
-    const hiddenCount = events.filter(e => !e.topPin && e._private).length;
-    const hiddenDotHtml = hiddenCount ? `<div class="day-hidden-dot" data-day-hidden="${escHtml(isoDate(date))}">🔒${hiddenCount}</div>` : `<div class="day-hidden-dot" data-day-hidden="${escHtml(isoDate(date))}" style="display:none"></div>`;
-
     col.innerHTML = `
       <div class="day-header">
         <div class="day-info">
           <span class="day-name">${DAY_NAMES[date.getDay()]}${isToday?' · Vandaag':''}</span>
           <div class="day-date">${date.getDate()}</div>
-          ${custDotsHtml}${hiddenDotHtml}
         </div>
         <div class="day-pins" id="pins-${isoDate(date)}">${renderPinsHtml(events)}</div>
       </div>
@@ -987,6 +992,7 @@
     const isCont = ev.multiDay && !ev.isStart; // vervolg-dag van meerdaags event
     const el = document.createElement('div');
     el.className = `item ${ev.type==='meeting'?'item-meeting':'item-task'}${size!=='normal'?' item-'+size:''}`;
+    if (ev.hideText) el.classList.add('item-icon-only');
     if (isCont) el.classList.add('item-multiday-cont');
     el.style.background = bg;
     el.style.color      = text;
@@ -1489,8 +1495,28 @@
       ? `<img src="${escHtml(imgEl.src)}" alt="">`
       : (iconEl?.textContent?.trim() || '📋');
 
-    document.getElementById('sh-private').checked = item.classList.contains('item-hidden');
-    document.getElementById('sh-toppin').checked  = !!(ov.topPin);
+    // Toon datum/tijd info van de meeting
+    const metaDiv = document.getElementById('sh-event-meta');
+    const calEv = calEvents.find(e => e.uid === uid) || calEvents.find(e => baseUid(e.uid) === baseUid(uid));
+    if (calEv && metaDiv) {
+      const d = calEv.date;
+      const dayNames = ['Zo','Ma','Di','Wo','Do','Vr','Za'];
+      const monthNames = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+      let meta = `📅 ${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]}`;
+      if (calEv.startHour !== null) {
+        const fmt = (h, m) => `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+        meta += `  ⏱ ${fmt(calEv.startHour, calEv.startMin)}`;
+        if (calEv.endHour !== null) meta += ` – ${fmt(calEv.endHour, calEv.endMin)}`;
+      }
+      metaDiv.textContent = meta;
+      metaDiv.style.display = '';
+    } else if (metaDiv) {
+      metaDiv.style.display = 'none';
+    }
+
+    document.getElementById('sh-private').checked  = item.classList.contains('item-hidden');
+    document.getElementById('sh-toppin').checked   = item.classList.contains('item-toppin-anchor') || !!(ov.topPin);
+    document.getElementById('sh-icononly').checked = !!(ov.hideText);
     const size = ov.size || 'normal';
     const sizeRadio = document.querySelector(`input[name="sh-size"][value="${size}"]`);
     if (sizeRadio) sizeRadio.checked = true;
@@ -1533,8 +1559,10 @@
 
     // Persist — recurring events save under base uid so all weeks inherit the setting
     const saveUid = uid ? baseUid(uid) : null;
+    const newTitle = titleInput.value.trim();
+    const hideText = document.getElementById('sh-icononly').checked;
     if (saveUid) {
-      overrides[saveUid] = { customerId: custId, icon: iconVal || undefined, private: isPrivate, topPin, size };
+      overrides[saveUid] = { customerId: custId, icon: iconVal || undefined, private: isPrivate, topPin, size, title: newTitle || undefined, hideText: hideText || undefined };
       localStorage.setItem(KEY_OVERRIDES, JSON.stringify(overrides));
     }
 
@@ -1616,6 +1644,8 @@
     tooltip.style.opacity = '';
   }
 
+  const tipMeta  = document.getElementById('tooltip-meta');
+
   function showTooltip(item, e) {
     const label = item.querySelector('.item-text')?.textContent?.trim()||'';
     if (!label) return;
@@ -1623,6 +1653,24 @@
     tipLabel.textContent = label;
     tipLabel.classList.remove('scrolling');
     tipLabel.style.removeProperty('--lsp');
+    // Date/time meta
+    const tipUid = item.dataset.uid;
+    const tipEv  = calEvents.find(e => e.uid === tipUid) || calEvents.find(e => baseUid(e.uid) === baseUid(tipUid));
+    if (tipEv && tipMeta) {
+      const d = tipEv.date;
+      const dayN = ['Zo','Ma','Di','Wo','Do','Vr','Za'];
+      const monN = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+      let m = `${dayN[d.getDay()]} ${d.getDate()} ${monN[d.getMonth()]}`;
+      if (tipEv.startHour !== null) {
+        const fmt = (h, mn) => `${String(h).padStart(2,'0')}:${String(mn).padStart(2,'0')}`;
+        m += `  ${fmt(tipEv.startHour, tipEv.startMin)}`;
+        if (tipEv.endHour !== null) m += `–${fmt(tipEv.endHour, tipEv.endMin)}`;
+      }
+      tipMeta.textContent = m;
+      tipMeta.style.display = '';
+    } else if (tipMeta) {
+      tipMeta.style.display = 'none';
+    }
     tooltip.classList.remove('visible');
     positionTooltip();
     requestAnimationFrame(() => {
