@@ -124,6 +124,13 @@
     .item-large .item-icon { font-size: 36px; }
     .item-large .item-icon img { width: 36px; height: 36px; }
     .item-large .item-text { flex: none; width: 100%; text-align: center; font-size: 10px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* Vrijdag full-row (5-daags): 2 kolommen zodat meer iconen passen */
+    .day-fullrow .day-body { grid-template-columns: 1fr 1fr; }
+    .day-fullrow .day-body .item { grid-column: auto; }
+    .day-fullrow .day-body .item-large,
+    .day-fullrow .day-body .item-wide,
+    .day-fullrow .day-body .day-divider,
+    .day-fullrow .day-body .item-drag-placeholder { grid-column: 1 / -1; }
     /* Alleen tekst: verberg icoon */
     .item-text-only .item-icon { display: none; }
     /* Alleen icoon: verberg tekst + sleep-handle */
@@ -498,8 +505,8 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v1.0.8';
-  const APP_BUILD     = '10 mrt 2026 · 14:00';
+  const APP_VERSION   = 'v1.0.9';
+  const APP_BUILD     = '10 mrt 2026 · 15:00';
 
   /* ── Auto-update: haal versie op van server, laad opnieuw als nieuwer ──
      Bypast alle iOS WKWebView / service-worker cacheproblemen.
@@ -938,7 +945,8 @@
       const isToday   = sameDay(date, today);
       const isWeekend = di >= 5;
       const dayEvts   = events.filter(e => sameDay(e.date, date));
-      grid.appendChild(buildDayCol(date, dayEvts, isToday, isWeekend, col, row));
+      const fullRow   = viewMode === 'workdays' && di === 4; // Vrijdag = volledige breedte-rij
+      grid.appendChild(buildDayCol(date, dayEvts, isToday, isWeekend, col, row, fullRow));
     });
 
     buildLegend();
@@ -946,9 +954,9 @@
     // (legend-hint removed — legend bar replaced by per-day indicators)
   }
 
-  function buildDayCol(date, events, isToday, isWeekend, gridCol, gridRow) {
+  function buildDayCol(date, events, isToday, isWeekend, gridCol, gridRow, fullRow) {
     const col = document.createElement('div');
-    col.className = 'day-col' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
+    col.className = 'day-col' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '') + (fullRow ? ' day-fullrow' : '');
     col.style.gridColumn = gridCol;
     col.style.gridRow    = gridRow;
     col.dataset.date     = isoDate(date);
