@@ -505,7 +505,8 @@
      Bypast alle iOS WKWebView / service-worker cacheproblemen.
      version.json is een tiny bestand dat altijd vers van de server komt. */
   (async function autoUpdate() {
-    if (new URLSearchParams(location.search).get('_v') === APP_VERSION) return;
+    // Als ?_v al in de URL zit zijn we al herladen — stop hier om loop te voorkomen
+    if (location.search.includes('_v=')) return;
     try {
       const {v} = await (await fetch('version.json?_=' + Date.now(), {cache:'no-store'})).json();
       if (v && v !== APP_VERSION)
@@ -604,22 +605,29 @@
   ];
 
   async function fetchAndParseIcs(url, weekDates, calColor) {
-    let lastErr;
-    for (const makeProxy of CORS_PROXIES) {
-      try {
-        const resp = await fetch(makeProxy(url), {signal: AbortSignal.timeout(12000)});
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const text = await resp.text();
-        // Sanity check: moet ICS-data zijn
-        if (!text.includes('BEGIN:VCALENDAR') && !text.includes('BEGIN:VEVENT')) {
-          throw new Error('Geen geldige ICS-data ontvangen');
-        }
-        return parseIcsForWeek(text, weekDates, calColor);
-      } catch (e) {
-        lastErr = e;
+    // Probeer alle proxies tegelijk — degene die het snelst antwoordt met geldige ICS wint
+    const timeout = typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout : (ms) => {
+      const c = new AbortController(); setTimeout(() => c.abort(), ms); return c.signal;
+    };
+    const tryProxy = async (makeProxy) => {
+      const resp = await fetch(makeProxy(url), {signal: timeout(10000)});
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const text = await resp.text();
+      if (!text.includes('BEGIN:VCALENDAR') && !text.includes('BEGIN:VEVENT'))
+        throw new Error('Geen geldige ICS');
+      return text;
+    };
+    let text;
+    try {
+      text = await Promise.any(CORS_PROXIES.map(tryProxy));
+    } catch {
+      // Promise.any gooit AggregateError als alle falen — probeer dan sequentieel als fallback
+      for (const makeProxy of CORS_PROXIES) {
+        try { text = await tryProxy(makeProxy); break; } catch { /**/ }
       }
+      if (!text) throw new Error('Agenda niet bereikbaar via alle proxies');
     }
-    throw lastErr;
+    return parseIcsForWeek(text, weekDates, calColor);
   }
 
   function parseIcsForWeek(text, weekDates, calColor) {
