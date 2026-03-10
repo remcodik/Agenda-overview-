@@ -498,8 +498,8 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v1.0.5';
-  const APP_BUILD     = '10 mrt 2026 · 12:00';
+  const APP_VERSION   = 'v1.0.6';
+  const APP_BUILD     = '10 mrt 2026 · 13:00';
 
   /* ── Auto-update: haal versie op van server, laad opnieuw als nieuwer ──
      Bypast alle iOS WKWebView / service-worker cacheproblemen.
@@ -597,11 +597,29 @@
   /* ═══════════════════════════════════
      ICS FETCH + PARSE
   ═══════════════════════════════════ */
+  const CORS_PROXIES = [
+    url => 'https://corsproxy.io/?' + encodeURIComponent(url),
+    url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+    url => 'https://thingproxy.freeboard.io/fetch/' + url,
+  ];
+
   async function fetchAndParseIcs(url, weekDates, calColor) {
-    const proxy = 'https://corsproxy.io/?' + encodeURIComponent(url);
-    const resp  = await fetch(proxy);
-    if (!resp.ok) throw new Error(`ICS fetch mislukt: HTTP ${resp.status}`);
-    return parseIcsForWeek(await resp.text(), weekDates, calColor);
+    let lastErr;
+    for (const makeProxy of CORS_PROXIES) {
+      try {
+        const resp = await fetch(makeProxy(url), {signal: AbortSignal.timeout(12000)});
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const text = await resp.text();
+        // Sanity check: moet ICS-data zijn
+        if (!text.includes('BEGIN:VCALENDAR') && !text.includes('BEGIN:VEVENT')) {
+          throw new Error('Geen geldige ICS-data ontvangen');
+        }
+        return parseIcsForWeek(text, weekDates, calColor);
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    throw lastErr;
   }
 
   function parseIcsForWeek(text, weekDates, calColor) {
@@ -812,8 +830,22 @@
       isConnected = false;
       document.getElementById('loading-dot').classList.remove('show');
       renderWeek();
-      alert('Kon agenda niet laden:\n' + err.message + '\n\nControleer de ICS-link in ⚙️ Instellingen.');
+      showLoadError(err.message);
     }
+  }
+
+  /* ── Foutmelding met Probeer opnieuw knop ── */
+  function showLoadError(msg) {
+    // Verwijder eventuele vorige foutmelding
+    document.getElementById('load-error-bar')?.remove();
+    const bar = document.createElement('div');
+    bar.id = 'load-error-bar';
+    bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;border-radius:14px;padding:12px 16px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.35);z-index:9000;max-width:calc(100vw - 32px);';
+    bar.innerHTML = `<span style="flex:1">⚠️ Agenda laden mislukt — controleer netwerk of ICS-link</span><button style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">Probeer opnieuw</button>`;
+    bar.querySelector('button').addEventListener('click', () => { bar.remove(); loadAllCalendars(); });
+    document.body.appendChild(bar);
+    // Verdwijnt na 15 seconden
+    setTimeout(() => bar.remove(), 15000);
   }
 
   /* ═══════════════════════════════════
