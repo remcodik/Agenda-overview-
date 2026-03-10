@@ -1,8 +1,8 @@
-// Mijn Week – Service Worker v0.9.5
+// Mijn Week – Service Worker v1.0.7
 // Strategie: altijd netwerk (network-only), nooit browser-cache.
 // Verander SW_VERSION bij elke release → browser detecteert de wijziging
 // → installeert direct → app herlaadt automatisch met nieuwe versie.
-const SW_VERSION = 'v0.9.6';
+const SW_VERSION = 'v1.0.7';
 
 self.addEventListener('install', () => {
   self.skipWaiting(); // activeer direct, wacht niet op oud tabblad
