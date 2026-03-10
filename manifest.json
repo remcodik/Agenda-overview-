@@ -1,0 +1,17 @@
+{
+  "name": "Mijn Week",
+  "short_name": "Mijn Week",
+  "description": "Weekoverzicht agenda",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
