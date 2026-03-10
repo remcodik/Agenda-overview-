@@ -498,8 +498,8 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v1.0.6';
-  const APP_BUILD     = '10 mrt 2026 · 13:00';
+  const APP_VERSION   = 'v1.0.8';
+  const APP_BUILD     = '10 mrt 2026 · 14:00';
 
   /* ── Auto-update: haal versie op van server, laad opnieuw als nieuwer ──
      Bypast alle iOS WKWebView / service-worker cacheproblemen.
@@ -1074,19 +1074,31 @@
       }
     }
 
-    body.addEventListener('touchstart', e => {
-      if (!e.target.closest('.item-drag-handle')) return;
-      e.preventDefault(); e.stopPropagation();
-      dragEl = e.target.closest('.item');
-      if (!dragEl) return;
-      // Remove divider if present (free-sort mode)
-      body.querySelector('.day-divider')?.remove();
-      dragEl.classList.add('item-dragging');
-      placeholder = document.createElement('div');
-      placeholder.className = 'item-drag-placeholder';
-      placeholder.style.height = dragEl.offsetHeight + 'px';
-      dragEl.after(placeholder);
-    }, {passive: false});
+    // Luister direct op elk drag-handle zodat iOS geen andere handler laat winnen
+    function attachHandle(handleEl) {
+      handleEl.addEventListener('touchstart', e => {
+        e.preventDefault(); e.stopPropagation();
+        dragEl = handleEl.closest('.item');
+        if (!dragEl) return;
+        body.querySelector('.day-divider')?.remove();
+        dragEl.classList.add('item-dragging');
+        placeholder = document.createElement('div');
+        placeholder.className = 'item-drag-placeholder';
+        placeholder.style.height = dragEl.offsetHeight + 'px';
+        dragEl.after(placeholder);
+      }, {passive: false});
+    }
+    // Hecht aan bestaande handles
+    body.querySelectorAll('.item-drag-handle').forEach(attachHandle);
+    // Observer voor dynamisch toegevoegde items (bijv. na renderWeek)
+    const _mo = new MutationObserver(muts => {
+      muts.forEach(m => m.addedNodes.forEach(n => {
+        if (n.nodeType !== 1) return;
+        if (n.classList?.contains('item-drag-handle')) attachHandle(n);
+        n.querySelectorAll?.('.item-drag-handle').forEach(attachHandle);
+      }));
+    });
+    _mo.observe(body, {childList: true, subtree: true});
 
     body.addEventListener('touchmove', e => {
       if (!dragEl) return;
@@ -1809,6 +1821,8 @@
   let lpTimer=null, didLongPress=false;
 
   document.addEventListener('touchstart', e => {
+    // Drag handle wordt door de sorteer-handler verwerkt — hier niet aanraken
+    if (e.target.closest('.item-drag-handle')) return;
     const item = e.target.closest('.item');
     const inSheet = e.target.closest('.bottom-sheet');
     didLongPress = false; // always reset at start of new touch sequence
