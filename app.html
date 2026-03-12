@@ -506,8 +506,8 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v1.0.10';
-  const APP_BUILD     = '10 mrt 2026 · 16:00';
+  const APP_VERSION   = 'v1.0.11';
+  const APP_BUILD     = '12 mrt 2026 · 14:00';
 
   /* ── Auto-update: haal versie op van server, laad opnieuw als nieuwer ──
      Bypast alle iOS WKWebView / service-worker cacheproblemen.
@@ -609,32 +609,40 @@
   const CORS_PROXIES = [
     url => 'https://corsproxy.io/?' + encodeURIComponent(url),
     url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+    url => 'https://corsproxy.org/?' + encodeURIComponent(url),
+    url => 'https://proxy.cors.sh/' + url,
     url => 'https://thingproxy.freeboard.io/fetch/' + url,
+    url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
   ];
 
   async function fetchAndParseIcs(url, weekDates, calColor) {
-    // Probeer alle proxies tegelijk — degene die het snelst antwoordt met geldige ICS wint
-    const timeout = typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout : (ms) => {
+    // Probeer eerst direct (werkt als server CORS toestaat)
+    const timeoutFn = typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout : (ms) => {
       const c = new AbortController(); setTimeout(() => c.abort(), ms); return c.signal;
     };
-    const tryProxy = async (makeProxy) => {
-      const resp = await fetch(makeProxy(url), {signal: timeout(10000)});
+    const tryUrl = async (fetchUrl, ms = 12000) => {
+      const resp = await fetch(fetchUrl, {signal: timeoutFn(ms)});
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const text = await resp.text();
       if (!text.includes('BEGIN:VCALENDAR') && !text.includes('BEGIN:VEVENT'))
         throw new Error('Geen geldige ICS');
       return text;
     };
+    // Direct proberen (Google Calendar ondersteunt dit soms)
     let text;
-    try {
-      text = await Promise.any(CORS_PROXIES.map(tryProxy));
-    } catch {
-      // Promise.any gooit AggregateError als alle falen — probeer dan sequentieel als fallback
-      for (const makeProxy of CORS_PROXIES) {
-        try { text = await tryProxy(makeProxy); break; } catch { /**/ }
+    try { text = await tryUrl(url, 8000); } catch { /* direct mislukt, ga door naar proxies */ }
+    if (!text) {
+      // Alle proxies tegelijk — degene die het snelst antwoordt met geldige ICS wint
+      try {
+        text = await Promise.any(CORS_PROXIES.map(makeProxy => tryUrl(makeProxy(url))));
+      } catch {
+        // Promise.any gooit AggregateError als alle falen — probeer dan sequentieel als fallback
+        for (const makeProxy of CORS_PROXIES) {
+          try { text = await tryUrl(makeProxy(url)); break; } catch { /**/ }
+        }
       }
-      if (!text) throw new Error('Agenda niet bereikbaar via alle proxies');
     }
+    if (!text) throw new Error('Agenda niet bereikbaar via alle proxies');
     return parseIcsForWeek(text, weekDates, calColor);
   }
 
