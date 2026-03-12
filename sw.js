@@ -2,7 +2,7 @@
 // Strategie: altijd netwerk (network-only), nooit browser-cache.
 // Verander SW_VERSION bij elke release → browser detecteert de wijziging
 // → installeert direct → app herlaadt automatisch met nieuwe versie.
-const SW_VERSION = 'v1.0.12';
+const SW_VERSION = 'v1.0.13';
 
 self.addEventListener('install', () => {
   self.skipWaiting(); // activeer direct, wacht niet op oud tabblad

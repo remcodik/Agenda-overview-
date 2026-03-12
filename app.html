@@ -506,19 +506,22 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v1.0.12';
-  const APP_BUILD     = '12 mrt 2026 · 14:30';
+  const APP_VERSION   = 'v1.0.13';
+  const APP_BUILD     = '12 mrt 2026 · 15:00';
 
   /* ── Auto-update: haal versie op van server, laad opnieuw als nieuwer ──
      Bypast alle iOS WKWebView / service-worker cacheproblemen.
      version.json is een tiny bestand dat altijd vers van de server komt. */
   (async function autoUpdate() {
-    // Als ?_v al in de URL zit zijn we al herladen — stop hier om loop te voorkomen
-    if (location.search.includes('_v=')) return;
     try {
       const {v} = await (await fetch('version.json?_=' + Date.now(), {cache:'no-store'})).json();
-      if (v && v !== APP_VERSION)
-        window.location.replace(location.pathname + '?_v=' + encodeURIComponent(v));
+      if (!v || v === APP_VERSION) return;
+      // Loop-preventie via sessionStorage (per versie, niet per URL-parameter)
+      const triedKey = 'reload_tried_' + v;
+      if (sessionStorage.getItem(triedKey)) return;
+      sessionStorage.setItem(triedKey, '1');
+      // Herlaad met timestamp om ook HTTP-cache te omzeilen
+      window.location.replace(location.pathname + '?_=' + Date.now());
     } catch (_) {}
   })();
 
