@@ -506,8 +506,8 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v1.0.13';
-  const APP_BUILD     = '12 mrt 2026 · 15:00';
+  const APP_VERSION   = 'v1.0.14';
+  const APP_BUILD     = '12 mrt 2026';
 
   /* ── Auto-update: haal versie op van server, laad opnieuw als nieuwer ──
      Bypast alle iOS WKWebView / service-worker cacheproblemen.
@@ -611,11 +611,11 @@
   ═══════════════════════════════════ */
   const CORS_PROXIES = [
     url => 'https://corsproxy.io/?' + encodeURIComponent(url),
-    url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
     url => 'https://corsproxy.org/?' + encodeURIComponent(url),
-    url => 'https://proxy.cors.sh/' + url,
-    url => 'https://thingproxy.freeboard.io/fetch/' + url,
+    url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
     url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
+    url => 'https://cors.deno.dev/' + url,
+    url => 'https://thingproxy.freeboard.io/fetch/' + url,
   ];
 
   const ICS_CACHE_KEY = 'ics_cache_v1'; // {calId: {text, ts}}
@@ -629,7 +629,7 @@
     const timeoutFn = typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout : (ms) => {
       const c = new AbortController(); setTimeout(() => c.abort(), ms); return c.signal;
     };
-    const tryUrl = async (fetchUrl, ms = 12000) => {
+    const tryUrl = async (fetchUrl, ms = 10000) => {
       const resp = await fetch(fetchUrl, {signal: timeoutFn(ms)});
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const text = await resp.text();
@@ -639,15 +639,11 @@
     };
     // Direct proberen (Google Calendar ondersteunt dit soms)
     let text;
-    try { text = await tryUrl(url, 8000); } catch { /* direct mislukt, ga door naar proxies */ }
+    try { text = await tryUrl(url, 6000); } catch { /* direct mislukt, ga door naar proxies */ }
     if (!text) {
       try {
         text = await Promise.any(CORS_PROXIES.map(makeProxy => tryUrl(makeProxy(url))));
-      } catch {
-        for (const makeProxy of CORS_PROXIES) {
-          try { text = await tryUrl(makeProxy(url)); break; } catch { /**/ }
-        }
-      }
+      } catch { /* alle proxies mislukt */ }
     }
     if (text) {
       if (calId) saveIcsCache(calId, text);
@@ -656,7 +652,7 @@
     // Geen live data — probeer cache
     const cached = calId && loadIcsCache()[calId];
     if (cached) return { events: parseIcsForWeek(cached.text, weekDates, calColor), fromCache: true };
-    throw new Error('Agenda niet bereikbaar');
+    throw new Error('Agenda niet bereikbaar — controleer de ICS-link');
   }
 
   function parseIcsForWeek(text, weekDates, calColor) {
@@ -880,13 +876,19 @@
     document.getElementById('load-error-bar')?.remove();
     const bar = document.createElement('div');
     bar.id = 'load-error-bar';
-    bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;border-radius:14px;padding:12px 16px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.35);z-index:9000;max-width:calc(100vw - 32px);';
+    const isIcsError = msg.includes('ICS-link') || msg.includes('niet bereikbaar');
+    bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;border-radius:14px;padding:12px 16px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.35);z-index:9000;max-width:calc(100vw - 32px);flex-wrap:wrap;';
     const icon = isWarning ? '⚠️' : '❌';
-    const label = isWarning ? 'Ververs' : 'Probeer opnieuw';
-    bar.innerHTML = `<span style="flex:1">${icon} ${msg}</span><button style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">${label}</button>`;
-    bar.querySelector('button').addEventListener('click', () => { bar.remove(); loadAllCalendars(); });
+    const retryLabel = isWarning ? 'Ververs' : 'Opnieuw';
+    let buttons = `<button class="err-retry" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">${retryLabel}</button>`;
+    if (isIcsError) {
+      buttons += `<button class="err-setup" style="background:rgba(255,100,100,.25);border:none;color:#fff;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Agenda-link aanpassen</button>`;
+    }
+    bar.innerHTML = `<span style="flex:1;min-width:150px">${icon} ${msg}</span>${buttons}`;
+    bar.querySelector('.err-retry').addEventListener('click', () => { bar.remove(); loadAllCalendars(); });
+    bar.querySelector('.err-setup')?.addEventListener('click', () => { bar.remove(); openSheet(document.getElementById('setup-sheet')); });
     document.body.appendChild(bar);
-    setTimeout(() => bar.remove(), isWarning ? 8000 : 15000);
+    setTimeout(() => bar.remove(), isWarning ? 8000 : 20000);
   }
 
   /* ═══════════════════════════════════
