@@ -55,6 +55,11 @@
 
     /* Calendar rows have two lines */
     .cal-fields { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .btn-test-ics { border: none; background: #f0f0f8; color: #555; border-radius: 6px; padding: 4px 8px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background .15s; }
+    .btn-test-ics:hover { background: #e0e8ff; }
+    .ics-test-result { font-size: 10px; font-weight: 700; padding: 5px 8px; border-radius: 6px; margin-top: 3px; line-height: 1.5; }
+    .ics-test-result.ok  { background: #dcfce7; color: #15803d; }
+    .ics-test-result.err { background: #fee2e2; color: #b91c1c; }
 
     /* ── Custom icons grid ── */
     .icons-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 16px; }
@@ -321,6 +326,30 @@
   /* ═══════════════════
      CALENDARS
   ═══════════════════ */
+  const ICS_PROXIES = [
+    { name: 'Direct',         make: u => u },
+    { name: 'corsproxy.io',   make: u => 'https://corsproxy.io/?' + encodeURIComponent(u) },
+    { name: 'allorigins.win', make: u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u) },
+    { name: 'corsproxy.org',  make: u => 'https://corsproxy.org/?' + encodeURIComponent(u) },
+    { name: 'codetabs.com',   make: u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u) },
+    { name: 'cors.deno.dev',  make: u => 'https://cors.deno.dev/' + u },
+  ];
+
+  async function testIcsUrl(url) {
+    const timeout = ms => { const c = new AbortController(); setTimeout(() => c.abort(), ms); return c.signal; };
+    for (const proxy of ICS_PROXIES) {
+      try {
+        const resp = await fetch(proxy.make(url), { signal: timeout(8000) });
+        if (!resp.ok) continue;
+        const text = await resp.text();
+        if (text.includes('BEGIN:VCALENDAR') || text.includes('BEGIN:VEVENT')) {
+          return { ok: true, via: proxy.name };
+        }
+      } catch { /* probeer volgende */ }
+    }
+    return { ok: false, detail: 'Alle routes geprobeerd. Controleer of de ICS-link nog geldig is.' };
+  }
+
   function renderCalendars() {
     const list = document.getElementById('calendar-list');
     list.innerHTML = '';
@@ -333,7 +362,11 @@
         </div>
         <div class="cal-fields">
           <input class="field-name" type="text" value="${escHtml(cal.name||'')}" data-idx="${i}" placeholder="Naam agenda" />
-          <input class="field-url" type="url" value="${escHtml(cal.url||'')}" data-idx="${i}" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+          <div style="display:flex;gap:5px;align-items:center;">
+            <input class="field-url" type="url" value="${escHtml(cal.url||'')}" data-idx="${i}" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            <button class="btn-test-ics" data-idx="${i}" title="Test of de agenda laadbaar is">Test</button>
+          </div>
+          <div class="ics-test-result" style="display:none"></div>
         </div>
         <button class="btn-remove" data-idx="${i}" title="Verwijderen">×</button>
       `;
@@ -351,6 +384,26 @@
       row.querySelector('.btn-remove').addEventListener('click', e => {
         calendars.splice(+e.target.dataset.idx, 1);
         renderCalendars();
+      });
+      row.querySelector('.btn-test-ics').addEventListener('click', async e => {
+        const idx = +e.target.dataset.idx;
+        const url = calendars[idx]?.url;
+        const resultEl = row.querySelector('.ics-test-result');
+        if (!url) { resultEl.style.display='block'; resultEl.className='ics-test-result err'; resultEl.textContent='Vul eerst een ICS-link in.'; return; }
+        e.target.textContent = '⏳';
+        e.target.disabled = true;
+        resultEl.style.display = 'none';
+        const res = await testIcsUrl(url);
+        e.target.textContent = 'Test';
+        e.target.disabled = false;
+        resultEl.style.display = 'block';
+        if (res.ok) {
+          resultEl.className = 'ics-test-result ok';
+          resultEl.textContent = '✅ Werkt via: ' + res.via;
+        } else {
+          resultEl.className = 'ics-test-result err';
+          resultEl.textContent = '❌ Geen verbinding. ' + res.detail;
+        }
       });
 
       list.appendChild(row);
