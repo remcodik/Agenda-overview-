@@ -49,10 +49,10 @@
     .week-nav { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center; min-width: 0; }
     .week-nav button { background: rgba(255,255,255,.12); border: none; color: #fff; width: 44px; height: 44px; border-radius: 12px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .week-nav button:hover { background: rgba(255,255,255,.22); }
-    .week-label { min-width: 0; display: flex; flex-direction: row; align-items: baseline; gap: 8px; }
-    .wl-week  { font-size: 22px; font-weight: 900; color: #fff; white-space: nowrap; line-height: 1.1; }
-    .wl-range { font-size: 20px; font-weight: 700; color: rgba(255,255,255,.75); white-space: nowrap; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
-    @media (max-width: 480px) { .wl-week { font-size: 17px; } .wl-range { font-size: 15px; max-width: 130px; } }
+    .week-label { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 0; line-height: 1; }
+    .wl-week  { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.55); white-space: nowrap; text-transform: uppercase; letter-spacing: .6px; }
+    .wl-range { font-size: 20px; font-weight: 900; color: #fff; white-space: nowrap; letter-spacing: -.3px; }
+    @media (max-width: 480px) { .wl-range { font-size: 17px; } }
     .btn-settings { background: rgba(255,255,255,.12); border: none; color: #fff; width: 44px; height: 44px; border-radius: 12px; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .btn-settings:hover { background: rgba(255,255,255,.22); }
     .btn-view-toggle { background: rgba(255,255,255,.12); border: none; color: rgba(255,255,255,.8); height: 44px; padding: 0 12px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; flex-shrink: 0; letter-spacing: .3px; }
@@ -476,6 +476,7 @@
       <button id="btn-reload-app" style="flex:1;border:1.5px solid #dbeafe;background:#f8faff;color:#1e40af;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Ververs app</button>
     </div>
     <div id="version-list">
+      <div class="version-entry"><span class="version-tag">v1.0.17</span><span class="version-date">14 mrt · 18:00</span><span class="version-desc">Week + datum in topbar herschreven: "Week 11" klein erboven, "9 – 15 mrt" groot en vet eronder.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.16</span><span class="version-date">14 mrt · 17:00</span><span class="version-desc">Bugfix: één kapotte agenda-link blokkeert niet langer de andere agenda's. Werkende agenda's tonen gewoon hun afspraken.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.15</span><span class="version-date">14 mrt · 12:00</span><span class="version-desc">Test-knop per agenda in instellingen: toont direct welke verbindingsroute werkt of waarom de agenda niet laadt.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.14</span><span class="version-date">12 mrt · 18:00</span><span class="version-desc">Snellere proxy-fallback bij verbindingsfout. Duidelijkere foutmelding met directe knop om agenda-link aan te passen.</span></div>
@@ -517,7 +518,7 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v1.0.16';
+  const APP_VERSION   = 'v1.0.17';
   const APP_BUILD     = '14 mrt 2026';
 
   /* ── Auto-update: haal versie op van server, laad opnieuw als nieuwer ──
@@ -612,9 +613,10 @@
       : `${MONTHS[a.getMonth()]} ${a.getDate()} – ${MONTHS[b.getMonth()]} ${b.getDate()}, ${b.getFullYear()}`;
   }
   function formatShortRange(a,b) {
+    const ma = MONTHS[a.getMonth()].toLowerCase(), mb = MONTHS[b.getMonth()].toLowerCase();
     return a.getMonth()===b.getMonth()
-      ? `${a.getDate()}–${b.getDate()} ${MONTHS[a.getMonth()]}`
-      : `${a.getDate()} ${MONTHS[a.getMonth()]}–${b.getDate()} ${MONTHS[b.getMonth()]}`;
+      ? `${a.getDate()} – ${b.getDate()} ${ma}`
+      : `${a.getDate()} ${ma} – ${b.getDate()} ${mb}`;
   }
 
   /* ═══════════════════════════════════
@@ -950,7 +952,7 @@
 
     const wl = document.querySelector('.week-label');
     wl.querySelector('.wl-week').textContent  = `Week ${getWeekNumber(dates[0])}`;
-    wl.querySelector('.wl-range').textContent = `· ${formatShortRange(dates[0], dates[6])}`;
+    wl.querySelector('.wl-range').textContent = formatShortRange(dates[0], dates[6]);
 
     // Only show demo data when NO calendars configured at all
     const hasCals = calendars.length > 0;
