@@ -1918,14 +1918,14 @@
     if (item) { e.preventDefault(); showTooltip(item, e); }
   }, {passive:false});
   document.addEventListener('click', e => {
-    // Tap a top-day pin → open edit sheet for that event
+    // Tap a top-day pin → show tooltip (same as regular items)
     const dayPin = e.target.closest('.day-pin');
     if (dayPin && !e.target.closest('.bottom-sheet')) {
       e.stopPropagation();
       const uid = dayPin.dataset.uid;
       if (uid) {
-        const item = document.querySelector(`.item[data-uid="${CSS.escape(uid)}"]`);
-        if (item) openEditSheet(item);
+        const item = document.querySelector(`.item[data-uid="${CSS.escape(uid)}"], .item-toppin-anchor[data-uid="${CSS.escape(uid)}"]`);
+        if (item) showTooltip(item, e);
       }
       return;
     }
