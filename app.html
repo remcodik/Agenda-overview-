@@ -37,6 +37,13 @@
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         window.location.reload();
       });
+
+      // Bij terugkeren naar de app: controleer automatisch op nieuwe SW
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          navigator.serviceWorker.getRegistration().then(r => { if (r) r.update(); });
+        }
+      });
     }
   </script>
   <style>
@@ -481,6 +488,7 @@
       <button id="btn-reload-app" style="flex:1;border:1.5px solid #dbeafe;background:#f8faff;color:#1e40af;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Ververs app</button>
     </div>
     <div id="version-list">
+      <div class="version-entry"><span class="version-tag">v1.0.18</span><span class="version-date">17 mrt · 20:00</span><span class="version-desc">Weekend: alleen iconen zichtbaar (geen tekst) – beter leesbaar in smalle kolommen. Topdag-icoon toont nu eerst tooltip met titel en bewerk-knop. Versie-updates automatisch bij app-heractivatie.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.17</span><span class="version-date">14 mrt · 18:00</span><span class="version-desc">Week + datum in topbar herschreven: "Week 11" klein erboven, "9 – 15 mrt" groot en vet eronder.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.16</span><span class="version-date">14 mrt · 17:00</span><span class="version-desc">Bugfix: één kapotte agenda-link blokkeert niet langer de andere agenda's. Werkende agenda's tonen gewoon hun afspraken.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.15</span><span class="version-date">14 mrt · 12:00</span><span class="version-desc">Test-knop per agenda in instellingen: toont direct welke verbindingsroute werkt of waarom de agenda niet laadt.</span></div>
@@ -1730,10 +1738,12 @@
   const tipLabel = document.getElementById('tooltip-label');
   const tipEdit  = document.getElementById('tooltip-edit');
   let activeItem = null;
+  let activeAnchor = null; // positioneringselement (kan afwijken van activeItem bij toppin)
 
   function positionTooltip() {
-    if (!activeItem) return;
-    const r = activeItem.getBoundingClientRect(), vw = window.innerWidth;
+    const anchor = activeAnchor || activeItem;
+    if (!anchor) return;
+    const r = anchor.getBoundingClientRect(), vw = window.innerWidth;
     tooltip.style.cssText = 'left:0;top:0;opacity:0';
     const tw = tooltip.offsetWidth;
     let left = r.left + r.width/2 - tw/2;
@@ -1746,7 +1756,8 @@
 
   const tipMeta  = document.getElementById('tooltip-meta');
 
-  function showTooltip(item, e) {
+  function showTooltip(item, e, anchorEl) {
+    activeAnchor = anchorEl || null;
     const label = item.querySelector('.item-text')?.textContent?.trim()||'';
     if (!label) return;
     activeItem = item;
@@ -1787,7 +1798,7 @@
     });
     e?.stopPropagation();
   }
-  function hideTooltip() { tooltip.classList.remove('visible'); }
+  function hideTooltip() { tooltip.classList.remove('visible'); activeAnchor = null; }
 
   tipEdit.addEventListener('click', e => { e.stopPropagation(); hideTooltip(); if (activeItem) openEditSheet(activeItem); });
 
@@ -1930,7 +1941,7 @@
       const uid = dayPin.dataset.uid;
       if (uid) {
         const item = document.querySelector(`.item[data-uid="${CSS.escape(uid)}"], .item-toppin-anchor[data-uid="${CSS.escape(uid)}"]`);
-        if (item) showTooltip(item, e);
+        if (item) showTooltip(item, e, dayPin); // positioneer tooltip bij pin, niet de verborgen anchor
       }
       return;
     }
