@@ -525,9 +525,13 @@
   /* ═══════════════════
      RELOAD / VERSION
   ═══════════════════ */
-  const APP_VERSION = 'v1.0.17';
-  const APP_BUILD   = '14 mrt 2026';
-  document.getElementById('cust-version-badge').textContent = APP_VERSION + ' · ' + APP_BUILD;
+  // Versie + datum live ophalen – automatisch correct na elke update
+  fetch('version.json?_=' + Date.now(), {cache: 'no-store'})
+    .then(r => r.json())
+    .then(({v, date}) => {
+      document.getElementById('cust-version-badge').textContent = (v || '–') + (date ? ' · ' + date : '');
+    })
+    .catch(() => {});
   if (!calendars.length) document.getElementById('cust-demo-hint').style.display = 'block';
 
   document.getElementById('btn-reload-cals').addEventListener('click', () => {

@@ -1,7 +1,8 @@
 // Mijn Week – Service Worker
-// Enige aanpassing nodig bij nieuwe release: bump SW_VERSION hieronder.
+// Enige aanpassing nodig bij nieuwe release: bump SW_VERSION en SW_DATE hieronder.
 // De app detecteert wijzigingen automatisch en herlaadt.
 const SW_VERSION = 'v1.0.18';
+const SW_DATE    = '17 mrt 2026';
 
 self.addEventListener('install', () => {
   self.skipWaiting(); // activeer direct, wacht niet op oud tabblad
@@ -23,7 +24,7 @@ self.addEventListener('message', e => {
 self.addEventListener('fetch', e => {
   // version.json dynamisch serveren vanuit SW_VERSION – geen apart bestand nodig
   if (new URL(e.request.url).pathname.endsWith('/version.json')) {
-    e.respondWith(new Response(JSON.stringify({v: SW_VERSION}), {
+    e.respondWith(new Response(JSON.stringify({v: SW_VERSION, date: SW_DATE}), {
       headers: {'Content-Type': 'application/json', 'Cache-Control': 'no-store'}
     }));
     return;
