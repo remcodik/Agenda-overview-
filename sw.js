@@ -1,8 +1,7 @@
-// Mijn Week – Service Worker v1.0.7
-// Strategie: altijd netwerk (network-only), nooit browser-cache.
-// Verander SW_VERSION bij elke release → browser detecteert de wijziging
-// → installeert direct → app herlaadt automatisch met nieuwe versie.
-const SW_VERSION = 'v1.0.17';
+// Mijn Week – Service Worker
+// Enige aanpassing nodig bij nieuwe release: bump SW_VERSION hieronder.
+// De app detecteert wijzigingen automatisch en herlaadt.
+const SW_VERSION = 'v1.0.18';
 
 self.addEventListener('install', () => {
   self.skipWaiting(); // activeer direct, wacht niet op oud tabblad
@@ -22,7 +21,14 @@ self.addEventListener('message', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // HTML-navigaties, app-bestanden én version.json: altijd vers van server halen
+  // version.json dynamisch serveren vanuit SW_VERSION – geen apart bestand nodig
+  if (new URL(e.request.url).pathname.endsWith('/version.json')) {
+    e.respondWith(new Response(JSON.stringify({v: SW_VERSION}), {
+      headers: {'Content-Type': 'application/json', 'Cache-Control': 'no-store'}
+    }));
+    return;
+  }
+  // HTML-navigaties, app-bestanden: altijd vers van server halen
   if (e.request.mode === 'navigate' ||
       e.request.url.match(/\.(html|js|css|json)(\?.*)?$/)) {
     e.respondWith(
