@@ -40,6 +40,10 @@ jobs:
           sed -i "s/const SW_VERSION = '$CURRENT';/const SW_VERSION = '$NEW_VERSION';/" sw.js
           sed -i "s/const SW_DATE.*=.*;/const SW_DATE    = '$DATE';/" sw.js
 
+          # app.html bijwerken (APP_VERSION + APP_BUILD moeten altijd matchen met SW_VERSION)
+          sed -i "s/const APP_VERSION.*=.*;/const APP_VERSION   = '$NEW_VERSION';/" app.html
+          sed -i "s/const APP_BUILD.*=.*;/const APP_BUILD     = '$DATE';/" app.html
+
           # version.json bijwerken
           echo "{\"v\":\"$NEW_VERSION\",\"date\":\"$DATE\"}" > version.json
 
@@ -47,6 +51,6 @@ jobs:
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
-          git add sw.js version.json
+          git add sw.js app.html version.json
           git diff --staged --quiet || git commit -m "Auto: versie opgehoogd naar $(grep -oP "(?<=SW_VERSION = ')v[^']+" sw.js) · $(date +'%d %b %Y') [skip ci]"
           git push
