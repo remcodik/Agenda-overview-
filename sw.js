@@ -1,6 +1,5 @@
 // Mijn Week – Service Worker
-// Enige aanpassing nodig bij nieuwe release: bump SW_VERSION en SW_DATE hieronder.
-// De app detecteert wijzigingen automatisch en herlaadt.
+// SW_VERSION en SW_DATE worden automatisch bijgewerkt door GitHub Actions bij elke merge.
 const SW_VERSION = 'v1.0.18';
 const SW_DATE    = '17 mrt 2026';
 
