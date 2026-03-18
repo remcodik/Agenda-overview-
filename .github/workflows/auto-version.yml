@@ -1,0 +1,47 @@
+name: Auto-versie bijwerken
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  update-version:
+    # Voorkom oneindige loop: sla over als commit van deze action zelf is
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Datum en versie bijwerken
+        run: |
+          # Nederlandse maandnamen
+          EN=$(date +'%b')
+          case $EN in
+            Jan) NL="jan" ;; Feb) NL="feb" ;; Mar) NL="mrt" ;;
+            Apr) NL="apr" ;; May) NL="mei" ;; Jun) NL="jun" ;;
+            Jul) NL="jul" ;; Aug) NL="aug" ;; Sep) NL="sep" ;;
+            Oct) NL="okt" ;; Nov) NL="nov" ;; Dec) NL="dec" ;;
+          esac
+          DATE="$(date +'%-d') $NL $(date +'%Y')"
+
+          # Huidige versie uit sw.js lezen
+          VERSION=$(grep -oP "(?<=SW_VERSION = ')v[^']+" sw.js)
+
+          # SW_DATE bijwerken in sw.js
+          sed -i "s/const SW_DATE.*=.*;/const SW_DATE    = '$DATE';/" sw.js
+
+          # version.json bijwerken
+          echo "{\"v\":\"$VERSION\",\"date\":\"$DATE\"}" > version.json
+
+          echo "Versie: $VERSION · $DATE"
+
+      - name: Commit en push
+        run: |
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add sw.js version.json
+          git diff --staged --quiet || git commit -m "Auto: versiedatum bijgewerkt naar $(date +'%d %b %Y') [skip ci]"
+          git push
