@@ -15,7 +15,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Datum en versie bijwerken
+      - name: Versie ophogen en datum bijwerken
         run: |
           # Nederlandse maandnamen
           EN=$(date +'%b')
@@ -27,21 +27,26 @@ jobs:
           esac
           DATE="$(date +'%-d') $NL $(date +'%Y')"
 
-          # Huidige versie uit sw.js lezen
-          VERSION=$(grep -oP "(?<=SW_VERSION = ')v[^']+" sw.js)
+          # Huidige versie lezen en patch ophogen (v1.0.18 → v1.0.19)
+          CURRENT=$(grep -oP "(?<=SW_VERSION = ')v\d+\.\d+\.\d+" sw.js)
+          MAJOR=$(echo $CURRENT | cut -d. -f1 | tr -d 'v')
+          MINOR=$(echo $CURRENT | cut -d. -f2)
+          PATCH=$(echo $CURRENT | cut -d. -f3)
+          NEW_VERSION="v$MAJOR.$MINOR.$((PATCH + 1))"
 
-          # SW_DATE bijwerken in sw.js
+          echo "Versie: $CURRENT → $NEW_VERSION · $DATE"
+
+          # sw.js bijwerken
+          sed -i "s/const SW_VERSION = '$CURRENT';/const SW_VERSION = '$NEW_VERSION';/" sw.js
           sed -i "s/const SW_DATE.*=.*;/const SW_DATE    = '$DATE';/" sw.js
 
           # version.json bijwerken
-          echo "{\"v\":\"$VERSION\",\"date\":\"$DATE\"}" > version.json
-
-          echo "Versie: $VERSION · $DATE"
+          echo "{\"v\":\"$NEW_VERSION\",\"date\":\"$DATE\"}" > version.json
 
       - name: Commit en push
         run: |
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
           git add sw.js version.json
-          git diff --staged --quiet || git commit -m "Auto: versiedatum bijgewerkt naar $(date +'%d %b %Y') [skip ci]"
+          git diff --staged --quiet || git commit -m "Auto: versie opgehoogd naar $(grep -oP "(?<=SW_VERSION = ')v[^']+" sw.js) · $(date +'%d %b %Y') [skip ci]"
           git push
