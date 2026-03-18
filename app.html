@@ -557,6 +557,7 @@
   const KEY_OVERRIDES   = 'event_overrides';  // {uid:{customerId,icon,private,topPin,size}}
   const KEY_ICON_ORDER  = 'icon_order';       // [emoji|'photo:id', ...]
   const KEY_SORT_ORDER  = 'item_sort_order';  // {'YYYY-MM-DD': ['uid1','uid2',…]}
+  const KEY_GLOBAL_ORDER = 'global_event_order'; // ['baseUid1','baseUid2',…] – volgorde over alle dagen
 
   const DEFAULT_CUSTOMERS = [
     {id:'c1', name:'Acme Corp',   bg:'#ede0ff', text:'#4c1d95'},
@@ -584,8 +585,9 @@
   let customIcons = loadJson(KEY_ICONS,      []);
   let customEmojis= loadJson(KEY_EMOJIS,    []);
   let overrides   = loadJson(KEY_OVERRIDES,  {});
-  let itemSortOrder = loadJson(KEY_SORT_ORDER, {});
-  let iconOrder   = loadJson(KEY_ICON_ORDER, null);
+  let itemSortOrder   = loadJson(KEY_SORT_ORDER, {});
+  let globalEventOrder = loadJson(KEY_GLOBAL_ORDER, []);
+  let iconOrder       = loadJson(KEY_ICON_ORDER, null);
 
   let calEvents   = [];
   let isConnected = false;
@@ -1032,13 +1034,20 @@
     const meetings = events.filter(e => !e.topPin && e.type === 'meeting');
     const tasks    = events.filter(e => !e.topPin && e.type === 'task');
 
-    // Apply saved sort order if present, otherwise meetings first then tasks
+    // Sorteer events: gebruik per-dag volgorde, dan globale volgorde, dan standaard (meetings → tasks)
     const dateKey = isoDate(date);
     const savedOrder = itemSortOrder[dateKey];
+    // Gebruik per-dag volgorde als die er is, anders de globale volgorde
+    const activeOrder = (savedOrder && savedOrder.length) ? savedOrder
+                      : (globalEventOrder && globalEventOrder.length) ? globalEventOrder
+                      : null;
     let bodyEvts;
-    if (savedOrder && savedOrder.length) {
+    if (activeOrder) {
       bodyEvts = [...meetings, ...tasks].sort((a, b) => {
-        const ai = savedOrder.indexOf(a.uid), bi = savedOrder.indexOf(b.uid);
+        // Vergelijk met baseUid zodat herhalende events (uid:datum) altijd matchen
+        const aBase = baseUid(a.uid), bBase = baseUid(b.uid);
+        const ai = activeOrder.findIndex(u => u === a.uid || u === aBase || baseUid(u) === aBase);
+        const bi = activeOrder.findIndex(u => u === b.uid || u === bBase || baseUid(u) === bBase);
         if (ai === -1 && bi === -1) return 0;
         if (ai === -1) return 1; if (bi === -1) return -1;
         return ai - bi;
@@ -1115,6 +1124,9 @@
         .map(el => el.dataset.uid).filter(Boolean);
       itemSortOrder[dateKey] = uids;
       localStorage.setItem(KEY_SORT_ORDER, JSON.stringify(itemSortOrder));
+      // Sla ook globale volgorde op (baseUids) zodat alle dagen dezelfde volgorde gebruiken
+      globalEventOrder = uids.map(uid => baseUid(uid));
+      localStorage.setItem(KEY_GLOBAL_ORDER, JSON.stringify(globalEventOrder));
     }
     function insertPlaceholder(clientY) {
       const items = getItems();
@@ -1196,7 +1208,18 @@
      DAY PINS (dagiconen)
   ═══════════════════════════════════ */
   function renderPinsHtml(dayEvents) {
-    const pinEvts = (dayEvents||[]).filter(e => e.topPin);
+    let pinEvts = (dayEvents||[]).filter(e => e.topPin);
+    // Zelfde volgorde als in de dag: sorteer pins op globalEventOrder via baseUid
+    if (globalEventOrder && globalEventOrder.length) {
+      pinEvts = pinEvts.slice().sort((a, b) => {
+        const aBase = baseUid(a.uid), bBase = baseUid(b.uid);
+        const ai = globalEventOrder.findIndex(u => u === aBase || baseUid(u) === aBase);
+        const bi = globalEventOrder.findIndex(u => u === bBase || baseUid(u) === bBase);
+        if (ai === -1 && bi === -1) return 0;
+        if (ai === -1) return 1; if (bi === -1) return -1;
+        return ai - bi;
+      });
+    }
     return pinEvts.map(e => {
       const icon = (overrides[e.uid]||{}).icon || e.icon || '🤝';
       const inner = icon.startsWith('data:') ? `<img src="${escHtml(icon)}">` : escHtml(icon);
