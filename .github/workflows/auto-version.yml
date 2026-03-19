@@ -44,6 +44,15 @@ jobs:
           sed -i "s/const APP_VERSION.*=.*;/const APP_VERSION   = '$NEW_VERSION';/" app.html
           sed -i "s/const APP_BUILD.*=.*;/const APP_BUILD     = '$DATE';/" app.html
 
+          # Statische fallback-tekst in version-panel header bijwerken
+          sed -i "s|id=\"version-build-info\">[^<]*<|id=\"version-build-info\">$NEW_VERSION · $DATE<|" app.html
+
+          # Nieuw versie-item bovenaan de versiegeschiedenis prependen
+          TIME=$(date +'%H:%M')
+          DAY=$(date +'%-d')
+          NEW_ENTRY="      <div class=\"version-entry\"><span class=\"version-tag\">$NEW_VERSION</span><span class=\"version-date\">$DAY $NL · $TIME</span><span class=\"version-desc\">Automatische versie-update.</span></div>"
+          sed -i "s|<div id=\"version-list\">|<div id=\"version-list\">\n$NEW_ENTRY|" app.html
+
           # version.json bijwerken
           echo "{\"v\":\"$NEW_VERSION\",\"date\":\"$DATE\"}" > version.json
 
