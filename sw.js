@@ -1,7 +1,7 @@
 // Mijn Week – Service Worker
 // SW_VERSION en SW_DATE worden automatisch bijgewerkt door GitHub Actions bij elke merge.
-const SW_VERSION = 'v1.0.18';
-const SW_DATE    = '17 mrt 2026';
+const SW_VERSION = 'v1.0.19';
+const SW_DATE    = '19 mrt 2026';
 
 self.addEventListener('install', () => {
   self.skipWaiting(); // activeer direct, wacht niet op oud tabblad
