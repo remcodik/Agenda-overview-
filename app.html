@@ -488,7 +488,8 @@
       <button id="btn-reload-app" style="flex:1;border:1.5px solid #dbeafe;background:#f8faff;color:#1e40af;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Ververs app</button>
     </div>
     <div id="version-list">
-      <div class="version-entry"><span class="version-tag">v1.0.18</span><span class="version-date">18 mrt · 19:00</span><span class="version-desc">Weekend: alleen iconen zichtbaar (geen tekst) – beter leesbaar in smalle kolommen. Topdag-icoon toont nu eerst tooltip met titel en bewerk-knop. Versie-updates automatisch bij app-heractivatie. Bugfix: iconen slepen werkt nu ook op iOS (touch-drag gecorrigeerd).</span></div>
+      <div class="version-entry"><span class="version-tag">v1.0.19</span><span class="version-date">19 mrt · 07:30</span><span class="version-desc">Bugfix: iconen slepen op iOS definitief opgelost – touch-drag reageert nu direct zonder scroll-vertraging.</span></div>
+      <div class="version-entry"><span class="version-tag">v1.0.18</span><span class="version-date">18 mrt · 19:00</span><span class="version-desc">Weekend: alleen iconen zichtbaar (geen tekst) – beter leesbaar in smalle kolommen. Topdag-icoon toont nu eerst tooltip met titel en bewerk-knop. Versie-updates automatisch bij app-heractivatie.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.17</span><span class="version-date">14 mrt · 18:00</span><span class="version-desc">Week + datum in topbar herschreven: "Week 11" klein erboven, "9 – 15 mrt" groot en vet eronder.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.16</span><span class="version-date">14 mrt · 17:00</span><span class="version-desc">Bugfix: één kapotte agenda-link blokkeert niet langer de andere agenda's. Werkende agenda's tonen gewoon hun afspraken.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.15</span><span class="version-date">14 mrt · 12:00</span><span class="version-desc">Test-knop per agenda in instellingen: toont direct welke verbindingsroute werkt of waarom de agenda niet laadt.</span></div>
@@ -531,8 +532,8 @@
   /* ═══════════════════════════════════
      STORAGE KEYS & DEFAULTS
   ═══════════════════════════════════ */
-  const APP_VERSION   = 'v1.0.18';
-  const APP_BUILD     = '18 mrt 2026';
+  const APP_VERSION   = 'v1.0.19';
+  const APP_BUILD     = '19 mrt 2026';
 
   /* ── Auto-update: haal versie op van server, laad opnieuw als nieuwer ──
      Bypast alle iOS WKWebView / service-worker cacheproblemen.
@@ -1569,9 +1570,9 @@
 
     grid.addEventListener('touchmove', e => {
       if (!touchEl) return;
+      e.preventDefault();
       const x = e.touches[0].clientX, y = e.touches[0].clientY;
       if (!clone && Math.hypot(x - lastX, y - lastY) < 8) return;
-      e.preventDefault();
       if (!clone) {
         const r = touchEl.getBoundingClientRect();
         clone = touchEl.cloneNode(true);
