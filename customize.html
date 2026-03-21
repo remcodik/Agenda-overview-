@@ -85,6 +85,16 @@
     #logo-suggestions { display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1.5px solid #dbeafe;border-radius:10px;overflow:hidden;z-index:20;box-shadow:0 6px 20px rgba(0,0,0,.12); }
     .logo-loading { padding:12px 14px;font-size:12px;color:#aaa;text-align:center; }
 
+    /* ── Scriptable section ── */
+    .scriptable-steps { margin: 0 16px 0; display: flex; flex-direction: column; gap: 8px; }
+    .scriptable-step  { display: flex; align-items: flex-start; gap: 10px; padding: 9px 12px; background: #f8faff; border: 1.5px solid #dbeafe; border-radius: 10px; font-size: 12px; color: #1e3a8a; line-height: 1.5; }
+    .scriptable-step-num { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: #3b82f6; color: #fff; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+    .btn-scriptable-dl { margin: 14px 16px 16px; display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(135deg, #4f8ef7, #7c3aed); color: #fff; border: none; border-radius: 12px; padding: 14px 20px; font-size: 14px; font-weight: 800; cursor: pointer; width: calc(100% - 32px); transition: filter .15s; }
+    .btn-scriptable-dl:hover { filter: brightness(1.12); }
+    .btn-scriptable-dl:active { filter: brightness(.95); }
+    .scriptable-status { font-size: 12px; font-weight: 700; text-align: center; min-height: 18px; padding: 0 16px 12px; }
+    .scriptable-notice { margin: 0 16px 14px; padding: 9px 12px; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; font-size: 11px; color: #14532d; line-height: 1.6; }
+
     /* ── Backup section ── */
     .backup-ios-tip { background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 11px 13px; font-size: 12px; color: #78350f; line-height: 1.6; margin: 0 16px 0; }
     .backup-ios-tip strong { color: #92400e; }
@@ -206,7 +216,46 @@
       </div>
     </div>
 
-    <!-- ── 4. Startscherm ── -->
+    <!-- ── 4. Scriptable widget ── -->
+    <div class="section collapsed" data-id="sec-scriptable">
+      <div class="section-header">
+        <span class="section-icon">📱</span>
+        <div style="flex:1;min-width:0;">
+          <div class="section-title">Scriptable Widget</div>
+          <div class="section-desc">Week-overzicht op je iPhone-thuisscherm</div>
+        </div>
+        <span class="section-chevron">▾</span>
+      </div>
+      <div class="section-body">
+        <div class="scriptable-steps" style="margin-top:14px;">
+          <div class="scriptable-step">
+            <span class="scriptable-step-num">1</span>
+            <span>Installeer <strong>Scriptable</strong> (gratis) via de App Store op je iPhone</span>
+          </div>
+          <div class="scriptable-step">
+            <span class="scriptable-step-num">2</span>
+            <span>Tik hieronder op <strong>Download voor Scriptable</strong> — sla het <code style="background:#e0e8ff;padding:1px 5px;border-radius:4px;font-size:10px;">.js</code> bestand op</span>
+          </div>
+          <div class="scriptable-step">
+            <span class="scriptable-step-num">3</span>
+            <span>Tik op het bestand in <strong>Bestanden</strong> → kies <strong>Openen in Scriptable</strong></span>
+          </div>
+          <div class="scriptable-step">
+            <span class="scriptable-step-num">4</span>
+            <span>Houd je thuisscherm ingedrukt → <strong>＋</strong> → zoek <em>Scriptable</em> → kies <strong>Large</strong> → selecteer <em>MijnWeek</em></span>
+          </div>
+        </div>
+        <div class="scriptable-notice">
+          <strong>Tip:</strong> Download het script opnieuw als je agenda's of klanten wijzigt — je instellingen worden automatisch meegenomen.
+        </div>
+        <button class="btn-scriptable-dl" id="btn-scriptable-download">
+          <span style="font-size:20px;">⬇</span> Download voor Scriptable
+        </button>
+        <div class="scriptable-status" id="scriptable-status"></div>
+      </div>
+    </div>
+
+    <!-- ── 6. Startscherm ── -->
     <div class="section" data-id="sec-install">
       <div class="section-header">
         <span class="section-icon">📲</span>
@@ -564,6 +613,67 @@
   });
 
   /* ═══════════════════
+     SCRIPTABLE WIDGET
+  ═══════════════════ */
+  (function () {
+    const statusEl = document.getElementById('scriptable-status');
+
+    document.getElementById('btn-scriptable-download').addEventListener('click', () => {
+      const cals = JSON.parse(localStorage.getItem('gcal_calendars') || '[]');
+      const custs = JSON.parse(localStorage.getItem('app_customers') || '[]');
+      const viewMode = localStorage.getItem('view_mode') || 'workdays';
+
+      if (!cals.length) {
+        statusEl.style.color = '#dc2626';
+        statusEl.textContent = '❌ Voeg eerst een agenda toe onder "Agenda\'s"';
+        setTimeout(() => { statusEl.textContent = ''; }, 4000);
+        return;
+      }
+
+      // Genereer het Scriptable-script met de configuratie ingebakken
+      const configObj = {
+        calendars: cals.map(c => ({ name: c.name || 'Agenda', url: c.url || '', color: c.color || '#3b82f6' })),
+        customers: custs.map(c => ({ name: c.name || '', bg: c.bg || '#ede0ff', text: c.text || '#4c1d95' })),
+        viewMode: viewMode,
+        appUrl: location.origin + location.pathname.replace('customize.html', 'app.html')
+      };
+
+      const configJson = JSON.stringify(configObj, null, 2)
+        .split('\n').map((l, i) => i === 0 ? l : '  ' + l).join('\n');
+
+      // Haal de template op en vervang de lege CONFIG
+      fetch('scriptable/MijnWeek.js')
+        .then(r => r.text())
+        .then(template => {
+          // Vervang het lege WIDGET_CONFIG object met de ingevulde versie
+          const filled = template.replace(
+            /const WIDGET_CONFIG = \{[\s\S]*?\};/,
+            'const WIDGET_CONFIG = ' + configJson + ';'
+          );
+
+          const blob = new Blob([filled], { type: 'text/javascript' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'MijnWeek.js';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+          statusEl.style.color = '#16a34a';
+          statusEl.textContent = '✅ Gedownload! Open het bestand → kies "Openen in Scriptable"';
+          setTimeout(() => { statusEl.textContent = ''; }, 6000);
+        })
+        .catch(() => {
+          statusEl.style.color = '#dc2626';
+          statusEl.textContent = '❌ Script kon niet worden geladen. Probeer opnieuw.';
+          setTimeout(() => { statusEl.textContent = ''; }, 4000);
+        });
+    });
+  })();
+
+  /* ═══════════════════
      STARTSCHERM / INSTALL
   ═══════════════════ */
   (function () {
@@ -835,8 +945,9 @@
     const defaults = {
       'sec-icons':     false,  // iconen: standaard OPEN
       'sec-customers': true,
-      'sec-backup':    true,
-      'sec-install':   true,
+      'sec-backup':     true,
+      'sec-scriptable': true,
+      'sec-install':    true,
       'sec-calendars': true,
       'sec-reload':    true,
       'sec-version':   true,
