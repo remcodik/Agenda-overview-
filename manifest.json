@@ -2,7 +2,7 @@
   "name": "Mijn Week",
   "short_name": "Mijn Week",
   "description": "Weekoverzicht agenda",
-  "start_url": "./app.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "background_color": "#1a1a2e",
