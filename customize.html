@@ -100,6 +100,12 @@
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-thumb { background: #d0d0e0; border-radius: 2px; }
+
+    /* ── Collapsible sections ── */
+    .section-header { cursor: pointer; user-select: none; }
+    .section-chevron { margin-left: auto; font-size: 13px; color: #ccc; transition: transform .22s ease; flex-shrink: 0; }
+    .section.collapsed .section-body { display: none; }
+    .section.collapsed .section-chevron { transform: rotate(-90deg); }
   </style>
 </head>
 <body>
@@ -116,127 +122,162 @@
 
   <div class="content">
 
-    <!-- ── 1. Klanten ── -->
-    <div class="section">
-      <div class="section-header">
-        <span class="section-icon">🎨</span>
-        <div>
-          <div class="section-title">Klanten</div>
-          <div class="section-desc">Kleurcodering per klant — zichtbaar als gekleurde tegel</div>
-        </div>
-      </div>
-      <div class="row-list" id="customer-list"></div>
-      <div class="add-row">
-        <button class="btn-add-row" id="btn-add-customer">＋ Klant toevoegen</button>
-      </div>
-    </div>
-
-    <!-- ── 2. Agenda's ── -->
-    <div class="section">
-      <div class="section-header">
-        <span class="section-icon">🗓️</span>
-        <div>
-          <div class="section-title">Agenda's</div>
-          <div class="section-desc">Koppel een of meerdere Google Agenda's via ICS-link</div>
-        </div>
-      </div>
-      <div class="row-list" id="calendar-list"></div>
-      <div class="ics-help">
-        <strong>Hoe ICS-link ophalen:</strong> Open <a href="https://calendar.google.com" target="_blank" rel="noopener">calendar.google.com</a> →
-        klik ⋮ naast je agenda → <em>Instellingen en delen</em> → scroll naar
-        <em>"Agenda integreren"</em> → kopieer <span class="ics-code">Privéadres in iCal-indeling</span>.
-      </div>
-      <div class="add-row">
-        <button class="btn-add-row" id="btn-add-calendar">＋ Agenda toevoegen</button>
-      </div>
-    </div>
-
-    <!-- ── 3. Eigen iconen & emoji ── -->
-    <div class="section">
+    <!-- ── 1. Eigen iconen & emoji (standaard open) ── -->
+    <div class="section" data-id="sec-icons">
       <div class="section-header">
         <span class="section-icon">🖼️</span>
-        <div>
+        <div style="flex:1;min-width:0;">
           <div class="section-title">Eigen iconen &amp; emoji</div>
           <div class="section-desc">Foto's en emoji — beschikbaar als icoon bij alle meetings</div>
         </div>
+        <span class="section-chevron">▾</span>
       </div>
-      <div class="icons-grid" id="icons-grid"></div>
-      <div style="border-top:1px solid #f0f0f5;padding:12px 16px;">
-        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:8px;">Zoek bedrijfslogo</div>
-        <div style="position:relative;">
-          <input id="logo-search" type="search" placeholder="🔍  Typ bedrijfsnaam… bijv. Apple, Bol.com" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-            style="width:100%;border:1.5px solid #e8e8f0;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;font-family:inherit;transition:border-color .15s;-webkit-appearance:none;">
-          <div id="logo-suggestions"></div>
+      <div class="section-body">
+        <div class="icons-grid" id="icons-grid"></div>
+        <div style="border-top:1px solid #f0f0f5;padding:12px 16px;">
+          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:8px;">Zoek bedrijfslogo</div>
+          <div style="position:relative;">
+            <input id="logo-search" type="search" placeholder="🔍  Typ bedrijfsnaam… bijv. Apple, Bol.com" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+              style="width:100%;border:1.5px solid #e8e8f0;border-radius:8px;padding:9px 12px;font-size:13px;outline:none;font-family:inherit;transition:border-color .15s;-webkit-appearance:none;">
+            <div id="logo-suggestions"></div>
+          </div>
+          <div id="logo-status" style="font-size:11px;color:#aaa;margin-top:6px;min-height:16px;"></div>
         </div>
-        <div id="logo-status" style="font-size:11px;color:#aaa;margin-top:6px;min-height:16px;"></div>
-      </div>
-      <div style="border-top:1px solid #f0f0f5;padding:12px 16px;">
-        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:8px;">Emoji-iconen</div>
-        <div class="icons-grid" id="emoji-grid" style="padding:0;margin-bottom:10px;min-height:20px;"></div>
-        <div style="display:flex;gap:8px;">
-          <input id="emoji-input" type="text" placeholder="Typ emoji  ☕ 🐕 🌞" maxlength="8"
-            style="flex:1;border:1.5px solid #e0e0f0;border-radius:8px;padding:8px 10px;font-size:20px;outline:none;min-width:0;">
-          <button class="btn-add-row" id="btn-add-emoji" style="width:auto;padding:8px 14px;white-space:nowrap;">＋ Voeg toe</button>
+        <div style="border-top:1px solid #f0f0f5;padding:12px 16px;">
+          <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:8px;">Emoji-iconen</div>
+          <div class="icons-grid" id="emoji-grid" style="padding:0;margin-bottom:10px;min-height:20px;"></div>
+          <div style="display:flex;gap:8px;">
+            <input id="emoji-input" type="text" placeholder="Typ emoji  ☕ 🐕 🌞" maxlength="8"
+              style="flex:1;border:1.5px solid #e0e0f0;border-radius:8px;padding:8px 10px;font-size:20px;outline:none;min-width:0;">
+            <button class="btn-add-row" id="btn-add-emoji" style="width:auto;padding:8px 14px;white-space:nowrap;">＋ Voeg toe</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ── 4. Agenda herlaad ── -->
-    <div class="section">
+    <!-- ── 2. Klanten ── -->
+    <div class="section" data-id="sec-customers">
       <div class="section-header">
-        <span class="section-icon">🔄</span>
-        <div>
-          <div class="section-title">Agenda herladen</div>
-          <div class="section-desc">Haal nieuwe afspraken op voor de huidige week</div>
+        <span class="section-icon">🎨</span>
+        <div style="flex:1;min-width:0;">
+          <div class="section-title">Klanten</div>
+          <div class="section-desc">Kleurcodering per klant — zichtbaar als gekleurde tegel</div>
         </div>
+        <span class="section-chevron">▾</span>
       </div>
-      <div style="padding:12px 16px;">
-        <button class="btn-add-row" id="btn-reload-cals">🔄 Herlaad agenda's nu</button>
+      <div class="section-body">
+        <div class="row-list" id="customer-list"></div>
+        <div class="add-row">
+          <button class="btn-add-row" id="btn-add-customer">＋ Klant toevoegen</button>
+        </div>
       </div>
     </div>
 
-    <!-- ── 5. Backup & herstel ── -->
-    <div class="section">
+    <!-- ── 3. Backup & herstel ── -->
+    <div class="section" data-id="sec-backup">
       <div class="section-header">
         <span class="section-icon">💾</span>
-        <div>
+        <div style="flex:1;min-width:0;">
           <div class="section-title">Backup &amp; herstel</div>
           <div class="section-desc">Agenda's, iconen, bewerkingen — alles in één bestand</div>
         </div>
+        <span class="section-chevron">▾</span>
       </div>
-      <div class="backup-ios-tip" style="margin-top:14px;">
-        <strong>📱 Thuis-scherm app op iPhone/iPad?</strong><br>
-        iOS slaat de data van de browser en de thuis-scherm app <em>apart</em> op.
-        Doe dit eenmalig om alles over te zetten:
-        <ol>
-          <li>Open de app in <strong>Safari</strong> en stel alles in</li>
-          <li>Tik <strong>Backup downloaden</strong> hieronder — sla het bestand op</li>
-          <li>Open de app via het <strong>thuis-scherm icoon</strong></li>
-          <li>Ga naar ⚙️ Instellingen → tik <strong>Backup terugzetten</strong></li>
-        </ol>
-      </div>
-      <div class="backup-btns">
-        <button class="btn-backup-export" id="btn-export">⬇ Backup downloaden</button>
-        <label class="btn-backup-import">
-          ⬆ Backup terugzetten
-          <input type="file" id="btn-import" accept=".json" style="display:none;">
-        </label>
-        <div class="backup-status" id="backup-status"></div>
+      <div class="section-body">
+        <div class="backup-ios-tip" style="margin-top:14px;">
+          <strong>📱 Thuis-scherm app op iPhone/iPad?</strong><br>
+          iOS slaat de data van de browser en de thuis-scherm app <em>apart</em> op.
+          Doe dit eenmalig om alles over te zetten:
+          <ol>
+            <li>Open de app in <strong>Safari</strong> en stel alles in</li>
+            <li>Tik <strong>Backup downloaden</strong> hieronder — sla het bestand op</li>
+            <li>Open de app via het <strong>thuis-scherm icoon</strong></li>
+            <li>Ga naar ⚙️ Instellingen → tik <strong>Backup terugzetten</strong></li>
+          </ol>
+        </div>
+        <div class="backup-btns">
+          <button class="btn-backup-export" id="btn-export">⬇ Backup downloaden</button>
+          <label class="btn-backup-import">
+            ⬆ Backup terugzetten
+            <input type="file" id="btn-import" accept=".json" style="display:none;">
+          </label>
+          <div class="backup-status" id="backup-status"></div>
+        </div>
       </div>
     </div>
 
-    <!-- ── 6. Versie ── -->
-    <div class="section">
+    <!-- ── 4. Startscherm ── -->
+    <div class="section" data-id="sec-install">
       <div class="section-header">
-        <span class="section-icon">📋</span>
-        <div>
-          <div class="section-title">Versie-informatie</div>
-          <div class="section-desc" id="cust-version-badge">…</div>
+        <span class="section-icon">📲</span>
+        <div style="flex:1;min-width:0;">
+          <div class="section-title">Startscherm</div>
+          <div class="section-desc" id="install-status-desc">Controleren…</div>
+        </div>
+        <span class="section-chevron">▾</span>
+      </div>
+      <div class="section-body">
+        <div id="install-section-body" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
+          <!-- gevuld door JS -->
         </div>
       </div>
-      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
-        <a href="app.html#version" class="btn-add-row" style="text-decoration:none;display:block;text-align:center;">📋 Versiegeschiedenis bekijken</a>
-        <button class="btn-add-row" id="btn-hard-reload">🔄 Ververs app (nieuwe versie laden)</button>
+    </div>
+
+    <!-- ── 5. Agenda's ── -->
+    <div class="section" data-id="sec-calendars">
+      <div class="section-header">
+        <span class="section-icon">🗓️</span>
+        <div style="flex:1;min-width:0;">
+          <div class="section-title">Agenda's</div>
+          <div class="section-desc">Koppel een of meerdere Google Agenda's via ICS-link</div>
+        </div>
+        <span class="section-chevron">▾</span>
+      </div>
+      <div class="section-body">
+        <div class="row-list" id="calendar-list"></div>
+        <div class="ics-help">
+          <strong>Hoe ICS-link ophalen:</strong> Open <a href="https://calendar.google.com" target="_blank" rel="noopener">calendar.google.com</a> →
+          klik ⋮ naast je agenda → <em>Instellingen en delen</em> → scroll naar
+          <em>"Agenda integreren"</em> → kopieer <span class="ics-code">Privéadres in iCal-indeling</span>.
+        </div>
+        <div class="add-row">
+          <button class="btn-add-row" id="btn-add-calendar">＋ Agenda toevoegen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 6. Agenda herladen ── -->
+    <div class="section" data-id="sec-reload">
+      <div class="section-header">
+        <span class="section-icon">🔄</span>
+        <div style="flex:1;min-width:0;">
+          <div class="section-title">Agenda herladen</div>
+          <div class="section-desc">Haal nieuwe afspraken op voor de huidige week</div>
+        </div>
+        <span class="section-chevron">▾</span>
+      </div>
+      <div class="section-body">
+        <div style="padding:12px 16px;">
+          <button class="btn-add-row" id="btn-reload-cals">🔄 Herlaad agenda's nu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 7. Versie ── -->
+    <div class="section" data-id="sec-version">
+      <div class="section-header">
+        <span class="section-icon">📋</span>
+        <div style="flex:1;min-width:0;">
+          <div class="section-title">Versie-informatie</div>
+          <div class="section-desc" id="cust-version-badge">laden…</div>
+        </div>
+        <span class="section-chevron">▾</span>
+      </div>
+      <div class="section-body">
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
+          <a href="app.html#version" class="btn-add-row" style="text-decoration:none;display:block;text-align:center;">📋 Versiegeschiedenis bekijken</a>
+          <button class="btn-add-row" id="btn-hard-reload">🔄 Ververs app (nieuwe versie laden)</button>
+        </div>
       </div>
     </div>
 
@@ -523,6 +564,77 @@
   });
 
   /* ═══════════════════
+     STARTSCHERM / INSTALL
+  ═══════════════════ */
+  (function () {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const desc = document.getElementById('install-status-desc');
+    const body = document.getElementById('install-section-body');
+
+    if (isStandalone) {
+      desc.textContent = 'Al geïnstalleerd als app';
+      body.innerHTML = '<p style="font-size:13px;color:#16a34a;font-weight:700;padding:4px 0;">App staat op je startscherm.</p>';
+      return;
+    }
+
+    // Capture install prompt from app.html context (may have been stored globally)
+    window.__installPrompt = window.__installPrompt || null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      window.__installPrompt = e;
+      renderAndroid();
+    });
+
+    function renderAndroid() {
+      desc.textContent = 'Installeerbaar als app';
+      body.innerHTML = `
+        <p style="font-size:13px;color:#555;line-height:1.5;padding:2px 0 4px;">Voeg Mijn Week toe aan je startscherm voor directe toegang zonder browser.</p>
+        <button id="cust-btn-install" class="btn-add-row" style="background:#4f8ef7;color:#fff;border:none;font-weight:800;">📲 Voeg toe aan startscherm</button>
+      `;
+      document.getElementById('cust-btn-install').addEventListener('click', async () => {
+        if (!window.__installPrompt) return;
+        window.__installPrompt.prompt();
+        const { outcome } = await window.__installPrompt.userChoice;
+        window.__installPrompt = null;
+        if (outcome === 'accepted') {
+          desc.textContent = 'Geïnstalleerd!';
+          body.innerHTML = '<p style="font-size:13px;color:#16a34a;font-weight:700;padding:4px 0;">App staat op je startscherm.</p>';
+        }
+      });
+    }
+
+    function renderIOS() {
+      desc.textContent = 'Volg de stappen hieronder';
+      body.innerHTML = `
+        <div style="background:#f0f7ff;border-radius:10px;padding:12px 14px;font-size:12px;color:#1e40af;line-height:1.6;margin-bottom:2px;">
+          Voeg Mijn Week toe aan je startscherm in Safari:
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;padding:4px 0 2px;">
+          <div style="display:flex;align-items:center;gap:12px;font-size:13px;"><span style="font-size:22px">1️⃣</span> Tik op het <strong>Deel-icoon</strong> onderin Safari ⬆️</div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:13px;"><span style="font-size:22px">2️⃣</span> Kies <strong>"Zet op beginscherm"</strong></div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:13px;"><span style="font-size:22px">3️⃣</span> Tik op <strong>"Voeg toe"</strong> rechtsboven</div>
+        </div>
+      `;
+    }
+
+    function renderDesktop() {
+      desc.textContent = 'Installeer als desktop-app';
+      body.innerHTML = `
+        <p style="font-size:13px;color:#555;line-height:1.5;padding:2px 0 4px;">In Chrome of Edge: klik op het installeer-icoon in de adresbalk, of open het menu en kies "App installeren".</p>
+      `;
+    }
+
+    if (window.__installPrompt) {
+      renderAndroid();
+    } else if (isIOS) {
+      renderIOS();
+    } else {
+      renderDesktop();
+    }
+  })();
+
+  /* ═══════════════════
      RELOAD / VERSION
   ═══════════════════ */
   // Versie + datum live ophalen – automatisch correct na elke update
@@ -713,6 +825,37 @@
       logoSuggestEl.style.display = 'none';
     }
   });
+
+  /* ═══════════════════
+     COLLAPSIBLE SECTIONS
+  ═══════════════════ */
+  (function () {
+    const KEY = 'section_states';
+    // true = collapsed, false = open
+    const defaults = {
+      'sec-icons':     false,  // iconen: standaard OPEN
+      'sec-customers': true,
+      'sec-backup':    true,
+      'sec-install':   true,
+      'sec-calendars': true,
+      'sec-reload':    true,
+      'sec-version':   true,
+    };
+    let states;
+    try { states = Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || '{}')); }
+    catch { states = { ...defaults }; }
+
+    document.querySelectorAll('.section[data-id]').forEach(sec => {
+      const id = sec.dataset.id;
+      if (states[id]) sec.classList.add('collapsed');
+
+      sec.querySelector('.section-header').addEventListener('click', () => {
+        sec.classList.toggle('collapsed');
+        states[id] = sec.classList.contains('collapsed');
+        localStorage.setItem(KEY, JSON.stringify(states));
+      });
+    });
+  })();
 
   /* ═══════════════════
      INIT

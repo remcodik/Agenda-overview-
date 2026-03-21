@@ -45,6 +45,13 @@
         }
       });
     }
+
+    // Vang install-prompt vroeg op (Android/Chrome/Edge) – moet vóór DOM ready
+    window.__installPrompt = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      window.__installPrompt = e;
+    });
   </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -303,6 +310,17 @@
     .version-tag { font-size: 12px; font-weight: 800; color: #4f8ef7; }
     .version-date { font-size: 11px; color: #aaa; padding-top: 1px; }
     .version-desc { font-size: 12px; color: #1a1a2e; line-height: 1.45; }
+
+    /* ── Install banner ── */
+    #install-banner { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: #1a1a2e; border-top: 2px solid #4f8ef7; padding: 14px 18px; display: flex; align-items: center; gap: 12px; transform: translateY(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); }
+    #install-banner.show { transform: translateY(0); }
+    #install-banner-text { flex: 1; min-width: 0; }
+    #install-banner-title { font-size: 14px; font-weight: 800; color: #fff; }
+    #install-banner-sub { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 2px; }
+    #btn-install { background: #4f8ef7; border: none; color: #fff; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    #btn-install:hover { filter: brightness(1.1); }
+    #btn-install-dismiss { background: none; border: none; color: rgba(255,255,255,.45); font-size: 22px; cursor: pointer; padding: 2px 4px; flex-shrink: 0; line-height: 1; }
+    #btn-install-dismiss:hover { color: #fff; }
   </style>
 </head>
 <body>
@@ -326,6 +344,50 @@
 
   <main class="week-grid"></main>
 
+</div>
+
+<!-- Install banner (Android/Chrome: native prompt · iOS: step-by-step) -->
+<div id="install-banner">
+  <span style="font-size:28px;flex-shrink:0">📲</span>
+  <div id="install-banner-text">
+    <div id="install-banner-title">Zet op startscherm</div>
+    <div id="install-banner-sub">Open Mijn Week direct als app</div>
+  </div>
+  <button id="btn-install">Installeren</button>
+  <button id="btn-install-dismiss" title="Sluiten">×</button>
+</div>
+
+<!-- iOS install instructions sheet -->
+<div id="ios-install-sheet" class="bottom-sheet">
+  <div class="bs-backdrop" id="ios-install-backdrop"></div>
+  <div class="bs-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title-row">
+      <span style="font-size:20px">📲</span>
+      <span style="flex:1;font-size:15px;font-weight:800;color:#1a1a2e">Zet op startscherm</span>
+      <button class="sheet-close" id="ios-install-close">×</button>
+    </div>
+    <div style="padding:16px 20px 32px;display:flex;flex-direction:column;gap:16px;">
+      <div style="background:#f0f7ff;border-radius:12px;padding:14px 16px;font-size:13px;color:#1e40af;line-height:1.6;">
+        Voeg <strong>Mijn Week</strong> toe aan je startscherm voor de beste app-ervaring zonder browser-balken.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span style="font-size:26px;flex-shrink:0">1️⃣</span>
+          <span style="font-size:13px;color:#1a1a2e;">Tik op het <strong>Deel-icoon</strong> onderin Safari <span style="font-size:15px">⬆️</span></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span style="font-size:26px;flex-shrink:0">2️⃣</span>
+          <span style="font-size:13px;color:#1a1a2e;">Scroll en kies <strong>"Zet op beginscherm"</strong></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span style="font-size:26px;flex-shrink:0">3️⃣</span>
+          <span style="font-size:13px;color:#1a1a2e;">Tik op <strong>"Voeg toe"</strong> rechtsboven</span>
+        </div>
+      </div>
+      <button id="btn-ios-done" style="background:#1a1a2e;color:#fff;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;">Klaar!</button>
+    </div>
+  </div>
 </div>
 
 <!-- Tooltip -->
@@ -488,6 +550,7 @@
       <button id="btn-reload-app" style="flex:1;border:1.5px solid #dbeafe;background:#f8faff;color:#1e40af;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">🔄 Ververs app</button>
     </div>
     <div id="version-list">
+      <div class="version-entry"><span class="version-tag">v1.0.20</span><span class="version-date">21 mrt 2026</span><span class="version-desc">Instellingen ingeklapt (iconen altijd open), directe versie-update bij refresh zonder cache wissen, startscherm-widget optie toegevoegd.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.19</span><span class="version-date">19 mrt · 07:30</span><span class="version-desc">Bugfix: iconen slepen op iOS definitief opgelost – touch-drag reageert nu direct zonder scroll-vertraging.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.18</span><span class="version-date">18 mrt · 19:00</span><span class="version-desc">Weekend: alleen iconen zichtbaar (geen tekst) – beter leesbaar in smalle kolommen. Topdag-icoon toont nu eerst tooltip met titel en bewerk-knop. Versie-updates automatisch bij app-heractivatie.</span></div>
       <div class="version-entry"><span class="version-tag">v1.0.17</span><span class="version-date">14 mrt · 18:00</span><span class="version-desc">Week + datum in topbar herschreven: "Week 11" klein erboven, "9 – 15 mrt" groot en vet eronder.</span></div>
@@ -1898,6 +1961,59 @@
   ═══════════════════════════════════ */
   function openSheet(el)  { el.classList.add('open'); }
   function closeSheet(el) { el.classList.remove('open'); }
+
+  /* ═══════════════════════════════════
+     INSTALL BANNER
+  ═══════════════════════════════════ */
+  (function () {
+    // Skip als app al geïnstalleerd (standalone modus) of gebruiker al afgewezen
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    if (isStandalone) return;
+    if (localStorage.getItem('install_dismissed') === '1') return;
+
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const banner = document.getElementById('install-banner');
+    const iosSheet = document.getElementById('ios-install-sheet');
+
+    function showBanner() { banner.classList.add('show'); }
+    function hideBanner(dismiss) {
+      banner.classList.remove('show');
+      if (dismiss) localStorage.setItem('install_dismissed', '1');
+    }
+
+    document.getElementById('btn-install-dismiss').addEventListener('click', () => hideBanner(true));
+
+    document.getElementById('btn-install').addEventListener('click', async () => {
+      if (window.__installPrompt) {
+        window.__installPrompt.prompt();
+        const { outcome } = await window.__installPrompt.userChoice;
+        window.__installPrompt = null;
+        hideBanner(outcome === 'accepted');
+      } else if (isIOS) {
+        hideBanner(false);
+        openSheet(iosSheet);
+      }
+    });
+
+    document.getElementById('ios-install-close').addEventListener('click', () => closeSheet(iosSheet));
+    document.getElementById('ios-install-backdrop').addEventListener('click', () => closeSheet(iosSheet));
+    document.getElementById('btn-ios-done').addEventListener('click', () => {
+      closeSheet(iosSheet);
+      localStorage.setItem('install_dismissed', '1');
+    });
+
+    // iOS: toon banner na korte vertraging (pagina is al geladen)
+    if (isIOS) {
+      setTimeout(showBanner, 1200);
+    } else {
+      // Android/Chrome: __installPrompt is al ingesteld of wacht op event
+      if (window.__installPrompt) {
+        setTimeout(showBanner, 800);
+      } else {
+        window.addEventListener('beforeinstallprompt', () => setTimeout(showBanner, 800), { once: true });
+      }
+    }
+  })();
 
   /* ═══════════════════════════════════
      TAP / LONG-PRESS + SWIPE
