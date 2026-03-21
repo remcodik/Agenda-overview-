@@ -225,7 +225,21 @@
       </div>
     </div>
 
-    <!-- ── 6. Versie ── -->
+    <!-- ── 6. Startscherm ── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">📲</span>
+        <div>
+          <div class="section-title">Startscherm</div>
+          <div class="section-desc" id="install-status-desc">Controleren…</div>
+        </div>
+      </div>
+      <div id="install-section-body" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
+        <!-- gevuld door JS -->
+      </div>
+    </div>
+
+    <!-- ── 7. Versie ── -->
     <div class="section">
       <div class="section-header">
         <span class="section-icon">📋</span>
@@ -521,6 +535,77 @@
     reader.readAsText(file);
     e.target.value = ''; // reset zodat hetzelfde bestand opnieuw gekozen kan worden
   });
+
+  /* ═══════════════════
+     STARTSCHERM / INSTALL
+  ═══════════════════ */
+  (function () {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const desc = document.getElementById('install-status-desc');
+    const body = document.getElementById('install-section-body');
+
+    if (isStandalone) {
+      desc.textContent = 'Al geïnstalleerd als app';
+      body.innerHTML = '<p style="font-size:13px;color:#16a34a;font-weight:700;padding:4px 0;">App staat op je startscherm.</p>';
+      return;
+    }
+
+    // Capture install prompt from app.html context (may have been stored globally)
+    window.__installPrompt = window.__installPrompt || null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      window.__installPrompt = e;
+      renderAndroid();
+    });
+
+    function renderAndroid() {
+      desc.textContent = 'Installeerbaar als app';
+      body.innerHTML = `
+        <p style="font-size:13px;color:#555;line-height:1.5;padding:2px 0 4px;">Voeg Mijn Week toe aan je startscherm voor directe toegang zonder browser.</p>
+        <button id="cust-btn-install" class="btn-add-row" style="background:#4f8ef7;color:#fff;border:none;font-weight:800;">📲 Voeg toe aan startscherm</button>
+      `;
+      document.getElementById('cust-btn-install').addEventListener('click', async () => {
+        if (!window.__installPrompt) return;
+        window.__installPrompt.prompt();
+        const { outcome } = await window.__installPrompt.userChoice;
+        window.__installPrompt = null;
+        if (outcome === 'accepted') {
+          desc.textContent = 'Geïnstalleerd!';
+          body.innerHTML = '<p style="font-size:13px;color:#16a34a;font-weight:700;padding:4px 0;">App staat op je startscherm.</p>';
+        }
+      });
+    }
+
+    function renderIOS() {
+      desc.textContent = 'Volg de stappen hieronder';
+      body.innerHTML = `
+        <div style="background:#f0f7ff;border-radius:10px;padding:12px 14px;font-size:12px;color:#1e40af;line-height:1.6;margin-bottom:2px;">
+          Voeg Mijn Week toe aan je startscherm in Safari:
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;padding:4px 0 2px;">
+          <div style="display:flex;align-items:center;gap:12px;font-size:13px;"><span style="font-size:22px">1️⃣</span> Tik op het <strong>Deel-icoon</strong> onderin Safari ⬆️</div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:13px;"><span style="font-size:22px">2️⃣</span> Kies <strong>"Zet op beginscherm"</strong></div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:13px;"><span style="font-size:22px">3️⃣</span> Tik op <strong>"Voeg toe"</strong> rechtsboven</div>
+        </div>
+      `;
+    }
+
+    function renderDesktop() {
+      desc.textContent = 'Installeer als desktop-app';
+      body.innerHTML = `
+        <p style="font-size:13px;color:#555;line-height:1.5;padding:2px 0 4px;">In Chrome of Edge: klik op het installeer-icoon in de adresbalk, of open het menu en kies "App installeren".</p>
+      `;
+    }
+
+    if (window.__installPrompt) {
+      renderAndroid();
+    } else if (isIOS) {
+      renderIOS();
+    } else {
+      renderDesktop();
+    }
+  })();
 
   /* ═══════════════════
      RELOAD / VERSION
